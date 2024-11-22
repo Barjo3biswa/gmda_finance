@@ -1,0 +1,93 @@
+.header-top-menu .navbar-nav>li>a {
+  padding: 8px 20px;
+}
+
+.bar-button-pro {
+  margin: 5px 0px;
+}
+
+.header-right-info .navbar-nav {
+  padding: 9px 0 0px 0px;
+}
+
+.breadcome-list {
+  margin-top: 60px;
+  margin-bottom: 20px;
+}
+
+.breadcome-list.single-page-breadcome {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+#myTab3.tab-review-design li a,
+#myTabedu1.tab-review-design li a {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+ul.tab-custon-design li.active a,
+ul.tab-review-design li.active a {
+  color: #fff !important;
+  background: green;
+  /* border-radius: 14px; */
+}
+
+.footer-copyright-area {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 4px 0px !important;
+}
+
+.mb-5 {
+  margin-bottom: 2rem;
+}
+
+.mt-5 {
+  margin-top: 2rem;
+}
+
+.sidebar-nav .metismenu li .icon-wrap {
+  font-size: 20px;
+  color: #3f3f3f !important;
+  font-weight: 600 !important;
+}
+
+.sidebar-nav .metismenu a {
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+}
+
+.title-hrmis {
+  margin-bottom: 0;
+  padding-top: 0;
+  color: #fff;
+  letter-spacing: .8px;
+  font-weight: 900;
+  font-size: 10px;
+  font-size: 10px;
+  line-height: 12px;
+}
+
+.badge-success {
+  background-color: #4b854b;
+  font-weight: 500;
+  letter-spacing: .8px;
+}
+
+.badge-danger {
+  background-color: #a35139;
+  font-weight: 500;
+  letter-spacing: .8px;
+}
+
+.badge-warning {
+  background-color: #c4bd5c;
+  font-weight: 500;
+  letter-spacing: .8px;
+}
+
+.navbar-nav {
+  padding-top: 12px;
+}
