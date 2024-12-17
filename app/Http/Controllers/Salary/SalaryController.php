@@ -9,6 +9,7 @@ use App\Imports\HeadWiseImport;
 use App\Models\AttendanceSummery;
 use App\Models\LoanMaster;
 use App\Models\LoanMasterDetails;
+use App\Models\LoanRecovery;
 use App\Models\salaryBlock;
 use App\Models\salaryHead;
 use App\Models\salaryHeadAmountDistribution;
@@ -82,6 +83,10 @@ class SalaryController extends Controller
         // dd($check);
         if (isset($check)) {
             return redirect()->back()->with('error', 'Opened Block is not fully Completed.');
+        }
+
+        if ($block->is_finalized == 1) {
+            return redirect()->back()->with('error', 'Salary is generated for this block.');
         }
         // dd("ok");
         DB::beginTransaction();
@@ -605,7 +610,7 @@ class SalaryController extends Controller
                 if ($temp_salary->isNotEmpty()) {
                     foreach ($temp_salary as $row) {
                         if ($row->detail_json) {
-                            $this->loanRecovery($row->detail_json);
+                            $this->loanRecovery($row->detail_json, $salary_block);
                         }
                         $data = $row->makeHidden(['id', 'created_at', 'updated_at', 'deleted_at'])->toArray();
                         salaryTrans::create($data);
@@ -626,16 +631,19 @@ class SalaryController extends Controller
         return redirect()->back()->with('success', 'Successfully Finalized Salary');
     }
 
-    public function loanRecovery($loan_detail)
+    public function loanRecovery($loan_detail, $salary_block)
     {
         // dd($loan_detail);
         $loan = json_decode($loan_detail);
 
         $loan_master = LoanMaster::where('id', $loan->loan_id)->first();
-        dd($loan_master);
-        $principal_amount = $loan_master->principal_amount;
-        $intrest_amount = $loan_master->intrest_amount;
+        // dd($loan_master);
+        $principal_amount = $loan->principal_amount;
+        $intrest_amount = $loan->intrest_amount;
+        $principal_installment = 0;
+        $interest_installment = 0;
 
+        // dd($principal_amount);
         if ($loan_master->advanceType->advance_type == 'flat') {
             ///// flat loans/////
             if ($principal_amount) {
@@ -643,11 +651,16 @@ class SalaryController extends Controller
                     'outstanding_principal' => $loan_master->outstanding_principal - $principal_amount,
                     'principal_installment' => $loan_master->principal_installment + 1,
                 ];
-            } else if ($intrest_amount) {
+                $principal_installment = $loan_master->principal_installment + 1;
+            } elseif ($intrest_amount) {
                 $data = [
                     'outstanding_interest_amount' => $loan_master->outstanding_interest_amount - $intrest_amount,
                     'interest_installment' => $loan_master->interest_installment + 1,
                 ];
+                $interest_installment = $loan_master->interest_installment + 1;
+                if ($interest_installment == $loan_master->no_of_installment_interest) {
+                    $data['status'] = 5;
+                }
             }
 
         } elseif ($loan_master->advanceType->advance_type == 'reducing') {
@@ -657,9 +670,31 @@ class SalaryController extends Controller
                 'outstanding_interest_amount' => $loan_master->outstanding_interest_amount - $intrest_amount,
                 'principal_installment' => $loan_master->principal_installment + 1,
             ];
+            if (($loan_master->principal_installment + 1) == $loan_master->no_of_installment) {
+                $data['status'] = 5;
+            }
 
         }
+        // dd($data);
         LoanMaster::where('id', $loan->loan_id)->update($data);
+
+        LoanRecovery::create([
+            'emp_id' => $loan_master->user_id,
+            'emp_code' => $loan_master->emp_code,
+            'loan_id' => $loan_master->id,
+            'inst_no' => $loan->installment_no,
+            'principal_installment' => $principal_installment,
+            'interest_installment' => $interest_installment,
+            'principal_amount' => $principal_amount,
+            'interest_amount' => $intrest_amount,
+            'total_amount' => ($principal_amount + $intrest_amount),
+            // 'loan_type_id' =>
+            // 'recovery_type' =>
+            'month' => $salary_block->month,
+            'year' => $salary_block->year,
+            'sal_block_id' => $salary_block->id,
+        ]);
+
     }
 
     public function attendanceProcess($id)
@@ -788,35 +823,44 @@ class SalaryController extends Controller
             $loans = LoanMaster::where('status', '!=', '5')->get();
             foreach ($loans as $loan) {
                 if ($loan->advanceType->advance_type == 'flat') {
-
-                    ///// flat loans/////
                     if ($loan->outstanding_principal > 0) {
                         $emi_amount = $loan->principal_installment;
                         if (($loan->adj_interest_emi_in == 'F' && $loan->principal_installment == 0) || ($loan->adj_interest_emi_in == 'L' && $loan->no_of_installment == ($loan->principal_installment + 1))) {
                             $emi_amount = $loan->adj_emi;
                         }
+                        //////////additional condition to prevent negative value//////
+                        if ($loan->outstanding_principal < $emi_amount) {
+                            $emi_amount = $loan->outstanding_principal;
+                        }
+                        /////////////////////// Ends Here ////////////////////////////
                         $data = [
                             'loan_id' => $loan->id,
                             'emi' => $emi_amount,
                             'principal_amount' => $emi_amount,
                             'intrest_amount' => null,
+                            'installment_no' => $loan->principal_installment + 1,
                         ];
-                    } elseif ($loan->outstanding_principal == 0 && $loan->outstanding_interest_amount > 0) {
+                    } elseif ($loan->outstanding_principal <= 0 && $loan->outstanding_interest_amount > 0) {
+                        // dd("here");
                         $emi_amount = $loan->interest_emi;
                         if (($loan->adj_interest_emi_in == 'F' && $loan->interest_installment == 0) || ($loan->adj_interest_emi_in == 'L' && $loan->no_of_installment_interest == ($loan->interest_installment + 1))) {
                             $emi_amount = $loan->adj_interest_emi;
                         }
+                        //////////additional condition to prevent negative value//////
+                        if ($loan->outstanding_interest_amount < $emi_amount) {
+                            $emi_amount = $loan->outstanding_interest_amount;
+                        }
+                        /////////////////////// Ends Here ////////////////////////////
                         $data = [
                             'loan_id' => $loan->id,
                             'emi' => $emi_amount,
                             'principal_amount' => null,
                             'intrest_amount' => $emi_amount,
+                            'installment_no' => $loan->interest_installment + 1,
                         ];
                     }
                 } elseif ($loan->advanceType->advance_type == 'reducing') {
-                    ///// reducing loans///
-                    // dd("ok");
-                    $installment_no = $loan->principal_installment = 1;
+                    $installment_no = $loan->principal_installment + 1;
                     $emi_details = LoanMasterDetails::where('loan_id', $loan->id)->where('payment_no', $installment_no)->first();
                     $emi_amount = $emi_details->payment;
 
@@ -825,9 +869,10 @@ class SalaryController extends Controller
                         'emi' => $emi_amount,
                         'principal_amount' => $emi_details->principal,
                         'intrest_amount' => $emi_details->interest,
+                        'installment_no' => $installment_no
                     ];
-                    // dd($data);
                 }
+
                 $json_data = json_encode($data);
                 $salary_data = [
                     'emp_code' => $loan->user->id,
@@ -843,7 +888,6 @@ class SalaryController extends Controller
                     'amount' => $emi_amount,
                     'detail_json' => $json_data,
                 ];
-                // dump($salary_data);
 
                 salaryTemp::updateOrCreate(
                     [

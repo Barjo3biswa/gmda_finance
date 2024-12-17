@@ -12,19 +12,21 @@ return new class extends Migration {
     {
         Schema::create('loan_recoveries', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('emp_id')->nullable();
-            $table->unsignedBigInteger('emp_code')->nullable();
-            $table->unsignedBigInteger('loan_id')->nullable();
-            $table->unsignedInteger('inst_no')->nullable();
-            $table->unsignedInteger('principal_installment')->nullable();
-            $table->unsignedInteger('interest_installment')->nullable();
+            $table->integer('emp_id')->nullable();
+            $table->integer('emp_code')->nullable();
+            $table->integer('loan_id')->nullable();
+            $table->integer('inst_no')->nullable();
+            $table->integer('principal_installment')->nullable();
+            $table->integer('interest_installment')->nullable();
+            $table->decimal('principal_amount', 10, 2)->nullable();
             $table->decimal('interest_amount', 10, 2)->nullable();
-            $table->unsignedBigInteger('loan_type_id')->nullable();
+            $table->decimal('total_amount', 10, 2)->nullable();
+            $table->integer('loan_type_id')->nullable();
             $table->string('recovery_type', 255)->nullable();
-            $table->integer('month', 255)->nullable();
-            $table->integer('year', 255)->nullable();
-            $table->unsignedInteger('status')->nullable();
-
+            $table->integer('month')->nullable();
+            $table->integer('year')->nullable();
+            $table->integer('sal_block_id')->nullable();
+            $table->string('status', 255)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
