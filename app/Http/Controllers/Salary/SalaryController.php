@@ -823,7 +823,7 @@ class SalaryController extends Controller
             $loans = LoanMaster::where('status', '!=', '5')->get();
             foreach ($loans as $loan) {
                 if ($loan->advanceType->advance_type == 'flat') {
-                    if ($loan->outstanding_principal > 0) {
+                    if ($loan->no_of_installment > $loan->principal_installment) {
                         $emi_amount = $loan->principal_installment;
                         if (($loan->adj_interest_emi_in == 'F' && $loan->principal_installment == 0) || ($loan->adj_interest_emi_in == 'L' && $loan->no_of_installment == ($loan->principal_installment + 1))) {
                             $emi_amount = $loan->adj_emi;
@@ -840,7 +840,7 @@ class SalaryController extends Controller
                             'intrest_amount' => null,
                             'installment_no' => $loan->principal_installment + 1,
                         ];
-                    } elseif ($loan->outstanding_principal <= 0 && $loan->outstanding_interest_amount > 0) {
+                    } elseif ($loan->no_of_installment_interest > $loan->interest_installment) {
                         // dd("here");
                         $emi_amount = $loan->interest_emi;
                         if (($loan->adj_interest_emi_in == 'F' && $loan->interest_installment == 0) || ($loan->adj_interest_emi_in == 'L' && $loan->no_of_installment_interest == ($loan->interest_installment + 1))) {
