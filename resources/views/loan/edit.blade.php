@@ -5,7 +5,7 @@
     }
 </style>
 @section('content')
-<div class="container" style="margin-bottom: 100px; margin-top: 100px;">
+<div class="container" style="margin-bottom: 100px; margin-top: 100px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);">
 	<div class="card">
 		<div class="card-header">
 			EDIT LOAN DETAILS
@@ -44,7 +44,7 @@
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <!-- <div class="col-md-3">
                     <label for="">Salary Head</label>
                     <select name="sal_block_id" id="sal_block_id" class="form-control" required>
                         <option value="">--SELECT--</option>
@@ -54,7 +54,7 @@
                             </option>
                         @endforeach
                     </select>
-                </div>
+                </div> -->
 
             </div>
             <hr>

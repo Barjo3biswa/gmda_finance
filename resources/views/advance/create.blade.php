@@ -5,8 +5,8 @@
     }
 </style>
 @section('content')
-<div class="container" style="margin-bottom: 100px; margin-top: 50px;">
-	<div class="card">
+<div class="container" style="margin-bottom: 100px; margin-top: 50px; ; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
+	<div class="card" style="background-color: #000;">
 		<div class="card-header">
 			NEW ADVANCE DETAILS
 			<a href="{{ route('advance.index') }}" class="btn btn-sm btn-outline-success float-right mr-1">Advance records</a>
