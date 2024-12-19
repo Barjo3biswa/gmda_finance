@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('content')
-    <div class="card">
+
+    <div class="card" style="margin-bottom: 100px; margin-top: 50px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);">
         <div class="card-header">
             <a class="btn btn-sm btn-pinterest float-right mr-1" href="{{ route('policy.upload-excel') }}">
                 {{-- excel icon --}}

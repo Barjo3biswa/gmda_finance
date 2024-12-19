@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-<div class="container" style="margin-bottom: 100px; margin-top: 50px;">
+<div class="container" style="margin-bottom: 100px; margin-top: 50px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
 <div class="card mb-3">
     <div class="card-header">
         <i class="fa fa-filter"></i> Filter
