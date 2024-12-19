@@ -6,6 +6,7 @@ use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
 use App\Imports\EmployeeWiseImport;
 use App\Imports\HeadWiseImport;
+use App\Imports\kssFileImport;
 use App\Models\AttendanceSummery;
 use App\Models\LoanMaster;
 use App\Models\LoanMasterDetails;
@@ -833,6 +834,15 @@ class SalaryController extends Controller
                             $emi_amount = $loan->outstanding_principal;
                         }
                         /////////////////////// Ends Here ////////////////////////////
+
+
+                        ///////////////////cut rest amount if inst no is last/////////////////////////
+                        if ($loan->no_of_installment == ($loan->principal_installment + 1)) {
+                            if (($loan->outstanding_principal - $emi_amount) > 0) {
+                                $emi_amount = $loan->outstanding_principal;
+                            }
+                        }
+                        //////////////////////////////////////////////////////////////////////////////
                         $data = [
                             'loan_id' => $loan->id,
                             'emi' => $emi_amount,
@@ -851,6 +861,15 @@ class SalaryController extends Controller
                             $emi_amount = $loan->outstanding_interest_amount;
                         }
                         /////////////////////// Ends Here ////////////////////////////
+
+                        ///////////////////cut rest amount if inst no is last/////////////////////////
+                        if ($loan->no_of_installment_interest == ($loan->interest_installment + 1)) {
+                            if (($loan->outstanding_interest_amount - $emi_amount) > 0) {
+                                $emi_amount = $loan->outstanding_interest_amount;
+                            }
+                        }
+                        //////////////////////////////////////////////////////////////////////////////
+
                         $data = [
                             'loan_id' => $loan->id,
                             'emi' => $emi_amount,
@@ -909,5 +928,24 @@ class SalaryController extends Controller
         return redirect()->back()->with('success', 'successfull');
     }
 
+    public function uploadKSS($id)
+    {
+        $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
+        return view('salary.kss-upload', compact('salary_block'));
+    }
+
+    public function saveKSS(Request $request)
+    {
+        dd($request->all());
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+        try {
+            Excel::import(new kssFileImport, $request->file('excel_file'));
+            return redirect()->back()->with('success', 'Imported successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to import: ' . $e->getMessage());
+        }
+    }
 
 }
