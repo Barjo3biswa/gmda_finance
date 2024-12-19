@@ -13,7 +13,7 @@
                             <ul class="breadcome-menu">
                                 <li><a href="#">Dashboard</a> <span class="bread-slash">/</span>
                                 </li>
-                                <li><span class="bread-blod">Salary Block</span>
+                                <li><span class="bread-blod">Process Loan</span>
                                 </li>
                             </ul>
                         </div>

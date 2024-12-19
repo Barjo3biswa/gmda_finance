@@ -1,6 +1,25 @@
 @extends('layouts.app')
 @section('content')
-<div class="container" style="margin-bottom: 100px; margin-top: 50px;">
+<div class="single-pro-review-area mt-t-30 mg-b-15">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                            <div class="breadcome-heading">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                            <ul class="breadcome-menu">
+                                <li><a href="#">Dashboard</a> <span class="bread-slash">/</span>
+                                </li>
+                                <li><span class="bread-blod">Loans</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="product-payment-inner-st">
+                        <div id="myTabContent" class="tab-content custom-product-edit">
 <div class="card mb-3">
     <div class="card-header">
         <i class="fa fa-filter"></i> Filter
@@ -129,6 +148,14 @@
                 {{-- {{$policies->appends(request()->all())->links()}} --}}
             </div>
 
+</div>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 </div>
 @endsection

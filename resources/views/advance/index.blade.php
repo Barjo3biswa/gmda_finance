@@ -13,7 +13,7 @@
                             <ul class="breadcome-menu">
                                 <li><a href="#">Dashboard</a> <span class="bread-slash">/</span>
                                 </li>
-                                <li><span class="bread-blod">Salary Block</span>
+                                <li><span class="bread-blod">Approved Advances</span>
                                 </li>
                             </ul>
                         </div>
@@ -88,7 +88,7 @@
                                 <div class="card-header">
                                     <!-- <a class="btn btn-success btn btn-xs float-right mr-1" href="{{ route('advance.create') }}"><i class="fa fa-plus"></i> New Advance</a> | -->
                                     <a class="btn btn-success btn btn-xs float-right mr-1"
-                                        href="{{ route('advance.existing') }}"><i class="fa fa-plus"></i> Old
+                                        href="{{ route('advance.existing') }}"><i class="fa fa-plus"></i> Existing
                                         Advance</a>
                                 </div>
                                 <div class="card-body">

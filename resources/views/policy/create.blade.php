@@ -6,7 +6,26 @@
 
 </style>
 @section('content')
-<div class="container" style="margin-bottom: 100px; margin-top: 50px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);">
+<div class="single-pro-review-area mt-t-30 mg-b-15">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                            <div class="breadcome-heading">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                            <ul class="breadcome-menu">
+                                <li><a href="#">Dashboard</a> <span class="bread-slash">/</span>
+                                </li>
+                                <li><span class="bread-blod">New Policy</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="product-payment-inner-st">
+                        <div id="myTabContent" class="tab-content custom-product-edit">
 	<div class="card">
 		<div class="card-header">
 			NEW POLICY DETAILS
@@ -16,7 +35,7 @@
 			<form action="{{ route('policy.store') }}" method="POST" enctype="multipart/form-data">
 				@csrf
 				<div class="form-group row">
-					<div class="col-md-6">
+					<div class="col-md-4">
 						<label for="inputname">Employee Name</label>
 						<select class="form-control select2" id="employee_id" name="employee_id">
 							<option value="">--SELECT--</option>
@@ -119,6 +138,14 @@
 			</form>
 		</div>
 	</div>
+	</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
 </div>
 @endsection
 @section('js')
