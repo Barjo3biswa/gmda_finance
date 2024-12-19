@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdvanceController;
+use App\Http\Controllers\LoanController;
+use App\Http\Controllers\PolicyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,6 +60,64 @@ Route::group(['middleware' => 'auth.jwt'], function () {
 
 
     Route::get('/include-exclude', [App\Http\Controllers\Salary\SalaryController::class, 'includeExclude'])->name('include-exclude');
+
+
+
+    Route::get('advance', [AdvanceController::class, 'index'])->name('advance.index');
+    Route::get('advance/show/{id}', [AdvanceController::class, 'show'])->name('advance.show');
+    Route::get('advance/create', [AdvanceController::class, 'create'])->name('advance.create');
+    Route::post('advance/store', [AdvanceController::class, 'store'])->name('advance.store');
+    Route::get('advance/edit/{id}', [AdvanceController::class, 'edit'])->name('advance.edit');
+    //Route::post('advance/update', [AdvanceController::class, 'update_advance'])->name('advance.update');
+
+    Route::put('advance/{id}/update', [AdvanceController::class, 'update_advance'])->name('advance.update');
+
+    Route::get('advance/search', [AdvanceController::class, 'search'])->name('advance.search');
+    Route::get('advance/update-advance', [AdvanceController::class, 'edit_advance_list'])->name('advance.update_advance');
+    Route::post('advance/update-advance_data', [AdvanceController::class, 'update_advance_data'])->name('advance.update_advance_data');
+    Route::get('advance/process-advance', [AdvanceController::class, 'process_advance'])->name('advance.processadvance');
+    Route::post('advance/process-advance-data', [AdvanceController::class, 'process_advance_data'])->name('advance.process_advance_data');
+    Route::get('advance/processed-data-list', [AdvanceController::class, 'processed_data_list'])->name('advance.processed_data_list');
+    Route::post('advance/process-data-list', [AdvanceController::class, 'process_advance_data_post'])->name('advance.process_advance_data_post');
+    Route::get('advance/processed-data-list/{id}', [AdvanceController::class, 'processed_data_list_delete'])->name('advance.processed_data_list_delete');
+
+    Route::get('advance/existing', [AdvanceController::class, 'createExisting'])->name('advance.existing');
+    Route::post('advance/store-existing', [AdvanceController::class, 'storeExisting'])->name('advance.store-existing');
+
+    Route::get('advance/view-advances-list', [AdvanceController::class, 'ViewAdvances'])->name('advance.viewadvances');
+    Route::get('advance/view-advance-details/{id}', [AdvanceController::class, 'ViewAdvanceDetails'])->name('advance.viewadvancedetails');
+
+    //loan
+    Route::get('loan', [LoanController::class, 'index'])->name('loan.index');
+    Route::get('loan/create', [LoanController::class, 'create'])->name('loan.create');
+    Route::post('loan/create', [LoanController::class, 'store'])->name('loan.store');
+    Route::get('loan/existing', [LoanController::class, 'createExisting'])->name('loan.existing');
+    Route::get('loan/process-loan', [LoanController::class, 'process_loan'])->name('loan.processloan');
+    Route::post('loan/process-loan-data', [LoanController::class, 'process_loan_data'])->name('loan.process_loan_data');
+    Route::get('loan/processed-loan-list', [LoanController::class, 'processed_loan_list'])->name('loan.processed_loan_list');
+    Route::post('loan/store-existing', [LoanController::class, 'storeExisting'])->name('loan.store-existing');
+
+    Route::get('loan/edit/{id}', [LoanController::class, 'edit'])->name('loan.edit');
+    Route::put('loan/{id}/update', [LoanController::class, 'update'])->name('loan.update');
+
+    Route::get('loan/show/{id}', [LoanController::class, 'show'])->name('loan.show');
+
+
+    //policy
+    Route::get('policy', [PolicyController::class, 'index'])->name('policy.index');
+    Route::get('policy/create', [PolicyController::class, 'create'])->name('policy.create');
+    Route::post('policy/create', [PolicyController::class, 'store'])->name('policy.store');
+    Route::get('policy/edit/{id}', [PolicyController::class, 'edit'])->name('policy.edit');
+    Route::get('policy/update-policy', [PolicyController::class, 'update_policy'])->name('policy.updatepolicy');
+    Route::post('policy/update-policy-data', [PolicyController::class, 'update_policy_data'])->name('policy.updatepolicydata');
+    Route::put('policy/{id}/update', [PolicyController::class, 'update'])->name('policy.update');
+    Route::get('policy/show/{id}', [PolicyController::class, 'show'])->name('policy.show');
+    Route::get('policy/process-policy', [PolicyController::class, 'process_policy'])->name('policy.processpolicy');
+    Route::post('policy/process-policy-data', [PolicyController::class, 'process_policy_data'])->name('policy.process_policy_data');
+    Route::get('policy/processed-policy-list', [PolicyController::class, 'processed_policy_list'])->name('policy.processed_policy_list');
+    Route::get('policy/processed-policy-list/{id}', [PolicyController::class, 'processed_policy_list_delete'])->name('policy.processed_policy_list_delete');
+
+    Route::post('policy/process-policy-search', [PolicyController::class, 'process_policy_search'])->name('policy.search');
 });
 
 

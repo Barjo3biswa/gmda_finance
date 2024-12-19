@@ -16,9 +16,4 @@ class AdvanceType extends Model
         'max_amount',
         'requires_recommender'
     ];
-
-    public function salaryHead()
-    {
-        return $this->belongsTo(salaryHead::class, 'salary_head_id', 'id');
-    }
 }
