@@ -98,7 +98,7 @@
                                                         aria-expanded="false" class="nav-link dropdown-toggle">
                                                         <img src="img/product/pro4.jpg" alt="" />
                                                         <span class="admin-name">{{ Auth::user()->name }}
-                                                            ({{ env('USER_NAME') }})</span>
+                                                            (Finance)</span>
                                                         <i class="fa fa-angle-down edu-icon edu-down-arrow"></i>
                                                     </a>
                                                     <ul role="menu"
@@ -114,10 +114,12 @@
                                                             )->get();
                                                         @endphp
                                                         @foreach ($modules as $mod)
-                                                            <li><a
-                                                                    href="{{ $mod->url }}/{{ $mod->project_name }}{{ $mod->is_jwt_req == 1 ? '?token=' . session('jwt_token') : '' }}"><span
-                                                                        class="edu-icon edu-user-rounded author-log-ic"></span>{{ $mod->name }}</a>
-                                                            </li>
+                                                            @if (\App\Helpers\commonHelper::isPermissionExist($mod->permission_name))
+                                                                <li><a
+                                                                        href="{{ $mod->url }}/{{ $mod->project_name }}{{ $mod->is_jwt_req == 1 ? '?token=' . session('jwt_token') : '' }}"><span
+                                                                            class="edu-icon edu-user-rounded author-log-ic"></span>{{ $mod->name }}</a>
+                                                                </li>
+                                                            @endif
                                                         @endforeach
                                                         <li>
                                                             <a
