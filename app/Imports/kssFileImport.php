@@ -37,48 +37,50 @@ class kssFileImport implements ToCollection, WithHeadingRow
                 'year' => $salary_block->year
             ])->delete();
             foreach ($rows as $row) {
-                $emp_id = User::where('emp_code', $row['emp_id'])->first()->id;
-                $row['total'] = floatval($row['total']);
-                $row['loan_amount'] = floatval($row['loan_amount']);
-                $row['interest'] = floatval($row['interest']);
-                $row['subscrptn'] = floatval($row['subscrptn']);
-                $row['recovery'] = floatval($row['recovery']);
-                $data = [
-                    'emp_code' => $row['emp_id'],
-                    'sal_head_id' => $salary_head->id,
-                    'salary_head_code' => $salary_head->code,
-                    'salary_head_name' => $salary_head->name,
-                    'month' => $salary_block->month,
-                    'year' => $salary_block->year,
-                    'block_id' => $salary_block->id,
-                    'pay_head' => 'deduction',
-                    'working_days' => 30,
-                    'status' => 'draft',
-                    'amount' => $row['total'],
-                    'last_amount' => $row['total'],
-                ];
-
-                salaryTemp::updateOrCreate(
-                    [
-                        'emp_id' => $emp_id,
+                $emp_info = User::where('emp_code', $row['emp_id'])->first();
+                if ($emp_info->salary_flag == 'open') {
+                    $row['total'] = floatval($row['total']);
+                    $row['loan_amount'] = floatval($row['loan_amount']);
+                    $row['interest'] = floatval($row['interest']);
+                    $row['subscrptn'] = floatval($row['subscrptn']);
+                    $row['recovery'] = floatval($row['recovery']);
+                    $data = [
+                        'emp_code' => $row['emp_id'],
                         'sal_head_id' => $salary_head->id,
-                    ],
-                    $data
-                );
+                        'salary_head_code' => $salary_head->code,
+                        'salary_head_name' => $salary_head->name,
+                        'month' => $salary_block->month,
+                        'year' => $salary_block->year,
+                        'block_id' => $salary_block->id,
+                        'pay_head' => 'deduction',
+                        'working_days' => 30,
+                        'status' => 'draft',
+                        'amount' => $row['total'],
+                        'last_amount' => $row['total'],
+                    ];
 
-                $kss_data = [
-                    'emp_id' => $emp_id,
-                    'emp_code' => $row['emp_id'],
-                    'loan_amount' => $row['loan_amount'],
-                    'interest' => $row['interest'],
-                    'subscrptn' => $row['subscrptn'],
-                    'recovery' => $row['recovery'],
-                    'total' => $row['total'],
-                    'month' => Carbon::createFromDate(null, $salary_block->month)->format('F'),
-                    'year' => $salary_block->year,
-                    'status' => 1,
-                ];
-                salaryKss::create($kss_data);
+                    salaryTemp::updateOrCreate(
+                        [
+                            'emp_id' => $emp_info->id,
+                            'sal_head_id' => $salary_head->id,
+                        ],
+                        $data
+                    );
+
+                    $kss_data = [
+                        'emp_id' => $emp_info->id,
+                        'emp_code' => $row['emp_id'],
+                        'loan_amount' => $row['loan_amount'],
+                        'interest' => $row['interest'],
+                        'subscrptn' => $row['subscrptn'],
+                        'recovery' => $row['recovery'],
+                        'total' => $row['total'],
+                        'month' => Carbon::createFromDate(null, $salary_block->month)->format('F'),
+                        'year' => $salary_block->year,
+                        'status' => 1,
+                    ];
+                    salaryKss::create($kss_data);
+                }
             }
 
             DB::commit();
