@@ -29,7 +29,7 @@
                                         <div class="sparkline8-list">
                                             <h6>Import Kss File</h6>
                                             <div class="review-content-section">
-                                                <form action="{{ route('save-kss') }}" method="post"
+                                                <form action="{{ route('save-kss', $id) }}" method="post"
                                                     class="dropzone dropzone-custom needsclick add-professors"
                                                     id="demo1-upload" enctype="multipart/form-data">
                                                     @csrf

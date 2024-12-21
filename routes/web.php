@@ -56,10 +56,13 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::get('/finalize-salary/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'FinalizeSalary'])->name('finalize-salary');
     Route::get('/process-loan-amount/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'processLoanAmount'])->name('process-loan-amount');
     Route::get('/upload-kss/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'uploadKSS'])->name('upload-kss');
-    Route::post('/save-kss', [App\Http\Controllers\Salary\SalaryController::class, 'saveKSS'])->name('save-kss');
-
-
+    Route::post('/save-kss/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'saveKSS'])->name('save-kss');
     Route::get('/include-exclude', [App\Http\Controllers\Salary\SalaryController::class, 'includeExclude'])->name('include-exclude');
+    Route::get('/hold-unhold', [App\Http\Controllers\Salary\SalaryController::class, 'holdUnhold'])->name('hold-unhold');
+    Route::post('/hold-salary', [App\Http\Controllers\Salary\SalaryController::class, 'holdSalary'])->name('hold-salary');
+
+
+
 
 
 

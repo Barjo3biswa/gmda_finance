@@ -19,6 +19,7 @@ use App\Models\salaryProcessStep;
 use App\Models\salaryTemp;
 use App\Models\salaryTrans;
 use App\Models\User;
+use App\Models\userHoldUnhold;
 use Auth;
 use Crypt;
 use DB;
@@ -930,22 +931,61 @@ class SalaryController extends Controller
 
     public function uploadKSS($id)
     {
+        $step_details = salaryProcessStep::where('id', $id)->first();
+        if (!CommonHelper::checkIsInOrder($step_details->order)) {
+            return redirect()->back()->with('error', 'Please maintaion process oeder');
+        }
         $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
-        return view('salary.kss-upload', compact('salary_block'));
+        return view('salary.kss-upload', compact('salary_block', 'id'));
     }
 
-    public function saveKSS(Request $request)
+    public function saveKSS(Request $request, $id)
     {
-        dd($request->all());
+        // dd($request->all());
+        $step_details = salaryProcessStep::where('id', $id)->first();
+        if (!CommonHelper::checkIsInOrder($step_details->order)) {
+            return redirect()->back()->with('error', 'Please maintaion process oeder');
+        }
         $request->validate([
             'excel_file' => 'required|mimes:xlsx,xls,csv',
         ]);
         try {
-            Excel::import(new kssFileImport, $request->file('excel_file'));
-            return redirect()->back()->with('success', 'Imported successfully.');
+            Excel::import(new kssFileImport(), $request->file('excel_file'));
+            $step_details->status = 'process';
+            $step_details->save();
+            return redirect()->route('salary-process', ['view' => 'process'])->with('success', 'Successfully Uploaded');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to import: ' . $e->getMessage());
         }
+    }
+
+
+    public function holdUnhold()
+    {
+        $employee = User::get();
+        return view('salary\hold-unhold-salary', compact('employee'));
+        // dd("ok");
+    }
+
+    public function holdSalary(Request $request)
+    {
+        dd($request->all());
+        $user = user::where('id', $request->emp_id)->first();
+        user::where('id', $request->emp_id)->update(
+            ['salary_flag' => 'hold']
+        );
+
+        userHoldUnhold::create([
+            'emp_id' => $request->emp_id,
+            'emp_code' => $user->emp_code,
+            'type' => 'salary',
+            'from_date' => $request->from_date ?? null,
+            'to_date' => $request->to_date ?? null,
+            'holding_type' => $request->emp_id,
+            'holding reason' => $request->emp_id,
+            'status' => $request->emp_id,
+            'created_by' => $request->emp_id,
+        ]);
     }
 
 }
