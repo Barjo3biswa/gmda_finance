@@ -632,7 +632,7 @@ body {}
 }
 
 .header-right-info ul.header-right-menu li .dropdown-header-top.author-log {
-    min-width: 140px;
+    max-width: 260px;
     padding: 10px 0px;
 }
 
