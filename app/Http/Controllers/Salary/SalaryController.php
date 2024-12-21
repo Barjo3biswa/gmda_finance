@@ -1078,7 +1078,7 @@ class SalaryController extends Controller
     public function holdUnhold()
     {
         $employee = User::get();
-        return view('salary\hold-unhold-salary', compact('employee'));
+        return view('salary.hold-unhold-salary', compact('employee'));
         // dd("ok");
     }
 
