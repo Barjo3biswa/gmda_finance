@@ -51,6 +51,8 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::get('/empty-temp/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'emptyTemp'])->name('empty-temp');
     Route::get('/pull-temp/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'processSalary'])->name('pull-temp');
     Route::get('/attendance-process/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'attendanceProcess'])->name('attendance-process');
+    Route::get('/finalize-salary/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'FinalizeSalary'])->name('finalize-salary');
+    Route::get('/salary-summary', [App\Http\Controllers\Salary\SalaryController::class, 'processSalarySummary'])->name('salary-summery');
     Route::get('/manage-pay-cut/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'payCutManage'])->name('manage-pay-cut');
     Route::get('/save-pay-cut/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'payCutSave'])->name('save-pay-cut');
     Route::get('/finalize-salary/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'FinalizeSalary'])->name('finalize-salary');

@@ -76,8 +76,8 @@
                                         {{-- <h4 class="title-hrmis">HRMIS</h4> --}}
                                         <div class="logo-div">
                                             <a href="{{ env('APP_URL') }}/GMDA/gmda-leave/public/"><img
-                                                    class="main-logo" src="{{ asset('img/logo/gmda-logo.png') }}"
-                                                    alt="" style="max-width: 75px;" /></a>
+                                                    class="main-logo" src="{{ asset('img/logo/gmda-logo.png') }}" alt=""
+                                                    style="max-width: 75px;" /></a>
                                             <div>
                                                 <p class="title-hrmis">Human</p>
                                                 <p class="title-hrmis">Resource </p>
@@ -214,17 +214,17 @@
 
     @yield('js')
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#sidebarCollapse').trigger('click');
         });
     </script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('.js-example-basic-multiple').select2();
         });
     </script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#date').inputmask('dd/mm/YYYY');
         });
 

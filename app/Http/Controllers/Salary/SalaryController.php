@@ -6,6 +6,7 @@ use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
 use App\Imports\EmployeeWiseImport;
 use App\Imports\HeadWiseImport;
+use App\Models\AttendanceSummery;
 use App\Imports\kssFileImport;
 use App\Models\AttendanceSummery;
 use App\Models\LoanMaster;
@@ -25,6 +26,7 @@ use Crypt;
 use DB;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Schema;
 
 class SalaryController extends Controller
 {
@@ -131,7 +133,6 @@ class SalaryController extends Controller
         // dd($request->all());
         $salary_block = salaryBlock::get();
         $salary_head = salaryHead::orderBy('order')->get();
-
         $process_steps = salaryProcessStep::orderBy('order')->get();
         $couurent_open_block = salaryBlock::where('sal_process_status', 'unblock')->first();
         $default_block = salaryBlock::where('month', date('m'))->where('year', date('Y'))->first();
@@ -744,6 +745,118 @@ class SalaryController extends Controller
         }
 
         return redirect()->back()->with('success', 'Successfully Processed Attendance');
+    }
+
+
+    public function processSalarySummary() : bool
+    {
+        // $step_details = salaryProcessStep::where('step_name', 'salary')->first();
+        $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
+
+        $user = user::get();
+
+        try {
+        DB::beginTransaction();
+        foreach ($user as $usr) {
+            $salaryTempData = salaryTemp::where('emp_id', $usr->id)->where('block_id', $salary_block->id)->get();
+
+            $salarySummary = SalarySummmary::updateOrCreate(
+                [
+                    'emp_id' => $usr->id,
+                    'sal_block_id' => $salary_block->id,
+                    'month' => $salary_block->month,
+                    'year' => $salary_block->year,
+                ],
+                [
+                    'emp_code' => $usr->emp_code,
+                ]
+            );
+
+            $this->addDynamicColumns($salarySummary, $salaryTempData);
+
+            foreach ($salaryTempData as $temp) {
+                if($temp->pay_head == 'Deduction'){
+                    $columnName = 'DED_' . str_replace('.', '_', $temp->salary_head_code);
+                    $salarySummary->$columnName = $temp->amount;
+                }
+
+                if($temp->pay_head == 'Income'){
+                    $columnName = 'INC_' . str_replace('.', '_', $temp->salary_head_code);
+                    $salarySummary->$columnName = $temp->amount;
+                }
+            }
+
+            $salarySummary->save();
+        }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        DB::commit();
+
+        return true;
+    }
+
+    private function addDynamicColumns($model, $salaryTempData)
+    {
+        $table = $model->getTable();
+
+        $deductionData = $salaryTempData->where('pay_head', 'Deduction');
+        $incomeData = $salaryTempData->where('pay_head', 'Income');
+
+        $existingColumns = \DB::getSchemaBuilder()->getColumnListing($table);
+        $nonTimestampColumns = collect($existingColumns)
+            ->reject(fn($col) => in_array($col, ['created_at', 'updated_at', 'deleted_at']));
+
+        $lastIncomeColumn = $nonTimestampColumns
+            ->filter(fn($col) => str_starts_with($col, 'INC_'))
+            ->last();
+
+        $lastDeductionColumn = $nonTimestampColumns
+            ->filter(fn($col) => str_starts_with($col, 'DED_'))
+            ->last();
+
+        $addedIncomeColumns = [];
+        $addedDeductionColumns = [];
+
+        foreach ($incomeData as $temp) {
+            $columnName = 'INC_' . str_replace('.', '_', $temp->salary_head_code);
+            if (!in_array($columnName, $existingColumns)) {
+                $addedIncomeColumns[] = $columnName;
+            }
+        }
+
+        foreach ($deductionData as $temp) {
+            $columnName = 'DED_' . str_replace('.', '_', $temp->salary_head_code);
+            if (!in_array($columnName, $existingColumns)) {
+                $addedDeductionColumns[] = $columnName;
+            }
+        }
+
+        $sqlQueries = [];
+
+        foreach ($addedDeductionColumns as $columnName) {
+            $sqlQueries[] = "ALTER TABLE `{$table}` ADD COLUMN `{$columnName}` DECIMAL(10,2) NULL " .
+                            ($lastDeductionColumn ? "AFTER `{$lastDeductionColumn}`" : "AFTER `deleted_at`");
+            $lastDeductionColumn = $columnName;
+        }
+
+        foreach ($addedIncomeColumns as $columnName) {
+            $sqlQueries[] = "ALTER TABLE `{$table}` ADD COLUMN `{$columnName}` DECIMAL(10,2) NULL " .
+                            ($lastIncomeColumn ? "AFTER `{$lastIncomeColumn}`" : "AFTER `deleted_at`");
+            $lastIncomeColumn = $columnName;
+        }
+
+        foreach ($sqlQueries as $query) {
+            try {
+                \DB::statement($query);
+            } catch (\Exception $e) {
+
+                throw $e;
+            }
+        }
     }
 
     public function includeExclude(Request $request)
