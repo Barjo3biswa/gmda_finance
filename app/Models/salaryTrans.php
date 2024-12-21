@@ -14,6 +14,6 @@ class salaryTrans extends Model
 
     public function employee()
     {
-        return $this->belongsTo(employee::class, 'emp_id');
+        return $this->belongsTo(Employee::class, 'emp_id');
     }
 }
