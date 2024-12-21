@@ -4,6 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdvanceController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PolicyController;
+use App\Models\Employee;
+use App\Models\salaryBlock;
+use App\Models\salaryHead;
+use App\Models\salaryHeadAmountDistribution;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,9 +28,7 @@ use App\Http\Controllers\PolicyController;
 Route::get('/invalidate-token', [App\Http\Controllers\Auth\TokenController::class, 'invalidateToken'])->name('invalidate-token');
 
 Route::group(['middleware' => 'auth.jwt'], function () {
-    Route::get('/', function () {
-        return view('welcome');
-    })->name('home');
+    Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
     Route::get('/salary-head', [App\Http\Controllers\Salary\SalaryController::class, 'salaryHead'])->name('salary-head');
     Route::post('/salary-head-store', [App\Http\Controllers\Salary\SalaryController::class, 'salaryHeadStore'])->name('salary-head-store');
