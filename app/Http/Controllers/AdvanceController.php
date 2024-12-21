@@ -33,14 +33,18 @@ class AdvanceController extends Controller
         $departments = Department::select('id', 'name')->get();
         $designations = AuthDesignation::get();
 
-        $query = Advance::with('employee', 'advanceType');
-        $advanceRequests = $query->orderBy('created_at', 'desc')->where("interest_amount", 0)->orWhereNull('interest_amount')
-        ->get()
-            ->map(function ($advance) {
-                // Check if the advance has a reference number in LoanMaster
-                $advance->has_loan_master = LoanMaster::where('reference_no', $advance->reference_no)->exists();
-                return $advance;
-            });
+        $query = Advance::with('employee', 'advanceType')
+            ->whereHas('advanceType', function($q) {
+                $q->where('type', 'advance');
+            })
+            ->orderBy('created_at', 'desc');
+
+        $advanceRequests = $query->get()->map(function ($advance) {
+            // Check if the advance has a reference number in LoanMaster
+            $advance->has_loan_master = LoanMaster::where('reference_no', $advance->reference_no)->exists();
+            return $advance;
+        });
+
         //->paginate(10);
         //dd($advanceRequests);
         $advanceTypes = AdvanceType::all();
@@ -167,7 +171,7 @@ class AdvanceController extends Controller
             'adj_interest_emi_in' => 'nullable|string',
             'wef_month' => 'required|integer|min:1|max:12',
             'wef_year' => 'required|integer|min:2000',
-            'sal_block_id' => 'required|integer',
+            //'sal_block_id' => 'required|integer',
             'close_advance' => 'nullable|string',
             'closed_from_month' => 'nullable|integer|min:1|max:12',
             'closed_from_year' => 'nullable|integer|min:2000',
@@ -227,7 +231,7 @@ class AdvanceController extends Controller
                 'interest_installment' => $request->interest_installment,
                 'adj_interest_emi' => $request->adj_interest_emi,
                 'adj_interest_emi_in' => $request->adj_interest_emi_in,
-                'sal_block_id' => $request->sal_block_id
+                //'sal_block_id' => $request->sal_block_id
                 //'updated_by' => auth()->id()
             ];
             

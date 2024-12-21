@@ -29,11 +29,19 @@ class LoanController extends Controller
         $departments = Department::select('id', 'name')->get();
         $designations = AuthDesignation::get();
 
-        $query = Advance::with('employee', 'advanceType');
-        $advanceRequests = $query->orderBy('created_at', 'desc')->where("interest_amount", ">", 0)
-        ->paginate(10);
+        $query = Advance::with('employee', 'advanceType')
+            ->whereHas('advanceType', function($q) {
+                $q->where('type', 'loan');
+            })
+            ->orderBy('created_at', 'desc');
+
+        $advanceRequests = $query->get()->map(function ($advance) {
+            // Check if the advance has a reference number in LoanMaster
+            $advance->has_loan_master = LoanMaster::where('reference_no', $advance->reference_no)->exists();
+            return $advance;
+        });
         //dd($advanceRequests);
-        $advanceTypes = AdvanceType::all();
+        $advanceTypes = AdvanceType::where('type', 'loan')->get();
         //dd($advanceTypes);
             // ->whereNotNull('type_name')
             // ->where('deleted_at', null)
@@ -55,7 +63,7 @@ class LoanController extends Controller
         $employees = Employee::select('*')->get();
         $designations = AuthDesignation::get();
         $advanceGroups = AdvanceGroup::all();
-        $advanceTypes = AdvanceType::all();
+        $advanceTypes = AdvanceType::where('type', 'loan')->get();
         $salaryheads = SalaryHead::all();
         return view("loan.create", compact('employees', 'advanceTypes', 'salaryheads', 'advanceGroups'));
     }
@@ -152,7 +160,7 @@ class LoanController extends Controller
             'applied_for' => 'Existing Loan'
         ];
 
-        //dd($loanMasterData);
+        // dd($loanMasterData);
         
         $salaryBlock = SalaryBlock::find($request->sal_block_id);
 
@@ -180,7 +188,12 @@ class LoanController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $refno=advance::where('id', $id)->value('reference_no');
+        $loan = LoanMaster::with('employee', 'advanceType')->where('reference_no', $refno)->first();
+        $employees = Employee::all();
+        $advanceTypes = AdvanceType::all();
+        $salaryheads = SalaryHead::all();
+        return view('loan.show', compact('loan', 'employees', 'advanceTypes', 'salaryheads'));
     }
 
     /**
@@ -189,7 +202,7 @@ class LoanController extends Controller
     public function edit(string $id)
     {
         // Fetch the loan data
-        $loan = LoanMaster::findOrFail($id);
+        $loan = Advance::findOrFail($id);
 
         // Fetch related data (e.g., employees, loan types, salary heads)
         $employees = Employee::all();
@@ -211,9 +224,9 @@ class LoanController extends Controller
         $advance->user_id = $request->employee_id;
         // Get employee details
         $employee = Employee::where('user_id', $request->employee_id)->first();
-        $advance->emp_code = $employee ? $employee->code : '';
-        $advance->advance_id = $request->loan_head_id;
-        $advance->loan_head_id = $request->sal_block_id;
+        // $advance->emp_code = $employee ? $employee->code : '';
+        // $advance->advance_id = $request->loan_head_id;
+        // $advance->loan_head_id = $request->sal_block_id;
         $advance->principal_amount = $request->principal_amount;
         $advance->monthly_installment = $request->monthly_emi;
         //$advance->recovered_amount = $request->recovered_amount;
@@ -230,7 +243,8 @@ class LoanController extends Controller
         $advance->payslip_3 = $data['payslip_3'];
         $advance->document_path = $data['document_path'];*/
         
-        $advance->update()-where('reference_no', $request->reference_no);
+        $advance = Advance::where('reference_no', $request->reference_no)->first();
+        $advance->update();
 
         $employee = Employee::where('user_id', $request->employee_id)->first();
         $emp_code = $employee->code;
@@ -239,12 +253,12 @@ class LoanController extends Controller
         //dd($emp_code, $emp_dept, $emp_desig);
 
         $loanMasterData = [
-            'reference_no' => $referenceNo,
+            'reference_no' => $request->reference_no,
             'user_id' => $request->employee_id,
             'emp_code' => $emp_code ?? null,
             'fld_deptid' => $emp_dept,
             'fld_desigid' => $emp_desig,
-            'loan_type_id' => $request->loan_head_id,
+            'loan_type_id' => $request->loan_type_id,
             'loan_amount' => $request->loan_amount,
             'loan_interest_rate' => $request->loan_interest_rate,
             'principal_amount' => $request->principal_amount,
@@ -265,10 +279,10 @@ class LoanController extends Controller
             'from_yyyy' => $request->wef_year,
             'from_mm' => $request->wef_month,
             'applied_on' => now(),
-            'applied_for' => 'Existing Loan'
+            'applied_for' => 'New Loan'
         ];
 
-        //dd($loanMasterData);
+        // dd($loanMasterData);
         
         $salaryBlock = SalaryBlock::find($request->sal_block_id);
 
@@ -285,8 +299,9 @@ class LoanController extends Controller
 
         //dd($loanMasterData);
         LoanMaster::updateOrCreate(
+            ['reference_no' => $request->reference_no],
             $loanMasterData
-        )->where('id', $id)->update();
+        );
 
         return redirect()->route('loan.index')->with('success', 'loan updated successfully');
     }
@@ -609,7 +624,7 @@ class LoanController extends Controller
                             'principal_or_interest' => $installmentType,
                             'month'          => $salary_block->month, //salary month
                             'year'           => $salary_block->year, //salary year
-                            'type'           => "advance",
+                            'type'           => "loan",
                             'ip_address'     => request()->ip(),
                         ];
                         LoanProcessLog::create($log_data);
@@ -752,5 +767,57 @@ class LoanController extends Controller
             ->pluck("type_name", "id")
             ->toArray();
         return view('loan.processed_loan_list', compact('processed_data', 'departments', "employees", "salary_block", "advance_types"));
+    }
+
+
+    public function close(string $id)
+    {
+        $refno=advance::where('id', $id)->value('reference_no');
+        $loan = LoanMaster::where('reference_no', $refno)->first();
+        // Fetch related data (e.g., employees, loan types, salary heads)
+        $employees = Employee::all();
+        $advanceTypes = AdvanceType::all();
+        $salaryheads = SalaryHead::all();
+
+        // Return the edit view with the current loan data
+        return view('loan.close', compact('loan', 'employees', 'advanceTypes', 'salaryheads'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function closeLoan(Request $request, string $id)
+    {
+        // dd($referenceNo);
+        
+        $advance = new Advance();
+        $advance->close_advance = $request->close_advance;
+        $advance->closed_from_month = $request->closed_from_month;
+        $advance->closed_from_year = $request->closed_from_year;
+        $advance->closed_to_month = $request->closed_to_month;
+        $advance->closed_to_year = $request->closed_to_year;
+        
+        $advance = Advance::where('reference_no', $request->reference_no)->first();
+        $advance->update();
+
+        $loanMasterData = [
+            'reference_no' => $request->reference_no,
+            'close_advance' => $request->close_advance,
+            'closed_from_month' => $request->closed_from_month,
+            'closed_from_year' => $request->closed_from_year,
+            'closed_to_month' => $request->closed_to_month,
+            'closed_to_year' => $request->closed_to_year,
+            'updated_by' => Auth::user()->id
+        ];
+
+        // dd($loanMasterData);
+
+        //dd($loanMasterData);
+        LoanMaster::updateOrCreate(
+            ['reference_no' => $request->reference_no],
+            $loanMasterData
+        );
+
+        return redirect()->route('loan.index')->with('success', 'loan updated successfully');
     }
 }

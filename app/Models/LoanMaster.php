@@ -38,6 +38,7 @@ class LoanMaster extends Model
         'outstanding_interest_amount',
         'no_of_installment_interest',
         'interest_installment',
+        'interest_emi',
         'adj_interest_emi',
         'adj_interest_emi_in',
         'fld_deptid',
@@ -45,6 +46,8 @@ class LoanMaster extends Model
         'sal_block_id',
         'sal_block_month',
         'sal_block_yr',
+        'from_yyyy',
+        'from_mm',
         'updated_by'
     ];
 

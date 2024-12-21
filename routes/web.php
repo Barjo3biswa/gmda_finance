@@ -100,6 +100,9 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::get('loan/edit/{id}', [LoanController::class, 'edit'])->name('loan.edit');
     Route::put('loan/{id}/update', [LoanController::class, 'update'])->name('loan.update');
 
+    Route::get('loan/close/{id}', [LoanController::class, 'close'])->name('loan.close');
+    Route::put('loan/{id}/close', [LoanController::class, 'closeLoan'])->name('loan.closeLoan');
+
     Route::get('loan/show/{id}', [LoanController::class, 'show'])->name('loan.show');
 
 

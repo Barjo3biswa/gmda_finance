@@ -39,7 +39,7 @@
 					<input type="hidden" name="sal_block_id" id="sal_block_id">
 					<div class="col-md-3">
 						<label for="">Employee</label>
-						<select class="form-control select2" id="employee_id" name="employee_id">
+						<select class="form-control select2" id="employee_id" name="employee_id" required>
 							<option value="">--SELECT--</option>
 							@foreach ($employees as $key => $emp)
 								<option value="{{ $emp->user_id }}">{{ $emp->first_name }} {{ $emp->last_name }}</option>
@@ -235,8 +235,11 @@ function calculatePrincipalAmount() {
     const interestInstallment = interestAmount / noOfInstallmentsInterest;
     document.getElementById("interest_installment").value = Math.round(interestInstallment);
 
-    var f_installment = interestInstallment-(interestInstallment*noOfInstallmentsInterest);
-	//document.getElementById('adj_emi').value = f_installment;
+    var f_installment = interestInstallment / noOfInstallmentsInterest;
+	document.getElementById('adj_emi').value = Math.round(f_installment);
+
+    const adjInterestEmi = interestInstallment + (f_installment || 0);
+    document.getElementById('adj_interest_emi').value = Math.round(adjInterestEmi);
 }
 </script>
 @endsection

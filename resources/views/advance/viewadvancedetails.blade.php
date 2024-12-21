@@ -31,10 +31,10 @@
                     <th>Loan Amount</th>
                     <td>{{ number_format($loanMaster->loan_amount, 2) }}</td>
                 </tr>
-                <tr>
+                <!-- <tr>
                     <th>Interest Rate</th>
                     <td>{{ $loanMaster->loan_interest_rate }}%</td>
-                </tr>
+                </tr> -->
                 <tr>
                     <th>Outstanding Principal</th>
                     <td>{{ number_format($loanMaster->outstanding_principal, 2) }}</td>
@@ -53,9 +53,9 @@
                 </tr>
                 <tr>
                     <th>Adjustable Installment In</th>
-                    <td>{{ number_format($loanMaster->adj_emi_in) }}</td>
+                    <td>{{ $loanMaster->adj_emi_in == 'f' ? 'First Installment' : 'Last Installment' }}</td>
                 </tr>
-                <tr>
+                <!-- <tr>
                     <th>Interest Amount</th>
                     <td>{{ number_format($loanMaster->interest_amount, 2) }}</td>
                 </tr>
@@ -70,7 +70,7 @@
                 <tr>
                     <th>Adujstable Interest Installment</th>
                     <td>{{ number_format($loanMaster->adj_interest_emi, 2) }}</td>
-                </tr>
+                </tr> -->
                 <tr>
                     <th>Installment Month</th>
                     <td>{{ number_format($loanMaster->adj_interest_emi, 2) }}</td>
