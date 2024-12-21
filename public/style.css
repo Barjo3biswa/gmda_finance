@@ -488,7 +488,7 @@ body {}
 }
 
 .header-top-menu .navbar-nav>li .dropdown-menu a {
-    padding: 10px 20px;
+    padding: 10px 5px;
     display: block;
     color: #303030;
 }

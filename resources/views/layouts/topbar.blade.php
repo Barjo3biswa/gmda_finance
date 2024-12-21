@@ -49,6 +49,7 @@
                         @if (\App\Helpers\commonHelper::isPermissionExist('salary_excel_upload'))
                             <a href="{{ route('excel-upload') }}" class="dropdown-item">Upload Excel</a>
                         @endif
+                        <a href="{{ route('hold-unhold') }}" class="dropdown-item">Hold/Unhold Salary</a>
                     </div>
                 </li>
             @endif

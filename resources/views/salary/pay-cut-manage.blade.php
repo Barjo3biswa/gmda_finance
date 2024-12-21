@@ -27,8 +27,8 @@
         }
 
         /* .pay_cut {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            background-color: rgba(250, 0, 0, 0.7);
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        } */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            background-color: rgba(250, 0, 0, 0.7);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        } */
     </style>
 @endsection
 @section('content')
@@ -167,14 +167,35 @@
     @endsection
     @section('js')
         <script>
-            // Initialize DataTable
-            new DataTable('#dtExample', {
-                pageLength: 150,
-                layout: {
-                    topStart: {
-                        buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+            $(document).ready(function() {
+                const table = new DataTable('#dtExample', {
+                    pageLength: 20,
+                    layout: {
+                        topStart: {
+                            buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                        }
                     }
-                },
+                });
+
+                // Save state before redirect
+                const saveState = () => {
+                    const state = {
+                        search: table.search(),
+                        page: table.page.info().page,
+                        length: table.page.info().length
+                    };
+                    localStorage.setItem('datatableState', JSON.stringify(state));
+                };
+
+                // Event listeners to save state
+                $('#dtExample').on('page.dt search.dt', saveState);
+
+                // Restore state after redirect
+                const state = JSON.parse(localStorage.getItem('datatableState'));
+                if (state) {
+                    table.search(state.search).draw(false);
+                    table.page(state.page).draw(false);
+                }
             });
         </script>
     @endsection
