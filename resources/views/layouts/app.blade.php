@@ -76,8 +76,8 @@
                                         {{-- <h4 class="title-hrmis">HRMIS</h4> --}}
                                         <div class="logo-div">
                                             <a href="{{ env('APP_URL') }}/GMDA/gmda-leave/public/"><img
-                                                    class="main-logo" src="{{ asset('img/logo/gmda-logo.png') }}" alt=""
-                                                    style="max-width: 75px;" /></a>
+                                                    class="main-logo" src="{{ asset('img/logo/gmda-logo.png') }}"
+                                                    alt="" style="max-width: 75px;" /></a>
                                             <div>
                                                 <p class="title-hrmis">Human</p>
                                                 <p class="title-hrmis">Resource </p>
@@ -121,10 +121,29 @@
                                                         @endphp
                                                         @foreach ($modules as $mod)
                                                             @if (\App\Helpers\commonHelper::isPermissionExist($mod->permission_name))
-                                                                <li><a
-                                                                        href="{{ $mod->url }}{{ $mod->project_name }}{{ $mod->is_jwt_req == 1 ? '?token=' . session('jwt_token') : '' }}"><span
-                                                                            class="edu-icon edu-user-rounded author-log-ic"></span>{{ $mod->name }}</a>
-                                                                </li>
+                                                                @if ($mod->id == 1)
+                                                                    <li><a
+                                                                            href="{{ $mod->url }}{{ $mod->project_name }}/login?is_auth=yes{{ $mod->is_jwt_req == 1 ? '&token=' . session('jwt_token') : '' }}"><span
+                                                                                class="edu-icon edu-user-rounded author-log-ic"></span>{{ $mod->name }}</a>
+                                                                        @if ($mod->id == auth()->user()->landing_module)
+                                                                            <span class="badge badge-success"
+                                                                                style="font-size: 9px">
+                                                                                <i class="fa-solid fa-arrow-right"></i>
+                                                                            </span>
+                                                                        @endif
+                                                                    </li>
+                                                                @else
+                                                                    <li><a
+                                                                            href="{{ $mod->url }}{{ $mod->project_name }}{{ $mod->is_jwt_req == 1 ? '?token=' . session('jwt_token') : '' }}"><span
+                                                                                class="edu-icon edu-user-rounded author-log-ic"></span>{{ $mod->name }}
+                                                                            @if ($mod->id == auth()->user()->landing_module)
+                                                                                <span class="badge badge-success"
+                                                                                    style="font-size: 9px"><i
+                                                                                        class="fa-solid fa-check"></i></span>
+                                                                            @endif
+                                                                        </a>
+                                                                    </li>
+                                                                @endif
                                                             @endif
                                                         @endforeach
                                                         <li>
@@ -214,17 +233,17 @@
 
     @yield('js')
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('#sidebarCollapse').trigger('click');
         });
     </script>
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('.js-example-basic-multiple').select2();
         });
     </script>
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('#date').inputmask('dd/mm/YYYY');
         });
 
