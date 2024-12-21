@@ -15,11 +15,11 @@ class Employee extends Model
     }
     public function designation()
     {
-        return $this->belongsTo(AuthDesignation::class, 'designation_id');
+        return $this->belongsTo(AuthDesignation::class, 'designation_id', 'id');
     }
     public function department()
     {
-        return $this->belongsTo(Department::class, 'department_id');
+        return $this->belongsTo(Department::class, 'department_id', 'id');
     }
     public function payband()
     {
@@ -29,8 +29,9 @@ class Employee extends Model
     {
         return $this->belongsTo(Employee::class, 'user_id');
     }
-    public function policy(){
-        return $this->hasMany(Policy::class,'employee_id','id');
+    public function policy()
+    {
+        return $this->hasMany(Policy::class, 'employee_id', 'id');
     }
 
     // full name of employee
