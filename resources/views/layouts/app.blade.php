@@ -32,6 +32,10 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.0/css/buttons.dataTables.css" />
+
     @yield('css')
     <style>
 
@@ -72,8 +76,8 @@
                                         {{-- <h4 class="title-hrmis">HRMIS</h4> --}}
                                         <div class="logo-div">
                                             <a href="{{ env('APP_URL') }}/GMDA/gmda-leave/public/"><img
-                                                    class="main-logo" src="{{ asset('img/logo/gmda-logo.png') }}"
-                                                    alt="" style="max-width: 75px;" /></a>
+                                                    class="main-logo" src="{{ asset('img/logo/gmda-logo.png') }}" alt=""
+                                                    style="max-width: 75px;" /></a>
                                             <div>
                                                 <p class="title-hrmis">Human</p>
                                                 <p class="title-hrmis">Resource </p>
@@ -157,9 +161,10 @@
     </div>
 
 
-    {{-- <script src="js/vendor/jquery-1.12.4.min.js"></script> --}}
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-        crossorigin="anonymous"></script>
+    {{--
+    <script src="js/vendor/jquery-1.12.4.min.js"></script> --}}
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="{{ asset('js/bootstrap.min.js') }}"></script>
     <script src="{{ asset('js/wow.min.js') }}"></script>
     <script src="{{ asset('js/jquery-price-slider.js') }}"></script>
@@ -185,22 +190,33 @@
     <script src="{{ asset('js/calendar/fullcalendar-active.js') }}"></script>
     <script src="{{ asset('js/plugins.js') }}"></script>
     <script src="{{ asset('js/main.js') }}"></script>
-    {{-- <script src="{{ asset('js/tawk-chat.js')}}"></script> --}}
+    {{--
+    <script src="{{ asset('js/tawk-chat.js')}}"></script> --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.0/js/dataTables.buttons.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.print.min.js"></script>
+
     @yield('js')
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#sidebarCollapse').trigger('click');
         });
     </script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('.js-example-basic-multiple').select2();
         });
     </script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#date').inputmask('dd/mm/YYYY');
         });
 
