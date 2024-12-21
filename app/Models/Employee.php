@@ -34,4 +34,10 @@ class Employee extends Model
         return $this->hasMany(Policy::class, 'employee_id', 'id');
     }
 
+    // full name of employee
+    public function getFullNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
 }
+
