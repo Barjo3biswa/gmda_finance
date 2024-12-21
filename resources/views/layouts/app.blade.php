@@ -7,6 +7,7 @@
     <title>HRMIS | HRMIS - Human Resources Management Information System</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/logo/gmda-logo.png') }}">
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
@@ -122,26 +123,44 @@
                                                         @foreach ($modules as $mod)
                                                             @if (\App\Helpers\commonHelper::isPermissionExist($mod->permission_name))
                                                                 @if ($mod->id == 1)
-                                                                    <li><a
+                                                                    <li style="display: flex"><a
                                                                             href="{{ $mod->url }}{{ $mod->project_name }}/login?is_auth=yes{{ $mod->is_jwt_req == 1 ? '&token=' . session('jwt_token') : '' }}"><span
                                                                                 class="edu-icon edu-user-rounded author-log-ic"></span>{{ $mod->name }}</a>
                                                                         @if ($mod->id == auth()->user()->landing_module)
-                                                                            <span class="badge badge-success"
-                                                                                style="font-size: 9px">
-                                                                                <i class="fa-solid fa-arrow-right"></i>
-                                                                            </span>
+                                                                            <a href="javascript:void(0)"><span
+                                                                                    class="badge badge-success"
+                                                                                    style="font-size: 9px">
+                                                                                    <i
+                                                                                        class="fa-solid fa-arrow-right"></i>
+                                                                                </span></a>
+                                                                        @else
+                                                                            <a href="javascript:void(0)"
+                                                                                class="def"
+                                                                                data-id="{{ $mod->id }}"><span
+                                                                                    class="badge badge-secondary"
+                                                                                    style="font-size: 8px">Set
+                                                                                    default</span></a>
                                                                         @endif
                                                                     </li>
                                                                 @else
-                                                                    <li><a
+                                                                    <li style="display: flex"><a
                                                                             href="{{ $mod->url }}{{ $mod->project_name }}{{ $mod->is_jwt_req == 1 ? '?token=' . session('jwt_token') : '' }}"><span
                                                                                 class="edu-icon edu-user-rounded author-log-ic"></span>{{ $mod->name }}
-                                                                            @if ($mod->id == auth()->user()->landing_module)
-                                                                                <span class="badge badge-success"
-                                                                                    style="font-size: 9px"><i
-                                                                                        class="fa-solid fa-check"></i></span>
-                                                                            @endif
                                                                         </a>
+                                                                        @if ($mod->id == auth()->user()->landing_module)
+                                                                            <a href="javascript:void(0)"> <span
+                                                                                    class="badge badge-success"
+                                                                                    style="font-size: 9px"><i
+                                                                                        class="fa-solid fa-check"></i></span></a>
+                                                                        @else
+                                                                            <a href="javascript:void(0)"
+                                                                                class="def"
+                                                                                data-id="{{ $mod->id }}"><span
+                                                                                    class="badge badge-secondary"
+                                                                                    style="font-size: 8px">Set
+                                                                                    default</span></a>
+                                                                        @endif
+
                                                                     </li>
                                                                 @endif
                                                             @endif
@@ -285,6 +304,41 @@
                 toastr.error("{{ $error }}");
             @endforeach
         @endif
+
+        $(document).ready(function() {
+            $(".def").on("click", function(e) {
+                e.preventDefault();
+                // Collect form data
+                let formData = {
+                    id: $(this).attr('data-id'),
+                    _token: $('meta[name="csrf-token"]').attr("content") // CSRF token
+                };
+                $.blockUI({
+                    message: '<h1>Just a moment...</h1>'
+                });
+                // AJAX POST request
+                $.ajax({
+                    url: "{{ route('set-default') }}",
+                    type: "POST",
+                    data: formData,
+                    success: function(response) {
+                        $.unblockUI();
+                        toastr.success(response.message);
+                        console.log(response);
+                        if (response.success) {
+                            window.location.reload();
+                        }
+                    },
+                    error: function(xhr) {
+                        // Handle error
+                        //alert("An error occurred. Please try again.");
+                        $.unblockUI();
+                        toastr.error(response.message);
+                        console.log(xhr.responseText);
+                    }
+                });
+            });
+        });
     </script>
 </body>
 

@@ -126,6 +126,9 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::get('policy/processed-policy-list/{id}', [PolicyController::class, 'processed_policy_list_delete'])->name('policy.processed_policy_list_delete');
 
     Route::post('policy/process-policy-search', [PolicyController::class, 'process_policy_search'])->name('policy.search');
+
+
+    Route::post('/set-default', [App\Http\Controllers\defaultOptionController::class, 'setDefault'])->name('set-default');
 });
 
 
