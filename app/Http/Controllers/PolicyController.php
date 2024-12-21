@@ -6,8 +6,8 @@ use App\Models\AuthDesignation;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Policy;
-use App\Models\SalaryBlock;
-use App\Models\SalaryHead;
+use App\Models\salaryBlock;
+use App\Models\salaryHead;
 use App\Models\LicProcessData;
 
 use Illuminate\Support\Facades\DB;
@@ -39,9 +39,9 @@ class PolicyController extends Controller
      */
     public function create()
     {
-        $policies  = Policy::orderBy('id', 'desc')
+        $policies = Policy::orderBy('id', 'desc')
             ->paginate(10);
-        $employees    = Employee::select('*')
+        $employees = Employee::select('*')
             ->get();
         $designations = AuthDesignation::get();
         return view('policy.create', compact('policies', 'employees', 'designations'));
@@ -76,17 +76,17 @@ class PolicyController extends Controller
             $start_date = $cd;
         }
 
-        $salary_block = SalaryBlock::where('sal_process_status', "Unblock")->where('is_finalized', 0)->first();
+        $salary_block = salaryBlock::where('sal_process_status', "Unblock")->where('is_finalized', 0)->first();
 
         // $closing_date  = $request->closing_date;
-        $closing_year  = substr(date('Y', strtotime($closing_date)), 2, 4);
+        $closing_year = substr(date('Y', strtotime($closing_date)), 2, 4);
         $closing_month = date("n", strtotime($closing_date));
-        $cls           = sprintf("%02d", $closing_month);
-        $clsyymm       = $closing_year . $cls;
+        $cls = sprintf("%02d", $closing_month);
+        $clsyymm = $closing_year . $cls;
         //Wef date
-        $wef_year  = substr($request->wef_year, 2, 4);
+        $wef_year = substr($request->wef_year, 2, 4);
         $wef_month = $request->wef_month;
-        $wefyymm   = $wef_year . $wef_month;
+        $wefyymm = $wef_year . $wef_month;
 
 
         //End Wef
@@ -100,53 +100,53 @@ class PolicyController extends Controller
             if ($validator) {
 
                 $queryData = [
-                    'employee_id'     => $request->employee_id,
-                    'employee_code'   => $employee->code,
-                    'policy_no'       => $request->policy_no,
+                    'employee_id' => $request->employee_id,
+                    'employee_code' => $employee->code,
+                    'policy_no' => $request->policy_no,
                 ];
                 $data = [
-                    'policy_name'     => $request->policy_name,
-                    'dependent_name'  => $request->dependent_name,
-                    'amount'          => $request->amount ?? 0,
+                    'policy_name' => $request->policy_name,
+                    'dependent_name' => $request->dependent_name,
+                    'amount' => $request->amount ?? 0,
                     'monthly_premium' => $request->monthly_premium,
-                    'wef_month'       => $request->wef_month,
-                    'wef_year'        => $request->wef_year,
-                    'wef_yy_mm'       => $wefyymm,
+                    'wef_month' => $request->wef_month,
+                    'wef_year' => $request->wef_year,
+                    'wef_yy_mm' => $wefyymm,
                     // 'start_date'      => $request->start_date,
-                    'start_date'      => $start_date,
-                    'maturity_date'   => $request->maturity_date,
+                    'start_date' => $start_date,
+                    'maturity_date' => $request->maturity_date,
                     // 'closing_date'    => $request->closing_date,
-                    'closing_date'    => $closing_date,
-                    'closing_year'    => $closing_year,
-                    'cls_yy_mm'       => $clsyymm,
-                    'closing_month'   => $closing_month,
-                    'status'          => 1,
+                    'closing_date' => $closing_date,
+                    'closing_year' => $closing_year,
+                    'cls_yy_mm' => $clsyymm,
+                    'closing_month' => $closing_month,
+                    'status' => 1,
 
                 ];
                 Policy::updateOrCreate($queryData, $data);
                 // return redirect()->back()->withErrors($validator)->withInput();
             } else {
                 $data = [
-                    'employee_id'     => $request->employee_id,
-                    'employee_code'   => $employee->code,
-                    'employee_designation'  => $employee->designation_id,
-                    'policy_no'       => $request->policy_no,
-                    'policy_name'     => $request->policy_name,
-                    'dependent_name'  => $request->dependent_name,
-                    'amount'          => $request->monthly_premium,
+                    'employee_id' => $request->employee_id,
+                    'employee_code' => $employee->code,
+                    'employee_designation' => $employee->designation_id,
+                    'policy_no' => $request->policy_no,
+                    'policy_name' => $request->policy_name,
+                    'dependent_name' => $request->dependent_name,
+                    'amount' => $request->monthly_premium,
                     'monthly_premium' => $request->monthly_premium,
-                    'wef_month'       => $request->wef_month,
-                    'wef_year'        => $request->wef_year,
-                    'wef_yy_mm'       => $wefyymm,
+                    'wef_month' => $request->wef_month,
+                    'wef_year' => $request->wef_year,
+                    'wef_yy_mm' => $wefyymm,
                     // 'start_date'      => $request->start_date,
-                    'start_date'      => $start_date,
-                    'maturity_date'   => $request->maturity_date,
+                    'start_date' => $start_date,
+                    'maturity_date' => $request->maturity_date,
                     // 'closing_date'    => $request->closing_date,
-                    'closing_date'    => $closing_date,
-                    'closing_year'    => $closing_year,
-                    'cls_yy_mm'       => $clsyymm,
-                    'closing_month'   => $closing_month,
-                    'status'          => 1,
+                    'closing_date' => $closing_date,
+                    'closing_year' => $closing_year,
+                    'cls_yy_mm' => $clsyymm,
+                    'closing_month' => $closing_month,
+                    'status' => 1,
 
                 ];
                 Policy::create($data);
@@ -177,9 +177,9 @@ class PolicyController extends Controller
      */
     public function edit(string $id)
     {
-        $policies     = Policy::where('id', $id)->first();
+        $policies = Policy::where('id', $id)->first();
         //dd($policies);
-        $employees    = Employee::with('policy')->get();
+        $employees = Employee::with('policy')->get();
         $designations = AuthDesignation::get();
         $emp = Employee::get(); //active()->get();
         return view('policy.edit', compact('employees', 'designations', 'policies', 'emp'));
@@ -190,24 +190,24 @@ class PolicyController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        
+
     }
 
     public function update_policy()
     {
-        $policies     = Policy::orderBy('id', 'desc')->paginate(10);
-        $emp          = Employee::get(); //active()->get()
-        $employees    = Employee::with('policy')->get();
+        $policies = Policy::orderBy('id', 'desc')->paginate(10);
+        $emp = Employee::get(); //active()->get()
+        $employees = Employee::with('policy')->get();
         $designations = AuthDesignation::get();
         return view('policy.update_policy', compact('employees', 'designations', 'policies', 'emp'));
     }
     public function update_policy_data(Request $request)
     {
         $employees = Employee::select('*')->get();
-        $rules     = [
+        $rules = [
             'comment' => 'required',
         ];
-        
+
         /*$validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)
@@ -219,19 +219,19 @@ class PolicyController extends Controller
 
         if ($request->stop_status == 0) {
             $status = [
-                'status'         => $request->stop_status,
+                'status' => $request->stop_status,
                 'closing_reason' => $request->comment,
             ];
         }
         if ($request->close_status == 9) {
             $status = [
-                'status'         => $request->close_status,
+                'status' => $request->close_status,
                 'closing_reason' => $request->comment,
             ];
         }
         if ($request->enable_status == 1) {
             $status = [
-                'status'         => $request->enable_status,
+                'status' => $request->enable_status,
                 'closing_reason' => $request->comment,
             ];
         }
@@ -266,15 +266,17 @@ class PolicyController extends Controller
 
     public function process_policy()
     {
-        $emp          = Employee::get(); //active()->
-        $departments  = Department::select('id', 'name')->get();
-        $salarystatus = SalaryBlock::where('sal_process_status', "Unblock")->first();
-        $policies     = Policy::filter()
+        $emp = Employee::get(); //active()->
+        $departments = Department::select('id', 'name')->get();
+        $salarystatus = salaryBlock::where('sal_process_status', "Unblock")->first();
+        $policies = Policy::filter()
             ->where('status', 1)
-            ->with(["licprocessdatas" => function ($query) use ($salarystatus) {
-                return $query->where("year", optional($salarystatus)->salary_year)
-                    ->where("month", optional($salarystatus)->salary_month);
-            }])
+            ->with([
+                "licprocessdatas" => function ($query) use ($salarystatus) {
+                    return $query->where("year", optional($salarystatus)->salary_year)
+                        ->where("month", optional($salarystatus)->salary_month);
+                }
+            ])
             ->with("employees")
             ->orderBy('employee_code', 'ASC')
             // ->whereDoesntHave('licprocessdata')
@@ -291,16 +293,16 @@ class PolicyController extends Controller
         //dd($request->all());
 
         $request->validate([
-            'datas'                 => 'required|array|min:1',
-            'datas.policy_ids.*'    => 'required|numeric|min:1',
-            'salary_block_id'       => 'required|exists:salary_blocks,id',
+            'datas' => 'required|array|min:1',
+            'datas.policy_ids.*' => 'required|numeric|min:1',
+            'salary_block_id' => 'required|exists:salary_blocks,id',
         ], [], [
-            'datas'                 => 'Policy',
-            'datas.policy_ids.*'    => 'Policy',
-            'salary_block_id'       => 'Salary Year',
+            'datas' => 'Policy',
+            'datas.policy_ids.*' => 'Policy',
+            'salary_block_id' => 'Salary Year',
         ]);
 
-        $salary_block = SalaryBlock::where("id", $request->salary_block_id)
+        $salary_block = salaryBlock::where("id", $request->salary_block_id)
             ->active()
             ->first();
 
@@ -308,7 +310,7 @@ class PolicyController extends Controller
             return redirect()->back()
                 ->with("error", "Selected salary year block is not active.");
         }
-        
+
         /*if ($salary_block->isLicProcessed()) {
             return redirect()->back()
                 ->with("error", "Selected salary year block is already processed.");
@@ -340,7 +342,7 @@ class PolicyController extends Controller
             //     "claims"    => 0,
             //     "deducts"   => 0
             // ]);
-            foreach($request->datas as $data){
+            foreach ($request->datas as $data) {
                 $policy_ids[] = $data['policy_id'];
                 $amounts[] = $data['monthly_premium'];
 
@@ -375,11 +377,11 @@ class PolicyController extends Controller
                     'sal_block_yr'    => $salary_block->sal_block_yr,
                 ];*/
                 $query_data = [
-                    'sal_block_id'    => $salary_block->id,
+                    'sal_block_id' => $salary_block->id,
                     'sal_block_month' => $salary_block->month,
-                    'sal_block_yr'    => $salary_block->year,
+                    'sal_block_yr' => $salary_block->year,
                 ];
-                
+
                 $procssed_employee_ids[$policy->employee_id] = $policy->employee_id;
                 $update_data = [
                     'monthly_premium' => $policy->monthly_premium,
@@ -399,7 +401,7 @@ class PolicyController extends Controller
             //     ->groupBy('employee_id')
             //     ->active()
             //     ->get();
-            
+
             /*
             $lic_policies_for_temp = licprocessdata::query()
                 ->where('month', $salary_block->salary_month)

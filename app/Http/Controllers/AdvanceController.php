@@ -11,8 +11,8 @@ use App\Models\AdvanceType;
 use App\Models\AdvanceGroup;
 use App\Models\Advance;
 use App\Models\AdvanceProcess;
-use App\Models\SalaryHead;
-use App\Models\SalaryBlock;
+use App\Models\salaryHead;
+use App\Models\salaryBlock;
 use App\Models\AdvanceRequest;
 use App\Models\LoanProcessLog;
 use Excel;
@@ -35,7 +35,7 @@ class AdvanceController extends Controller
 
         $query = Advance::with('employee', 'advanceType');
         $advanceRequests = $query->orderBy('created_at', 'desc')->where("interest_amount", 0)->orWhereNull('interest_amount')
-        ->get()
+            ->get()
             ->map(function ($advance) {
                 // Check if the advance has a reference number in LoanMaster
                 $advance->has_loan_master = LoanMaster::where('reference_no', $advance->reference_no)->exists();
@@ -45,10 +45,10 @@ class AdvanceController extends Controller
         //dd($advanceRequests);
         $advanceTypes = AdvanceType::all();
         //dd($advanceTypes);
-            // ->whereNotNull('type_name')
-            // ->where('deleted_at', null)
-            // ->pluck("type_name", "id")
-            // ->toArray();
+        // ->whereNotNull('type_name')
+        // ->where('deleted_at', null)
+        // ->pluck("type_name", "id")
+        // ->toArray();
 
         if (empty($advanceTypes)) {
             $advanceTypes = [];
@@ -59,7 +59,7 @@ class AdvanceController extends Controller
 
     public function create()
     {
-        $employees    = Employee::select('*')->get();
+        $employees = Employee::select('*')->get();
         $designations = AuthDesignation::get();
         $advanceTypes = AdvanceType::all();
 
@@ -77,30 +77,30 @@ class AdvanceController extends Controller
 
         DB::beginTransaction();
 
-        try{
+        try {
 
             $find_data = [
                 'reference_no' => $request->ref_no,
             ];
 
             $data = [
-                'employee_id'           => $request->employee_id,
-                'employee_name'         => $request->emp_name,
-                'reference_no'          => $request->ref_no,
-                'loan_type_id'          => $request->loan_type,
-                'loan_head_id'          => $request->loan_head,
-                'duration'              => $request->duration,
-                'amount'                => $request->amount,
-                'monthly_installment'   => $request->instalment,
-                'recovered_amount'      => 0,
-                'wef_month'             => $request->wef_month,
-                'wef_year'              => $request->wef_year,
-                'start_date'            => $request->start_date,
-                'closing_date'          => $request->closing_date,
-                'status'                => Advances::$ACTIVE,
+                'employee_id' => $request->employee_id,
+                'employee_name' => $request->emp_name,
+                'reference_no' => $request->ref_no,
+                'loan_type_id' => $request->loan_type,
+                'loan_head_id' => $request->loan_head,
+                'duration' => $request->duration,
+                'amount' => $request->amount,
+                'monthly_installment' => $request->instalment,
+                'recovered_amount' => 0,
+                'wef_month' => $request->wef_month,
+                'wef_year' => $request->wef_year,
+                'start_date' => $request->start_date,
+                'closing_date' => $request->closing_date,
+                'status' => Advances::$ACTIVE,
             ];
 
-            Advances::updateOrCreate($find_data,$data);
+            Advances::updateOrCreate($find_data, $data);
             //dd($data);
 
         } catch (Exception $e) {
@@ -119,9 +119,9 @@ class AdvanceController extends Controller
     public function edit($id)
     {
         //dd($id);
-        $employees    = Employee::select('*')->get();
+        $employees = Employee::select('*')->get();
         $designations = AuthDesignation::get();
-        $advance      = Advance::where('id', $id)->first();
+        $advance = Advance::where('id', $id)->first();
         //dd($advance);
         $advanceTypes = AdvanceType::all();
         return view("advance.edit", compact('employees', 'designations', 'advance', 'advanceTypes'));
@@ -204,7 +204,7 @@ class AdvanceController extends Controller
             $emp_dept = Employee::where('code', $request->emp_code)->first()->department_id;
             $emp_desig = Employee::where('code', $request->emp_code)->first()->designation_id;
 
-            $loanAmnt=$request->principal_amount+$request->interest_amount;
+            $loanAmnt = $request->principal_amount + $request->interest_amount;
             $loanMasterData = [
                 'reference_no' => $request->ref_no,
                 'user_id' => $request->employee_id,
@@ -230,8 +230,8 @@ class AdvanceController extends Controller
                 'sal_block_id' => $request->sal_block_id
                 //'updated_by' => auth()->id()
             ];
-            
-            $salaryBlock = SalaryBlock::find($request->sal_block_id);
+
+            $salaryBlock = salaryBlock::find($request->sal_block_id);
 
             /*if ($salaryBlock) {
                 $loanMasterData['sal_block_month'] = $salaryBlock->month;
@@ -260,14 +260,14 @@ class AdvanceController extends Controller
         //dd($request->all());
 
 
-        $employees    = Employee::select('*')->get();
+        $employees = Employee::select('*')->get();
         $designations = AuthDesignation::get();
 
-        $advances     = Advances::query()
+        $advances = Advances::query()
             ->when(request("type"), function ($query) {
                 return $query->where('loan_type_id', request("type"));
             })
-            ->when($request->emp_id, function($query){
+            ->when($request->emp_id, function ($query) {
                 return $query->where('employee_id', request("emp_id"));
             })
             ->when(!is_null(request("status")), function ($query) {
@@ -288,8 +288,8 @@ class AdvanceController extends Controller
     public function process_advance()
     {
         $emp = Employee::all();
-        $departments  = Department::select('id', 'name')->get();
-        $salarystatus = SalaryBlock::where('sal_process_status', 'Unblock')->first();
+        $departments = Department::select('id', 'name')->get();
+        $salarystatus = salaryBlock::where('sal_process_status', 'Unblock')->first();
 
         //dd($salarystatus->isAdvanceProcessed());
 
@@ -302,12 +302,14 @@ class AdvanceController extends Controller
             ->orderBy('user_id', 'desc')
             ->paginate(100);*/
 
-            $advances = LoanMaster::filter()
+        $advances = LoanMaster::filter()
             // ->active()
-            ->with(["advanceprocessdata" => function ($query) use ($salarystatus) {
-                return $query->where("year", optional($salarystatus)->year)
-                    ->where("month", optional($salarystatus)->month);
-            }],'employee', 'advanceType', 'salhead')->where("interest_amount", 0)->orWhereNull('interest_amount')
+            ->with([
+                "advanceprocessdata" => function ($query) use ($salarystatus) {
+                    return $query->where("year", optional($salarystatus)->year)
+                        ->where("month", optional($salarystatus)->month);
+                }
+            ], 'employee', 'advanceType', 'salhead')->where("interest_amount", 0)->orWhereNull('interest_amount')
             ->orderBy('user_id', 'desc')
             ->paginate(100);
 
@@ -325,20 +327,20 @@ class AdvanceController extends Controller
         // dd($request->all());
 
         $request->validate([
-            'datas'                 => 'required|array|min:1',
-            'datas.policy_ids.*'    => 'required|numeric|min:1',
+            'datas' => 'required|array|min:1',
+            'datas.policy_ids.*' => 'required|numeric|min:1',
             'datas.loan_head_ids.*' => 'required|numeric|min:1',
-            'salary_block_id'       => 'required|exists:salary_blocks,id',
+            'salary_block_id' => 'required|exists:salary_blocks,id',
         ], [], [
-            'salary_block_id'       => 'Salary Year',
+            'salary_block_id' => 'Salary Year',
         ]);
 
         //dd($request->all());
         /**
          * Fetch the salary block and check if it is active
          */
-        
-         $salary_block = SalaryBlock::where("id", $request->salary_block_id)->active()->first();
+
+        $salary_block = salaryBlock::where("id", $request->salary_block_id)->active()->first();
 
         if (!$salary_block) {
             return redirect()->back()
@@ -348,7 +350,7 @@ class AdvanceController extends Controller
             return redirect()->back()
                 ->with("error", "Selected salary year block is already processed.");
         }
-        
+
 
         /**
          * On active block, fetch advance ids and amounts
@@ -359,46 +361,46 @@ class AdvanceController extends Controller
         DB::beginTransaction();
         try {
             //log
-            foreach($request->allrows as $ldata){
+            foreach ($request->allrows as $ldata) {
                 $adv_ids[] = $ldata['advance_id'];
             }
-    
+
             $loans = LoanMaster::query()        //$selected_advances = Advance::query()
-                    ->whereIn("id", $adv_ids)
-                    //->active()
-                    ->get();
-    
-                    foreach($loans as $loan){
-                        if ($loan->principal_instllmnt_status == 'completed' || $loan->outstanding_principal <= 0) {
-                            $installmentType = 'interest';
-                        } else {
-                            $installmentType = 'principal';
-                        }
-    
-                        $log_data = [
-                            'loan_id'   => $loan->id,
-                            'ref_no'    => $loan->reference_no,
-                            'employee_id'    => $loan->user_id,
-                            'emp_code'    => $loan->emp_code,
-                            'monthly_emi'    => $loan->monthly_emi,
-                            'interest_installment' => $loan->interest_installment,
-                            'process_by'     => auth()->user()->id,
-                            'process_date'   => now(),
-                            'principal_or_interest' => $installmentType,
-                            'month'          => $salary_block->month, //salary month
-                            'year'           => $salary_block->year, //salary year
-                            'type'           => "advance",
-                            'ip_address'     => request()->ip(),
-                        ];
-                        LoanProcessLog::create($log_data);
-                    }
+                ->whereIn("id", $adv_ids)
+                //->active()
+                ->get();
+
+            foreach ($loans as $loan) {
+                if ($loan->principal_instllmnt_status == 'completed' || $loan->outstanding_principal <= 0) {
+                    $installmentType = 'interest';
+                } else {
+                    $installmentType = 'principal';
+                }
+
+                $log_data = [
+                    'loan_id' => $loan->id,
+                    'ref_no' => $loan->reference_no,
+                    'employee_id' => $loan->user_id,
+                    'emp_code' => $loan->emp_code,
+                    'monthly_emi' => $loan->monthly_emi,
+                    'interest_installment' => $loan->interest_installment,
+                    'process_by' => auth()->user()->id,
+                    'process_date' => now(),
+                    'principal_or_interest' => $installmentType,
+                    'month' => $salary_block->month, //salary month
+                    'year' => $salary_block->year, //salary year
+                    'type' => "advance",
+                    'ip_address' => request()->ip(),
+                ];
+                LoanProcessLog::create($log_data);
+            }
             //  dd($loans);
             //log---
 
             $advance_ids = [];
             $amounts = [];
 
-            foreach($request->datas as $data){
+            foreach ($request->datas as $data) {
                 if (isset($data['advance_id']) && isset($data['monthly_premium'])) {
                     $advance_ids[] = $data['advance_id'];
                     $amounts[] = $data['monthly_premium'];
@@ -427,7 +429,7 @@ class AdvanceController extends Controller
             $procssed_employee_ids = [];
 
             foreach ($selected_advances as $advance) {
-                if($advance->recovered_amount >= $advance->principal_amount){
+                if ($advance->recovered_amount >= $advance->principal_amount) {
                     $advance->status = 0;
                     //$advance->save();
                 } else {
@@ -438,19 +440,19 @@ class AdvanceController extends Controller
                     // Advance::where("id", $advance->id)
                     //     ->increment('recovered_amount', $advance->monthly_installment);
 
-                        // ->update(array('recovered_amount', DB::raw('recovered_amount + $advance->monthly_installment')));
+                    // ->update(array('recovered_amount', DB::raw('recovered_amount + $advance->monthly_installment')));
 
                     $query_data = [
-                        'employee_id'    => $advance->user_id,
-                        'emp_code'    => $advance->emp_code,
-                        'reference_no'   => $advance->reference_no,
-                        'loan_head_id'   => $advance->loan_type_id,
-                        'month'          => $salary_block->month, //salary month
-                        'year'           => $salary_block->year, //salary year
-                        'advance_id'     => $advance->id,
-                        'status'         => AdvanceProcess::$ACTIVE,
+                        'employee_id' => $advance->user_id,
+                        'emp_code' => $advance->emp_code,
+                        'reference_no' => $advance->reference_no,
+                        'loan_head_id' => $advance->loan_type_id,
+                        'month' => $salary_block->month, //salary month
+                        'year' => $salary_block->year, //salary year
+                        'advance_id' => $advance->id,
+                        'status' => AdvanceProcess::$ACTIVE,
                     ];
-                    
+
                     $procssed_employee_ids[$advance->user_id] = $advance->user_id;
                     $update_data = [
                         'amount' => $advance->monthly_emi,
@@ -468,12 +470,12 @@ class AdvanceController extends Controller
                     //log
                     //dd($advance);
                     $log_data = [
-                        'is_processed'   => 1
+                        'is_processed' => 1
                     ];
                     LoanProcessLog::where('ref_no', $advance->reference_no)->update($log_data);
                 }
             }
-            
+
         } catch (\Throwable $th) {
             report($th);
             dd($th->getMessage());
@@ -485,15 +487,15 @@ class AdvanceController extends Controller
 
     public function processed_data_list()
     {
-        $salary_block = SalaryBlock::where("sal_process_status", "Unblock")
+        $salary_block = salaryBlock::where("sal_process_status", "Unblock")
             ->active()
             ->first();
         request()->merge([
             "month" => request("month", $salary_block->month),
-            "year"  => request("year", $salary_block->year),
+            "year" => request("year", $salary_block->year),
         ]);
         $departments = Department::select("name", "id")->get();
-        $employees   = Employee::select("id", "first_name", "middle_name", "last_name", "code")
+        $employees = Employee::select("id", "first_name", "middle_name", "last_name", "code")
             //->active()
             ->get();
         $processed_data_query = AdvanceProcess::query()
@@ -512,9 +514,9 @@ class AdvanceController extends Controller
                     return $query->where("department_id", request("department_id"));
                 });
             });
-            /*->whereHas('advances', function ($query) {
-                return $query->where("interest_amount", "=", 0);
-            })*/
+        /*->whereHas('advances', function ($query) {
+            return $query->where("interest_amount", "=", 0);
+        })*/
 
         if (request("export") == "excel") {
             return $this->exportToExcel($processed_data_query, request("month"), request("year"));
@@ -551,7 +553,7 @@ class AdvanceController extends Controller
         $designations = AuthDesignation::get();
         $advanceGroups = AdvanceGroup::all();
         $advanceTypes = AdvanceType::all();
-        $salaryheads = SalaryHead::all();
+        $salaryheads = salaryHead::all();
         return view("advance.existing", compact('employees', 'advanceTypes', 'salaryheads', 'advanceGroups'));
     }
 
@@ -643,7 +645,7 @@ class AdvanceController extends Controller
         $currentDate = now();
         $year = $currentDate->format('y');
         $month = str_pad($currentDate->format('m'), 2, '0', STR_PAD_LEFT);
-        
+
         // Get the last reference number
         $lastRefNo = AdvanceRequest::whereNotNull('reference_no')
             ->where('reference_no', 'LIKE', "ADV/{$year}/{$month}/%")
@@ -651,7 +653,7 @@ class AdvanceController extends Controller
             ->first();
 
         $sequence = '0001';
-        
+
         if ($lastRefNo) {
             $parts = explode('/', $lastRefNo->reference_no);
             if (count($parts) == 4) {
@@ -661,7 +663,7 @@ class AdvanceController extends Controller
         }
 
         //dd($request->all());
-        
+
         $referenceNo = "ADV/{$year}/{$month}/{$sequence}";
 
         $advance = new Advance();
@@ -724,12 +726,12 @@ class AdvanceController extends Controller
             'adj_interest_emi' => $request->adj_interest_emi,
             'adj_interest_emi_in' => $request->adj_interest_emi_in,
             'sal_block_id' => $request->sal_block_id,
-            'from_yyyy'=> $request->wef_year,
+            'from_yyyy' => $request->wef_year,
             'from_mm' => $request->wef_month,
             //'updated_by' => auth()->id()
         ];
-        
-        $salaryBlock = SalaryBlock::find($request->sal_block_id);
+
+        $salaryBlock = salaryBlock::find($request->sal_block_id);
 
         /*if ($salaryBlock) {
             $loanMasterData['sal_block_month'] = $salaryBlock->month;
