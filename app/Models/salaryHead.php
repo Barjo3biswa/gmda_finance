@@ -12,7 +12,7 @@ class salaryHead extends Model
     use HasFactory;
     use SoftDeletes;
 
-    public function TempAmount($hd_id, $block_id, $emp_id)
+    public function TempAmount($hd_id, $block_id, $emp_id, $status)
     {
         $block = salaryBlock::find($block_id);
         if ($block->is_finalized) {
@@ -20,8 +20,14 @@ class salaryHead extends Model
                 ->where('sal_head_id', $hd_id)->where('emp_id', $emp_id)
                 ->sum('amount');
         } else {
+            if ($status == 'all') {
+                $stat = ['draft', 'temp'];
+            } else {
+                $stat = [$status];
+            }
             return salaryTemp::where('block_id', $block_id)
                 ->where('sal_head_id', $hd_id)->where('emp_id', $emp_id)
+                ->whereIn('status', $stat)
                 ->sum('amount');
         }
 
@@ -49,7 +55,7 @@ class salaryHead extends Model
 
     }
 
-    public function TempAmountTotal($hd_id, $block_id)
+    public function TempAmountTotal($hd_id, $block_id, $status)
     {
         $block = salaryBlock::find($block_id);
         if ($block->is_finalized) {
@@ -57,8 +63,14 @@ class salaryHead extends Model
                 ->where('sal_head_id', $hd_id)
                 ->sum('amount');
         } else {
+            if ($status == 'all') {
+                $stat = ['draft', 'temp'];
+            } else {
+                $stat = [$status];
+            }
             return salaryTemp::where('block_id', $block_id)
                 ->where('sal_head_id', $hd_id)
+                ->whereIn('status', $stat)
                 ->sum('amount');
         }
     }

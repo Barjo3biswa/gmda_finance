@@ -36,6 +36,16 @@
         .sparkline8-list {
             height: 325px;
         }
+
+        .tr_warning {
+            background-color: rgba(226, 226, 98, 0.5);
+            /* Faded yellow */
+        }
+
+        .tr_danger {
+            background-color: rgba(250, 0, 0, 0.5);
+            /* Faded red */
+        }
     </style>
 @endsection
 @section('content')
@@ -168,15 +178,24 @@
                                                     </thead>
                                                     <tbody>
                                                         @foreach ($salary_head->where('pay_head', 'Income') as $hd)
-                                                            <tr>
+                                                            @php
+                                                                $amount = $hd->TempAmountTotal(
+                                                                    $hd->id,
+                                                                    $view_salary_block,
+                                                                    'all',
+                                                                );
+                                                                $class = '';
+                                                                if ($amount == 0) {
+                                                                    $class = 'tr_warning';
+                                                                }
+                                                            @endphp
+                                                            <tr class="{{ $class }}">
                                                                 <td>{{ $hd->name }}</td>
-                                                                <td>{{ $hd->TempAmountTotal($hd->id, $view_salary_block) }}
+                                                                <td>{{ number_format($amount, 2) }}
                                                                 </td>
                                                             </tr>
                                                             @php
-                                                                $income =
-                                                                    $income +
-                                                                    $hd->TempAmountTotal($hd->id, $view_salary_block);
+                                                                $income = $income + $amount;
                                                             @endphp
                                                         @endforeach
                                                     </tbody>
@@ -197,15 +216,39 @@
                                                     </thead>
                                                     <tbody>
                                                         @foreach ($salary_head->where('pay_head', 'Deduction') as $hd)
-                                                            <tr>
+                                                            @php
+                                                                $amount = $hd->TempAmountTotal(
+                                                                    $hd->id,
+                                                                    $view_salary_block,
+                                                                    'all',
+                                                                );
+                                                                $class = '';
+                                                                if ($amount == 0) {
+                                                                    $class = 'tr_warning';
+                                                                }
+                                                                if ($hd->pay_cut_hd) {
+                                                                    $class = 'tr_danger';
+                                                                }
+                                                            @endphp
+                                                            <tr class="{{ $class }}">
                                                                 <td>{{ $hd->name }}</td>
-                                                                <td>{{ $hd->TempAmountTotal($hd->id, $view_salary_block) }}
+                                                                <td>{{ number_format($amount, 2) }}
+                                                                    @if ($hd->pay_cut_hd == 1)
+                                                                        <a target="_blank"
+                                                                            href="{{ route('salary-process', ['view' => 'summery', 'status' => 'pay_cut']) }}"><i
+                                                                                class="fa-solid fa-arrow-right"></i></a>
+                                                                    @endif
                                                                 </td>
                                                             </tr>
                                                             @php
-                                                                $deduction =
-                                                                    $deduction +
-                                                                    $hd->TempAmountTotal($hd->id, $view_salary_block);
+                                                                if ($hd->pay_cut_hd == 1) {
+                                                                    $amount = $hd->TempAmountTotal(
+                                                                        $hd->id,
+                                                                        $view_salary_block,
+                                                                        'draft',
+                                                                    );
+                                                                }
+                                                                $deduction = $deduction + $amount;
                                                             @endphp
                                                         @endforeach
                                                     </tbody>
@@ -218,15 +261,15 @@
                                                     <thead>
                                                         <tr>
                                                             <th>Income Total</th>
-                                                            <th>{{ $income }}</th>
+                                                            <th>{{ number_format($income, 2) }}</th>
                                                         </tr>
                                                         <tr>
                                                             <th>Deduction Total</th>
-                                                            <th>{{ $deduction }}</th>
+                                                            <th>{{ number_format($deduction, 2) }}</th>
                                                         </tr>
                                                         <tr>
                                                             <th>Net Salary Total</th>
-                                                            <th>{{ $income - $deduction }}</th>
+                                                            <th>{{ number_format($income - $deduction, 2) }}</th>
                                                         </tr>
                                                     </thead>
                                                 </table>

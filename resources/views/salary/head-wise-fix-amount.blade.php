@@ -99,70 +99,70 @@
                                             <form action="{{ route('save-record') }}" method="post">
                                                 @csrf
                                                 <div class="row">
-                                                    <div class="sparkline8-list">
-                                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                                            <table class="table table-bordered">
-                                                                <thead>
+                                                    {{-- <div class="sparkline8-list"> --}}
+                                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th colspan=3>
+                                                                        <h4>Income</h4>
+                                                                    </th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Head</th>
+                                                                    <th>Amount</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach ($salary_head->where('pay_head', 'Income') as $hd)
                                                                     <tr>
-                                                                        <th colspan=3>
-                                                                            <h4>Income</h4>
-                                                                        </th>
+                                                                        <td>{{ $hd->name }}</td>
+                                                                        <td>
+                                                                            <input type="number" class="form-control"
+                                                                                name="amount[{{ $hd->id }}][]"
+                                                                                value="{{ $hd->masterAmount($hd->id, $editable_id) }}">
+                                                                        </td>
                                                                     </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th colspan=3>
+                                                                        <h4>Deduction</h4>
+                                                                    </th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Head</th>
+                                                                    <th>Amount</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach ($salary_head->where('pay_head', 'Deduction') as $hd)
                                                                     <tr>
-                                                                        <th>Head</th>
-                                                                        <th>Amount</th>
+                                                                        <td>{{ $hd->name }}</td>
+                                                                        <td>
+                                                                            <input type="number" class="form-control"
+                                                                                name="amount[{{ $hd->id }}][]"
+                                                                                value="{{ $hd->masterAmount($hd->id, $editable_id) }}">
+                                                                        </td>
                                                                     </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    @foreach ($salary_head->where('pay_head', 'Income') as $hd)
-                                                                        <tr>
-                                                                            <td>{{ $hd->name }}</td>
-                                                                            <td>
-                                                                                <input type="number" class="form-control"
-                                                                                    name="amount[{{ $hd->id }}][]"
-                                                                                    value="{{ $hd->masterAmount($hd->id, $editable_id) }}">
-                                                                            </td>
-                                                                        </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                                            <table class="table table-bordered">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th colspan=3>
-                                                                            <h4>Deduction</h4>
-                                                                        </th>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <th>Head</th>
-                                                                        <th>Amount</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    @foreach ($salary_head->where('pay_head', 'Deduction') as $hd)
-                                                                        <tr>
-                                                                            <td>{{ $hd->name }}</td>
-                                                                            <td>
-                                                                                <input type="number" class="form-control"
-                                                                                    name="amount[{{ $hd->id }}][]"
-                                                                                    value="{{ $hd->masterAmount($hd->id, $editable_id) }}">
-                                                                            </td>
-                                                                        </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12"
-                                                                style="display:flex; justify-content:right">
-                                                                <input type="hidden" name="employee_id"
-                                                                    value="{{ $editable_id }}">
-                                                                <input type="submit" class="btn btn-primary" value="Submit">
-                                                            </div>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12"
+                                                            style="display:flex; justify-content:right">
+                                                            <input type="hidden" name="employee_id"
+                                                                value="{{ $editable_id }}">
+                                                            <input type="submit" class="btn btn-primary" value="Submit">
                                                         </div>
                                                     </div>
+                                                    {{-- </div> --}}
                                                 </div>
                                             </form>
                                         @endif

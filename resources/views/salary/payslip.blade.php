@@ -90,31 +90,31 @@
                                                                 </div>
                                                             </div>
                                                             @if ($is_editable_flag)
-                                                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
-                                                                <div class="form-group">
-                                                                    <input type="hidden" name="emp_id"
-                                                                        value="{{ $emp_id }}">
-                                                                    <input type="hidden" name="sal_block_id"
-                                                                        value="{{ $view_salary_block }}">
-                                                                    <input type="submit" value="Apply"
-                                                                        class="btn btn-primary btn-xs"
-                                                                        style="margin-top: 25px;">
+                                                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+                                                                    <div class="form-group">
+                                                                        <input type="hidden" name="emp_id"
+                                                                            value="{{ $emp_id }}">
+                                                                        <input type="hidden" name="sal_block_id"
+                                                                            value="{{ $view_salary_block }}">
+                                                                        <input type="submit" value="Apply"
+                                                                            class="btn btn-primary btn-xs"
+                                                                            style="margin-top: 25px;">
+                                                                    </div>
                                                                 </div>
-                                                            </div>
                                                             @endif
                                                         </div>
                                                     </form>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
-                                                    <h5>Emp Name: {{$emp_details->name}}</h5>
-                                                    <h5>Emp Code: {{$emp_details->emp_code}}</h5>
-                                                    <h5>Present Count: {{$attendance->present_count ??"NA"}}</h5>
-                                                    <h5>Leave Count: {{$attendance->leave_count ??"NA"}}</h5>
-                                                    <h5>Half Day Count: {{$attendance->hd_count ??"NA"}}</h5>
-                                                    <h5>Absent Count: {{$attendance->absent_count ??"NA"}}</h5>
+                                                <h5>Emp Name: {{ $emp_details->name }}</h5>
+                                                <h5>Emp Code: {{ $emp_details->emp_code }}</h5>
+                                                <h5>Present Count: {{ $attendance->present_count ?? 'NA' }}</h5>
+                                                <h5>Leave Count: {{ $attendance->leave_count ?? 'NA' }}</h5>
+                                                <h5>Half Day Count: {{ $attendance->hd_count ?? 'NA' }}</h5>
+                                                <h5>Absent Count: {{ $attendance->absent_count ?? 'NA' }}</h5>
                                             </div>
-                                        </div>                                        
+                                        </div>
                                         <div class="row">
                                             @php
                                                 $income = 0;
@@ -138,9 +138,17 @@
                                                     </thead>
                                                     <tbody>
                                                         @foreach ($salary_head->where('pay_head', 'Income') as $hd)
+                                                            @php
+                                                                $amount = $hd->TempAmount(
+                                                                    $hd->id,
+                                                                    $view_salary_block,
+                                                                    $emp_id,
+                                                                    'all',
+                                                                );
+                                                            @endphp
                                                             <tr>
                                                                 <td>{{ $hd->name }}</td>
-                                                                <td>{{ $hd->TempAmount($hd->id, $view_salary_block, $emp_id) }}
+                                                                <td>{{ $amount }}
                                                                 </td>
                                                                 @if ($is_editable_flag)
                                                                     <td>
@@ -153,13 +161,7 @@
                                                                 @endif
                                                             </tr>
                                                             @php
-                                                                $income =
-                                                                    $income +
-                                                                    $hd->TempAmount(
-                                                                        $hd->id,
-                                                                        $view_salary_block,
-                                                                        $emp_id,
-                                                                    );
+                                                                $income = $income + $amount;
                                                             @endphp
                                                         @endforeach
                                                     </tbody>
@@ -183,28 +185,56 @@
                                                     </thead>
                                                     <tbody>
                                                         @foreach ($salary_head->where('pay_head', 'Deduction') as $hd)
+                                                            @php
+                                                                $amount = $hd->TempAmount(
+                                                                    $hd->id,
+                                                                    $view_salary_block,
+                                                                    $emp_id,
+                                                                    'all',
+                                                                );
+                                                            @endphp
                                                             <tr>
                                                                 <td>{{ $hd->name }}</td>
-                                                                <td>{{ $hd->TempAmount($hd->id, $view_salary_block, $emp_id) }}
+                                                                <td>{{ $amount }}
                                                                 </td>
                                                                 @if ($is_editable_flag)
                                                                     <td>
-                                                                        <button type="button" data-toggle="modal"
-                                                                            data-target="#exampleModalCenter"
-                                                                            onclick="appenFunction({{ $hd->id }}, {{ $view_salary_block }}, {{ $emp_id }})">
-                                                                            Edit
-                                                                        </button>
-                                                                    </td>
+                                                                        @if ($hd->pay_cut_hd == 1)
+                                                                            @php
+                                                                                $flag = \App\Helpers\commonHelper::checkFlag(
+                                                                                    $hd->id,
+                                                                                    $emp_id,
+                                                                                );
+                                                                            @endphp
+                                                                            @if ($flag == false)
+                                                                                <a onclick="return confirm('Are you sure you Include pay cut amount in salary?');"
+                                                                                    href="{{ route('include-exclude', ['hd_id' => $hd->id, 'emp_id' => $emp_id]) }}"
+                                                                                    class="btn btn-primary btn-xs">Include</a>
+                                                                            @else
+                                                                                <a onclick="return confirm('Are you sure you Exclude pay cut amount in salary?');"
+                                                                                    href="{{ route('include-exclude', ['hd_id' => $hd->id, 'emp_id' => $emp_id]) }}"
+                                                                                    class="btn btn-danger btn-xs">Exclude</a>
+                                                                            @endif
+                                                                        @else
+                                                                            <button type="button" data-toggle="modal"
+                                                                                data-target="#exampleModalCenter"
+                                                                                onclick="appenFunction({{ $hd->id }}, {{ $view_salary_block }}, {{ $emp_id }})">
+                                                                                Edit
+                                                                            </button>
+                                                                        @endif
                                                                 @endif
+                                                                </td>
                                                             </tr>
                                                             @php
-                                                                $deduction =
-                                                                    $deduction +
-                                                                    $hd->TempAmount(
+                                                                if ($hd->pay_cut_hd == 1) {
+                                                                    $amount = $hd->TempAmount(
                                                                         $hd->id,
                                                                         $view_salary_block,
                                                                         $emp_id,
+                                                                        'draft',
                                                                     );
+                                                                }
+                                                                $deduction = $deduction + $amount;
                                                             @endphp
                                                         @endforeach
                                                     </tbody>
@@ -231,7 +261,7 @@
                                                 </table>
                                             </div>
                                         </div>
-                                    </div>                               
+                                    </div>
                                 </div>
 
                             </div>

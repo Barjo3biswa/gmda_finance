@@ -8,6 +8,29 @@
             border-radius: 4px;
             font-size: 12px;
         }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .table-responsive::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #007bff;
+            border-radius: 4px;
+        }
+
+        .td_danger {
+            background-color: rgba(250, 0, 0, 0.5);
+            /* Faded red */
+        }
+
+        .pay_cut {
+            background-color: rgba(250, 0, 0, 0.7);
+            /* Faded red */
+        }
     </style>
 @endsection
 @section('content')
@@ -81,44 +104,75 @@
                                             <h4>Salary Summery For
                                                 {{ \Carbon\Carbon::createFromDate(null, $curr_salary_blk->month)->format('F') }}/{{ $curr_salary_blk->year }}
                                             </h4>
-                                            <div class="static-table-list">
-                                                <table class="table table-bordered " id="dtExample">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-hover" id="dtExample">
                                                     <thead>
                                                         <tr>
                                                             <th>Emp Name</th>
                                                             <th>Emp Code</th>
-                                                            
+
                                                             @foreach ($salary_head as $hd)
-                                                                <th>{{$hd->code}}</th>
+                                                                <th width="5%">{{ $hd->code }}</th>
                                                             @endforeach
                                                             <!-- <th>Gross</th>
-                                                            <th>Deduction</th> -->
-                                                            <th>Net</th>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <th>Deduction</th> -->
+                                                            <th width="5%">Net</th>
                                                             <th>Pay Slip</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         @foreach ($employee as $key => $emp)
                                                             @php
-                                                                $ind_gross = $emp->grossSalary($view_salary_block);
-                                                                $ind_deduct = $emp->deductSalary($view_salary_block);
+                                                                $ind_gross = $emp->grossSalary(
+                                                                    $view_salary_block,
+                                                                    'draft',
+                                                                );
+                                                                $ind_deduct = $emp->deductSalary(
+                                                                    $view_salary_block,
+                                                                    'draft',
+                                                                );
                                                                 $indi_net = $ind_gross - $ind_deduct;
+                                                                $class = '';
+                                                                if ($indi_net < 0) {
+                                                                    $class = 'td_danger';
+                                                                }
                                                             @endphp
                                                             <tr>
-                                                                <td>{{ $emp->name }}</td>
-                                                                <td>{{ $emp->emp_code }}</td>
+                                                                <td class="{{ $class }}">{{ $emp->name }}</td>
+                                                                <td class="{{ $class }}">{{ $emp->emp_code }}</td>
                                                                 @foreach ($salary_head as $hd)
-                                                                    <th>{{$emp->getHeadAmount($view_salary_block,$hd->id)}}</th>
+                                                                    @php
+                                                                        $amount = $emp->getHeadAmount(
+                                                                            $view_salary_block,
+                                                                            $hd->id,
+                                                                        );
+                                                                        $pay_cut = '';
+                                                                        if ($hd->pay_cut_hd == 1 && $amount > 0) {
+                                                                            $pay_cut = 'pay_cut';
+                                                                        }
+                                                                    @endphp
+                                                                    <td class="{{ $class }} {{ $pay_cut }}">
+                                                                        {{ $amount }}
+                                                                    </td>
                                                                 @endforeach
-                                                                <!-- <td>{{ $ind_gross }}</td>
-                                                                <td>{{ $ind_deduct }}</td> -->
-                                                                <td>{{ $indi_net }}</td>
-                                                                <td><a
+                                                                <!-- <td class="{{ $class }}">{{ $ind_gross }}</td><td class="{{ $class }}">{{ $ind_deduct }}</td> -->
+                                                                <td class="{{ $class }}">{{ $indi_net }}</td>
+                                                                <td class="{{ $class }}"><a
                                                                         href="{{ route('payslip', ['id' => Crypt::encrypt($emp->id), 'sl_blk' => $view_salary_block]) }}">View</a>
                                                                 </td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th colspan="2">Total</th>
+                                                            @foreach ($salary_head as $hd)
+                                                                <th></th>
+                                                            @endforeach
+                                                            <th></th>
+                                                            <th></th>
+                                                        </tr>
+                                                    </tfoot>
                                                 </table>
                                             </div>
                                         </div>
@@ -134,11 +188,41 @@
     @endsection
     @section('js')
         <script>
+            // Initialize DataTable
             new DataTable('#dtExample', {
+                pageLength: 150,
                 layout: {
                     topStart: {
                         buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
                     }
+                },
+                footerCallback: function(row, data, start, end, display) {
+                    var api = this.api();
+
+                    // Helper function to convert string to numeric value
+                    var intVal = function(i) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '') * 1 :
+                            typeof i === 'number' ? i : 0;
+                    };
+
+                    // Iterate over each column to calculate sums
+                    api.columns().every(function(index) {
+                        // Adjust the range to include only summable columns (e.g., salary heads and net)
+                        if (index > 1 && index < api.columns().count() - 1) {
+                            var total = api
+                                .column(index, {
+                                    page: 'current'
+                                }) // Use 'current' for visible rows
+                                .data()
+                                .reduce(function(a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+
+                            // Update the footer with the calculated total
+                            $(api.column(index).footer()).html(total.toLocaleString());
+                        }
+                    });
                 }
             });
         </script>

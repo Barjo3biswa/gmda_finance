@@ -7,12 +7,16 @@ use App\Http\Controllers\Controller;
 use App\Imports\EmployeeWiseImport;
 use App\Imports\HeadWiseImport;
 use App\Models\AttendanceSummery;
+use App\Imports\kssFileImport;
+use App\Models\AttendanceSummery;
+use App\Models\LoanMaster;
+use App\Models\LoanMasterDetails;
+use App\Models\LoanRecovery;
 use App\Models\salaryBlock;
 use App\Models\salaryHead;
 use App\Models\salaryHeadAmountDistribution;
 use App\Models\salaryMaster;
 use App\Models\salaryProcessStep;
-use App\Models\SalarySummmary;
 use App\Models\salaryTemp;
 use App\Models\salaryTrans;
 use App\Models\User;
@@ -83,6 +87,10 @@ class SalaryController extends Controller
         if (isset($check)) {
             return redirect()->back()->with('error', 'Opened Block is not fully Completed.');
         }
+
+        if ($block->is_finalized == 1) {
+            return redirect()->back()->with('error', 'Salary is generated for this block.');
+        }
         // dd("ok");
         DB::beginTransaction();
         try {
@@ -124,7 +132,6 @@ class SalaryController extends Controller
         // dd($request->all());
         $salary_block = salaryBlock::get();
         $salary_head = salaryHead::orderBy('order')->get();
-        $employee = User::get();
         $process_steps = salaryProcessStep::orderBy('order')->get();
         $couurent_open_block = salaryBlock::where('sal_process_status', 'unblock')->first();
         $default_block = salaryBlock::where('month', date('m'))->where('year', date('Y'))->first();
@@ -133,11 +140,15 @@ class SalaryController extends Controller
         $is_editable_flag = SalaryBlock::where('id', $view_salary_block)
             ->where('sal_process_status', 'unblock')->where('is_finalized', 0)
             ->first();
-
+        $employee = User::get();
         if ($request->view == "process") {
             return view("salary.process-salary", compact('salary_block', 'salary_head', 'employee', 'view_salary_block', 'process_steps', 'is_editable_flag'));
         } else {
-            // dd("ok");
+            if ($request->status == 'pay_cut') {
+                $employee = User::all()->filter(function ($user) {
+                    return $user->payCut() > 0;
+                });
+            }
             return view("salary.salary-summery", compact('salary_block', 'salary_head', 'employee', 'view_salary_block', 'process_steps', 'is_editable_flag'));
         }
 
@@ -365,6 +376,7 @@ class SalaryController extends Controller
 
     public function employeeWiseImport(Request $request)
     {
+        // dd("ok");
         $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->where('is_finalized', 0)->first();
         if (!$salary_block) {
             return redirect()->back()->with('error', 'Please Unblock New Salary Month & Year');
@@ -389,6 +401,7 @@ class SalaryController extends Controller
             $salary_block = salaryBlock::where('id', $request->sal_block_id)->first();
             $deductable_head = salaryHead::where('sal_deduct_if_absent', 1)->orderBy('order')->get();
             $attendance_summery = AttendanceSummery::where('block_id', $salary_block->id)->where('user_id', $request->emp_id)->first();
+            $pay_cut_head = salaryHead::where('pay_cut_hd', 1)->first()->id;
             if (!$attendance_summery) {
                 return redirect()->back()->with('error', 'Attendence is not processed.');
             }
@@ -405,7 +418,7 @@ class SalaryController extends Controller
                     $temp_salary->working_days = ($attendance_summery->days_in_month - $request->pay_cut_day);
                     $temp_salary->save();
                 }
-                salaryTemp::where('emp_id', $user->id)->where('sal_head_id', 19)->update(['amount' => $pay_cut]);
+                salaryTemp::where('emp_id', $user->id)->where('sal_head_id', $pay_cut_head)->update(['amount' => $pay_cut]);
             }
             DB::commit();
         } catch (\Exception $e) {
@@ -506,7 +519,7 @@ class SalaryController extends Controller
                                     ->where('sal_head_id', $value2)->first();
                                 $new_amount += $temp_salary->amount;
                             }
-                            $new_amount = ($new_amount / 100) * $existingRecord->salaryHead->percentage;
+                            $new_amount = round(($new_amount / 100) * $existingRecord->salaryHead->percentage);
                         }
 
                         $data['amount'] = $new_amount;
@@ -562,10 +575,12 @@ class SalaryController extends Controller
                 $gross = salaryTemp::where('emp_id', $emp->id)
                     ->where('block_id', $sal_block_id)
                     ->whereIn('sal_head_id', $income_hed)
+                    ->where('status', 'draft')
                     ->sum('amount');
                 $deduction = salaryTemp::where('emp_id', $emp->id)
                     ->where('block_id', $sal_block_id)
                     ->whereIn('sal_head_id', $deduct_hed)
+                    ->where('status', 'draft')
                     ->sum('amount');
                 $net = $gross - $deduction;
                 $data = [
@@ -590,11 +605,15 @@ class SalaryController extends Controller
                 salaryMaster::create($data);
 
                 $temp_salary = salaryTemp::where('emp_id', $emp->id)
+                    ->where('status', 'draft')
                     ->where('block_id', $sal_block_id)
                     ->get();
 
                 if ($temp_salary->isNotEmpty()) {
                     foreach ($temp_salary as $row) {
+                        if ($row->detail_json) {
+                            $this->loanRecovery($row->detail_json, $salary_block);
+                        }
                         $data = $row->makeHidden(['id', 'created_at', 'updated_at', 'deleted_at'])->toArray();
                         salaryTrans::create($data);
                     }
@@ -613,28 +632,93 @@ class SalaryController extends Controller
         }
         return redirect()->back()->with('success', 'Successfully Finalized Salary');
     }
+
+    public function loanRecovery($loan_detail, $salary_block)
+    {
+        // dd($loan_detail);
+        $loan = json_decode($loan_detail);
+
+        $loan_master = LoanMaster::where('id', $loan->loan_id)->first();
+        // dd($loan_master);
+        $principal_amount = $loan->principal_amount;
+        $intrest_amount = $loan->intrest_amount;
+        $principal_installment = 0;
+        $interest_installment = 0;
+
+        // dd($principal_amount);
+        if ($loan_master->advanceType->advance_type == 'flat') {
+            ///// flat loans/////
+            if ($principal_amount) {
+                $data = [
+                    'outstanding_principal' => $loan_master->outstanding_principal - $principal_amount,
+                    'principal_installment' => $loan_master->principal_installment + 1,
+                ];
+                $principal_installment = $loan_master->principal_installment + 1;
+            } elseif ($intrest_amount) {
+                $data = [
+                    'outstanding_interest_amount' => $loan_master->outstanding_interest_amount - $intrest_amount,
+                    'interest_installment' => $loan_master->interest_installment + 1,
+                ];
+                $interest_installment = $loan_master->interest_installment + 1;
+                if ($interest_installment == $loan_master->no_of_installment_interest) {
+                    $data['status'] = 5;
+                }
+            }
+
+        } elseif ($loan_master->advanceType->advance_type == 'reducing') {
+            ///// reducing loans/////
+            $data = [
+                'outstanding_principal' => $loan_master->outstanding_principal - $principal_amount,
+                'outstanding_interest_amount' => $loan_master->outstanding_interest_amount - $intrest_amount,
+                'principal_installment' => $loan_master->principal_installment + 1,
+            ];
+            if (($loan_master->principal_installment + 1) == $loan_master->no_of_installment) {
+                $data['status'] = 5;
+            }
+
+        }
+        // dd($data);
+        LoanMaster::where('id', $loan->loan_id)->update($data);
+
+        LoanRecovery::create([
+            'emp_id' => $loan_master->user_id,
+            'emp_code' => $loan_master->emp_code,
+            'loan_id' => $loan_master->id,
+            'inst_no' => $loan->installment_no,
+            'principal_installment' => $principal_installment,
+            'interest_installment' => $interest_installment,
+            'principal_amount' => $principal_amount,
+            'interest_amount' => $intrest_amount,
+            'total_amount' => ($principal_amount + $intrest_amount),
+            // 'loan_type_id' =>
+            // 'recovery_type' =>
+            'month' => $salary_block->month,
+            'year' => $salary_block->year,
+            'sal_block_id' => $salary_block->id,
+        ]);
+
+    }
+
     public function attendanceProcess($id)
     {
         $step_details = salaryProcessStep::where('id', $id)->first();
         if (!CommonHelper::checkIsInOrder($step_details->order)) {
             return redirect()->back()->with('error', 'Please maintaion process oeder');
         }
-        $sal_block_id = $step_details->block_id;
-        $salary_block = salaryBlock::where('id', $sal_block_id)->first();
-        if ($salary_block->is_finalized == 1) {
-            return redirect()->back()->with('error', 'Already Processed');
-        }
-        $employee = User::get();
+
         DB::beginTransaction();
         try {
-            foreach ($employee as $usr) {
+            $user = user::get();
+            $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
+            $deductable_head = salaryHead::where('sal_deduct_if_absent', 1)->orderBy('order')->get();
+            $pay_cut_head = salaryHead::where('pay_cut_hd', 1)->first()->id;
+            foreach ($user as $usr) {
                 $attendance_summery = AttendanceSummery::where('block_id', $salary_block->id)->where('user_id', $usr->id)->first();
                 if (!$attendance_summery) {
                     return redirect()->back()->with('error', 'Attendence is not processed.');
                 }
                 if ($attendance_summery->absent_count > 0) {
                     $pay_cut = 0;
-                    $deductable_head = salaryHead::where('sal_deduct_if_absent', 1)->orderBy('order')->get();
                     foreach ($deductable_head as $hd) {
                         $temp_salary = salaryTemp::where('emp_id', $usr->id)->where('sal_head_id', $hd->id)->first();
                         $salary_assigned_amount = salaryHeadAmountDistribution::where('emp_id', $usr->id)->where('sal_head_id', $hd->id)->first();
@@ -647,7 +731,7 @@ class SalaryController extends Controller
                         $temp_salary->working_days = ($attendance_summery->days_in_month - $attendance_summery->absent_count);
                         $temp_salary->save();
                     }
-                    salaryTemp::where('emp_id', $usr->id)->where('sal_head_id', 19)->update(['amount' => $pay_cut]);
+                    salaryTemp::where('emp_id', $usr->id)->where('sal_head_id', $pay_cut_head)->update(['amount' => $pay_cut, 'status' => 'temp']);
                 }
 
             }
@@ -774,5 +858,207 @@ class SalaryController extends Controller
         }
     }
 
+    public function includeExclude(Request $request)
+    {
+        $temp_salary = salaryTemp::where('sal_head_id', $request->hd_id)->where('emp_id', $request->emp_id)->first();
+        // dd($temp_salary);
+        // dump($temp_salary->status);
+        if ($temp_salary->status == 'temp') {
+            $status = 'draft';
+        } else if ($temp_salary->status == 'draft') {
+            $status = 'temp';
+        }
+        // dump($status);
+        $temp_salary->status = $status;
+        $temp_salary->save();
+        return redirect()->back()->with('success', 'Successfull');
+    }
+
+    public function payCutManage($id)
+    {
+        // dd($id);
+        $step_details = salaryProcessStep::where('id', $id)->first();
+        if (!CommonHelper::checkIsInOrder($step_details->order)) {
+            return redirect()->back()->with('error', 'Please maintaion process oeder');
+        }
+        if ($step_details->status == 'process') {
+            return redirect()->back()->with('error', 'Process is completed');
+        }
+        $salary_block = salaryBlock::get();
+        $all_sal_head = salaryHead::orderBy('order')->get();
+        $salary_head = salaryHead::where('pay_cut_hd', 1)->orderBy('order')->get();
+        $view_salary_block = salaryBlock::where('sal_process_status', 'unblock')->first()->id;
+        $employee = User::all()->filter(function ($user) {
+            return $user->payCut() > 0;
+        });
+        $pay_cut_head = salaryHead::where('pay_cut_hd', 1)->first();
+        $attendance = AttendanceSummery::where('block_id', $view_salary_block)->first();
+        return view('salary.pay-cut-manage', compact('employee', 'salary_block', 'all_sal_head', 'salary_head', 'view_salary_block', 'pay_cut_head', 'attendance', 'id'));
+    }
+
+    public function payCutSave($id)
+    {
+        $step_details = salaryProcessStep::where('id', $id)->first();
+        if (!CommonHelper::checkIsInOrder($step_details->order)) {
+            return redirect()->back()->with('error', 'Please maintaion process oeder');
+        }
+        if ($step_details->status == 'process') {
+            return redirect()->back()->with('error', 'Process is completed');
+        }
+        DB::beginTransaction();
+        try {
+            $pay_cut_head = salaryHead::where('pay_cut_hd', 1)->first();
+
+
+            salaryTemp::where('sal_head_id', $pay_cut_head->id)
+                ->where('status', 'temp')
+                ->update(['amount' => 0, 'status' => 'draft']);
+            $step_details->status = 'process';
+            $step_details->save();
+            DB::commit();
+        } catch (\Exception $e) {
+            // dd($e);
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Error while Processing');
+        }
+        return redirect()->route('salary-process', ['view' => 'process'])->with('success', 'Successfully Saved');
+    }
+
+    public function processLoanAmount($id)
+    {
+        $step_details = salaryProcessStep::where('id', $id)->first();
+        if (!CommonHelper::checkIsInOrder($step_details->order)) {
+            return redirect()->back()->with('error', 'Please maintaion process oeder');
+        }
+        $sal_block_id = $step_details->block_id;
+        $salary_block = salaryBlock::where('id', $sal_block_id)->first();
+        DB::beginTransaction();
+        try {
+            $loans = LoanMaster::where('status', '!=', '5')->get();
+            foreach ($loans as $loan) {
+                if ($loan->advanceType->advance_type == 'flat') {
+                    if ($loan->no_of_installment > $loan->principal_installment) {
+                        $emi_amount = $loan->principal_installment;
+                        if (($loan->adj_interest_emi_in == 'F' && $loan->principal_installment == 0) || ($loan->adj_interest_emi_in == 'L' && $loan->no_of_installment == ($loan->principal_installment + 1))) {
+                            $emi_amount = $loan->adj_emi;
+                        }
+                        //////////additional condition to prevent negative value//////
+                        if ($loan->outstanding_principal < $emi_amount) {
+                            $emi_amount = $loan->outstanding_principal;
+                        }
+                        /////////////////////// Ends Here ////////////////////////////
+
+
+                        ///////////////////cut rest amount if inst no is last/////////////////////////
+                        if ($loan->no_of_installment == ($loan->principal_installment + 1)) {
+                            if (($loan->outstanding_principal - $emi_amount) > 0) {
+                                $emi_amount = $loan->outstanding_principal;
+                            }
+                        }
+                        //////////////////////////////////////////////////////////////////////////////
+                        $data = [
+                            'loan_id' => $loan->id,
+                            'emi' => $emi_amount,
+                            'principal_amount' => $emi_amount,
+                            'intrest_amount' => null,
+                            'installment_no' => $loan->principal_installment + 1,
+                        ];
+                    } elseif ($loan->no_of_installment_interest > $loan->interest_installment) {
+                        // dd("here");
+                        $emi_amount = $loan->interest_emi;
+                        if (($loan->adj_interest_emi_in == 'F' && $loan->interest_installment == 0) || ($loan->adj_interest_emi_in == 'L' && $loan->no_of_installment_interest == ($loan->interest_installment + 1))) {
+                            $emi_amount = $loan->adj_interest_emi;
+                        }
+                        //////////additional condition to prevent negative value//////
+                        if ($loan->outstanding_interest_amount < $emi_amount) {
+                            $emi_amount = $loan->outstanding_interest_amount;
+                        }
+                        /////////////////////// Ends Here ////////////////////////////
+
+                        ///////////////////cut rest amount if inst no is last/////////////////////////
+                        if ($loan->no_of_installment_interest == ($loan->interest_installment + 1)) {
+                            if (($loan->outstanding_interest_amount - $emi_amount) > 0) {
+                                $emi_amount = $loan->outstanding_interest_amount;
+                            }
+                        }
+                        //////////////////////////////////////////////////////////////////////////////
+
+                        $data = [
+                            'loan_id' => $loan->id,
+                            'emi' => $emi_amount,
+                            'principal_amount' => null,
+                            'intrest_amount' => $emi_amount,
+                            'installment_no' => $loan->interest_installment + 1,
+                        ];
+                    }
+                } elseif ($loan->advanceType->advance_type == 'reducing') {
+                    $installment_no = $loan->principal_installment + 1;
+                    $emi_details = LoanMasterDetails::where('loan_id', $loan->id)->where('payment_no', $installment_no)->first();
+                    $emi_amount = $emi_details->payment;
+
+                    $data = [
+                        'loan_id' => $loan->id,
+                        'emi' => $emi_amount,
+                        'principal_amount' => $emi_details->principal,
+                        'intrest_amount' => $emi_details->interest,
+                        'installment_no' => $installment_no
+                    ];
+                }
+
+                $json_data = json_encode($data);
+                $salary_data = [
+                    'emp_code' => $loan->user->id,
+                    'sal_head_id' => $loan->advanceType->salary_head_id,
+                    'salary_head_code' => $loan->advanceType->salaryHead->code,
+                    'salary_head_name' => $loan->advanceType->salaryHead->name,
+                    'month' => $salary_block->month,
+                    'year' => $salary_block->year,
+                    'block_id' => $salary_block->id,
+                    'pay_head' => $loan->advanceType->salaryHead->pay_head,
+                    'working_days' => 30,
+                    'status' => 'draft',
+                    'amount' => $emi_amount,
+                    'detail_json' => $json_data,
+                ];
+
+                salaryTemp::updateOrCreate(
+                    [
+                        'emp_id' => $loan->user->id,
+                        'sal_head_id' => $loan->advanceType->salary_head_id,
+                    ],
+                    $salary_data
+                );
+            }
+            $step_details->status = 'process';
+            $step_details->save();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            // dd($e);
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Error');
+        }
+        return redirect()->back()->with('success', 'successfull');
+    }
+
+    public function uploadKSS($id)
+    {
+        $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
+        return view('salary.kss-upload', compact('salary_block'));
+    }
+
+    public function saveKSS(Request $request)
+    {
+        dd($request->all());
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+        try {
+            Excel::import(new kssFileImport, $request->file('excel_file'));
+            return redirect()->back()->with('success', 'Imported successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to import: ' . $e->getMessage());
+        }
+    }
 
 }

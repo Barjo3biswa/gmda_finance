@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -11,7 +12,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject // Add implements JWTSubject here
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -74,7 +75,7 @@ class User extends Authenticatable implements JWTSubject // Add implements JWTSu
         return AuthRole::whereIn('id', $roleIds)->get();
     }
 
-    public function grossSalary($block_id)
+    public function grossSalary($block_id, $status)
     {
         $hed = salaryHead::where('pay_head', 'Income')->pluck('id')->toArray();
         $block = salaryBlock::find($block_id);
@@ -84,16 +85,20 @@ class User extends Authenticatable implements JWTSubject // Add implements JWTSu
                 ->where('block_id', $block_id)
                 ->sum('amount');
         } else {
+            if ($status == 'all') {
+                $stat = ['draft', 'temp'];
+            } else {
+                $stat = [$status];
+            }
             return salaryTemp::whereIn('sal_head_id', $hed)
                 ->where('emp_id', $this->id)
                 ->where('block_id', $block_id)
+                ->whereIn('status', $stat)
                 ->sum('amount');
         }
-
-
     }
 
-    public function deductSalary($block_id)
+    public function deductSalary($block_id, $status)
     {
         $hed = salaryHead::where('pay_head', 'Deduction')->pluck('id')->toArray();
         $block = salaryBlock::find($block_id);
@@ -103,12 +108,17 @@ class User extends Authenticatable implements JWTSubject // Add implements JWTSu
                 ->where('block_id', $block_id)
                 ->sum('amount');
         } else {
+            if ($status == 'all') {
+                $stat = ['draft', 'temp'];
+            } else {
+                $stat = [$status];
+            }
             return salaryTemp::whereIn('sal_head_id', $hed)
                 ->where('emp_id', $this->id)
                 ->where('block_id', $block_id)
+                ->whereIn('status', $stat)
                 ->sum('amount');
         }
-
     }
 
     public function getHeadAmount($block_id, $head_id)
@@ -128,9 +138,16 @@ class User extends Authenticatable implements JWTSubject // Add implements JWTSu
     }
 
 
-    // public function attendanceSummery(){
-
-    // }
+    public function payCut()
+    {
+        $pay_cut_hd = salaryHead::where('pay_cut_hd', 1)->first();
+        if ($pay_cut_hd) {
+            return salaryTemp::where('sal_head_id', $pay_cut_hd->id)
+                ->where('emp_id', $this->id)
+                ->sum('amount');
+        }
+        return 0;
+    }
 
 
 }
