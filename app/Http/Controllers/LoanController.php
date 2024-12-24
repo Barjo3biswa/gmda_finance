@@ -129,6 +129,8 @@ class LoanController extends Controller
 
         $advance->save();
 
+        $advanceId = $advance->id;
+
         $employee = Employee::where('user_id', $request->employee_id)->first();
         $emp_code = $employee->code;
         $emp_dept = $employee->department_id;
@@ -136,6 +138,7 @@ class LoanController extends Controller
         //dd($emp_code, $emp_dept, $emp_desig);
 
         $loanMasterData = [
+            'advances_id' => $advanceId,
             'reference_no' => $referenceNo,
             'user_id' => $request->employee_id,
             'emp_code' => $emp_code ?? null,
@@ -467,6 +470,8 @@ class LoanController extends Controller
         $advance->document_path = $data['document_path'];*/
         $advance->save();
 
+        $advanceId = $advance->id;
+
 
         $employee = Employee::where('user_id', $request->employee_id)->first();
         $emp_code = $employee->code;
@@ -475,6 +480,7 @@ class LoanController extends Controller
         //dd($emp_code, $emp_dept, $emp_desig);
 
         $loanMasterData = [
+            'advances_id' => $advanceId,
             'reference_no' => $request->reference_no,
             'user_id' => $request->employee_id,
             'emp_code' => $emp_code ?? null,
@@ -695,6 +701,7 @@ class LoanController extends Controller
                         'year' => $salary_block->year, //salary year
                         'advance_id' => $advance->id,
                         'processed_at' => now(),
+                        'processed_by_id' => auth()->user()->id,
                         'status' => AdvanceProcess::$ACTIVE,
                     ];
 
@@ -763,9 +770,9 @@ class LoanController extends Controller
                     return $query->where("department_id", request("department_id"));
                 });
             })
-            /*->whereHas('advances', function ($query) {
-                $query->where("interest_amount", ">", 0);
-            })*/
+            ->whereHas('advanceType', function($q) {
+                $q->where('type', 'loan');
+            })
         ;
 
         if (request("export") == "excel") {

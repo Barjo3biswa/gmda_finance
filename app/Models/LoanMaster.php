@@ -18,6 +18,7 @@ class LoanMaster extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'advances_id',
         'advance_id',
         'reference_no',
         'user_id',

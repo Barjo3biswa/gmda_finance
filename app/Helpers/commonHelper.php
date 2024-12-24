@@ -101,5 +101,15 @@ class CommonHelper
         ];
     }
 
+    public static function getMonthName($month) {
+        $month = (Int)$month;
+        try {
+            $months = self::allMonthArray();
+            return $months[$month];
+        } catch (\Throwable $th) {
+            throw new \Exception("Invalid month {$month}");
+        }
+    }
+
 }
 

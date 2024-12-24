@@ -102,7 +102,7 @@
 
                 <div class="form-group row">
                     <div class="col-md-3">
-						<label for="monthly_emi">Monthly Installment</label>
+						<label for="monthly_emi">Monthly Installment(Principal)</label>
 						<input type="number" class="form-control" id="monthly_emi" name="monthly_emi" value="0" step="0.01" ></input>
 					</div>
                     <div class="col-md-3">
