@@ -6,14 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class salaryTrans extends Model
+class userHoldUnhold extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $guarded = ['id'];
-    use SoftDeletes;
-
-    public function employee()
-    {
-        return $this->belongsTo(Employee::class, 'emp_id');
-    }
 }

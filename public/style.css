@@ -632,12 +632,13 @@ body {}
 }
 
 .header-right-info ul.header-right-menu li .dropdown-header-top.author-log {
-    width: 200px;
+    max-width: 260px;
     padding: 10px 0px;
 }
 
 .header-right-info ul.header-right-menu li .dropdown-header-top.author-log li {
     display: block;
+    justify-content: space-between;
 }
 
 .header-right-info ul.header-right-menu li .dropdown-header-top.author-log li a {

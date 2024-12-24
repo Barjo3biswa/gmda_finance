@@ -93,7 +93,7 @@ class LoanMaster extends Model
 
     public function salhead()
     {
-        return $this->belongsTo(SalaryHead::class, 'sal_block_id');
+        return $this->belongsTo(salaryHead::class, 'sal_block_id');
     }
 
     public function advanceType()

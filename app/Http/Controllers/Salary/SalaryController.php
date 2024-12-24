@@ -6,8 +6,8 @@ use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
 use App\Imports\EmployeeWiseImport;
 use App\Imports\HeadWiseImport;
-use App\Imports\kssFileImport;
 use App\Models\AttendanceSummery;
+use App\Imports\kssFileImport;
 use App\Models\LoanMaster;
 use App\Models\LoanMasterDetails;
 use App\Models\LoanRecovery;
@@ -19,11 +19,13 @@ use App\Models\salaryProcessStep;
 use App\Models\salaryTemp;
 use App\Models\salaryTrans;
 use App\Models\User;
+use App\Models\userHoldUnhold;
 use Auth;
 use Crypt;
 use DB;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Schema;
 
 class SalaryController extends Controller
 {
@@ -130,7 +132,6 @@ class SalaryController extends Controller
         // dd($request->all());
         $salary_block = salaryBlock::get();
         $salary_head = salaryHead::orderBy('order')->get();
-
         $process_steps = salaryProcessStep::orderBy('order')->get();
         $couurent_open_block = salaryBlock::where('sal_process_status', 'unblock')->first();
         $default_block = salaryBlock::where('month', date('m'))->where('year', date('Y'))->first();
@@ -139,7 +140,7 @@ class SalaryController extends Controller
         $is_editable_flag = SalaryBlock::where('id', $view_salary_block)
             ->where('sal_process_status', 'unblock')->where('is_finalized', 0)
             ->first();
-        $employee = User::get();
+        $employee = User::where('salary_flag', 'open')->get();
         if ($request->view == "process") {
             return view("salary.process-salary", compact('salary_block', 'salary_head', 'employee', 'view_salary_block', 'process_steps', 'is_editable_flag'));
         } else {
@@ -486,7 +487,7 @@ class SalaryController extends Controller
         if ($salary_block->sal_process_status == 'block') {
             return redirect()->back()->with('error', 'Please Unblock Salary for this month');
         }
-        $employee = User::get();
+        $employee = User::where('salary_flag', 'open')->get();
         $salary_heads = salaryHead::orderBy('order')->get();
         DB::beginTransaction();
         try {
@@ -707,7 +708,7 @@ class SalaryController extends Controller
 
         DB::beginTransaction();
         try {
-            $user = user::get();
+            $user = user::where('salary_flag', 'open')->get();
             $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
             $deductable_head = salaryHead::where('sal_deduct_if_absent', 1)->orderBy('order')->get();
             $pay_cut_head = salaryHead::where('pay_cut_hd', 1)->first()->id;
@@ -743,6 +744,118 @@ class SalaryController extends Controller
         }
 
         return redirect()->back()->with('success', 'Successfully Processed Attendance');
+    }
+
+
+    public function processSalarySummary(): bool
+    {
+        // $step_details = salaryProcessStep::where('step_name', 'salary')->first();
+        $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
+
+        $user = user::get();
+
+        try {
+            DB::beginTransaction();
+            foreach ($user as $usr) {
+                $salaryTempData = salaryTemp::where('emp_id', $usr->id)->where('block_id', $salary_block->id)->get();
+
+                $salarySummary = SalarySummmary::updateOrCreate(
+                    [
+                        'emp_id' => $usr->id,
+                        'sal_block_id' => $salary_block->id,
+                        'month' => $salary_block->month,
+                        'year' => $salary_block->year,
+                    ],
+                    [
+                        'emp_code' => $usr->emp_code,
+                    ]
+                );
+
+                $this->addDynamicColumns($salarySummary, $salaryTempData);
+
+                foreach ($salaryTempData as $temp) {
+                    if ($temp->pay_head == 'Deduction') {
+                        $columnName = 'DED_' . str_replace('.', '_', $temp->salary_head_code);
+                        $salarySummary->$columnName = $temp->amount;
+                    }
+
+                    if ($temp->pay_head == 'Income') {
+                        $columnName = 'INC_' . str_replace('.', '_', $temp->salary_head_code);
+                        $salarySummary->$columnName = $temp->amount;
+                    }
+                }
+
+                $salarySummary->save();
+            }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        DB::commit();
+
+        return true;
+    }
+
+    private function addDynamicColumns($model, $salaryTempData)
+    {
+        $table = $model->getTable();
+
+        $deductionData = $salaryTempData->where('pay_head', 'Deduction');
+        $incomeData = $salaryTempData->where('pay_head', 'Income');
+
+        $existingColumns = \DB::getSchemaBuilder()->getColumnListing($table);
+        $nonTimestampColumns = collect($existingColumns)
+            ->reject(fn($col) => in_array($col, ['created_at', 'updated_at', 'deleted_at']));
+
+        $lastIncomeColumn = $nonTimestampColumns
+            ->filter(fn($col) => str_starts_with($col, 'INC_'))
+            ->last();
+
+        $lastDeductionColumn = $nonTimestampColumns
+            ->filter(fn($col) => str_starts_with($col, 'DED_'))
+            ->last();
+
+        $addedIncomeColumns = [];
+        $addedDeductionColumns = [];
+
+        foreach ($incomeData as $temp) {
+            $columnName = 'INC_' . str_replace('.', '_', $temp->salary_head_code);
+            if (!in_array($columnName, $existingColumns)) {
+                $addedIncomeColumns[] = $columnName;
+            }
+        }
+
+        foreach ($deductionData as $temp) {
+            $columnName = 'DED_' . str_replace('.', '_', $temp->salary_head_code);
+            if (!in_array($columnName, $existingColumns)) {
+                $addedDeductionColumns[] = $columnName;
+            }
+        }
+
+        $sqlQueries = [];
+
+        foreach ($addedDeductionColumns as $columnName) {
+            $sqlQueries[] = "ALTER TABLE `{$table}` ADD COLUMN `{$columnName}` DECIMAL(10,2) NULL " .
+                ($lastDeductionColumn ? "AFTER `{$lastDeductionColumn}`" : "AFTER `deleted_at`");
+            $lastDeductionColumn = $columnName;
+        }
+
+        foreach ($addedIncomeColumns as $columnName) {
+            $sqlQueries[] = "ALTER TABLE `{$table}` ADD COLUMN `{$columnName}` DECIMAL(10,2) NULL " .
+                ($lastIncomeColumn ? "AFTER `{$lastIncomeColumn}`" : "AFTER `deleted_at`");
+            $lastIncomeColumn = $columnName;
+        }
+
+        foreach ($sqlQueries as $query) {
+            try {
+                \DB::statement($query);
+            } catch (\Exception $e) {
+
+                throw $e;
+            }
+        }
     }
 
     public function includeExclude(Request $request)
@@ -823,98 +936,101 @@ class SalaryController extends Controller
         try {
             $loans = LoanMaster::where('status', '!=', '5')->get();
             foreach ($loans as $loan) {
-                if ($loan->advanceType->advance_type == 'flat') {
-                    if ($loan->no_of_installment > $loan->principal_installment) {
-                        $emi_amount = $loan->principal_installment;
-                        if (($loan->adj_interest_emi_in == 'F' && $loan->principal_installment == 0) || ($loan->adj_interest_emi_in == 'L' && $loan->no_of_installment == ($loan->principal_installment + 1))) {
-                            $emi_amount = $loan->adj_emi;
-                        }
-                        //////////additional condition to prevent negative value//////
-                        if ($loan->outstanding_principal < $emi_amount) {
-                            $emi_amount = $loan->outstanding_principal;
-                        }
-                        /////////////////////// Ends Here ////////////////////////////
-
-
-                        ///////////////////cut rest amount if inst no is last/////////////////////////
-                        if ($loan->no_of_installment == ($loan->principal_installment + 1)) {
-                            if (($loan->outstanding_principal - $emi_amount) > 0) {
+                if ($loan->user->salary_flag == 'open') {
+                    if ($loan->advanceType->advance_type == 'flat') {
+                        if ($loan->no_of_installment > $loan->principal_installment) {
+                            $emi_amount = $loan->principal_installment;
+                            if (($loan->adj_interest_emi_in == 'F' && $loan->principal_installment == 0) || ($loan->adj_interest_emi_in == 'L' && $loan->no_of_installment == ($loan->principal_installment + 1))) {
+                                $emi_amount = $loan->adj_emi;
+                            }
+                            //////////additional condition to prevent negative value//////
+                            if ($loan->outstanding_principal < $emi_amount) {
                                 $emi_amount = $loan->outstanding_principal;
                             }
-                        }
-                        //////////////////////////////////////////////////////////////////////////////
-                        $data = [
-                            'loan_id' => $loan->id,
-                            'emi' => $emi_amount,
-                            'principal_amount' => $emi_amount,
-                            'intrest_amount' => null,
-                            'installment_no' => $loan->principal_installment + 1,
-                        ];
-                    } elseif ($loan->no_of_installment_interest > $loan->interest_installment) {
-                        // dd("here");
-                        $emi_amount = $loan->interest_emi;
-                        if (($loan->adj_interest_emi_in == 'F' && $loan->interest_installment == 0) || ($loan->adj_interest_emi_in == 'L' && $loan->no_of_installment_interest == ($loan->interest_installment + 1))) {
-                            $emi_amount = $loan->adj_interest_emi;
-                        }
-                        //////////additional condition to prevent negative value//////
-                        if ($loan->outstanding_interest_amount < $emi_amount) {
-                            $emi_amount = $loan->outstanding_interest_amount;
-                        }
-                        /////////////////////// Ends Here ////////////////////////////
+                            /////////////////////// Ends Here ////////////////////////////
 
-                        ///////////////////cut rest amount if inst no is last/////////////////////////
-                        if ($loan->no_of_installment_interest == ($loan->interest_installment + 1)) {
-                            if (($loan->outstanding_interest_amount - $emi_amount) > 0) {
+
+                            ///////////////////cut rest amount if inst no is last/////////////////////////
+                            if ($loan->no_of_installment == ($loan->principal_installment + 1)) {
+                                if (($loan->outstanding_principal - $emi_amount) > 0) {
+                                    $emi_amount = $loan->outstanding_principal;
+                                }
+                            }
+                            //////////////////////////////////////////////////////////////////////////////
+                            $data = [
+                                'loan_id' => $loan->id,
+                                'emi' => $emi_amount,
+                                'principal_amount' => $emi_amount,
+                                'intrest_amount' => null,
+                                'installment_no' => $loan->principal_installment + 1,
+                            ];
+                        } elseif ($loan->no_of_installment_interest > $loan->interest_installment) {
+                            // dd("here");
+                            $emi_amount = $loan->interest_emi;
+                            if (($loan->adj_interest_emi_in == 'F' && $loan->interest_installment == 0) || ($loan->adj_interest_emi_in == 'L' && $loan->no_of_installment_interest == ($loan->interest_installment + 1))) {
+                                $emi_amount = $loan->adj_interest_emi;
+                            }
+                            //////////additional condition to prevent negative value//////
+                            if ($loan->outstanding_interest_amount < $emi_amount) {
                                 $emi_amount = $loan->outstanding_interest_amount;
                             }
+                            /////////////////////// Ends Here ////////////////////////////
+
+                            ///////////////////cut rest amount if inst no is last/////////////////////////
+                            if ($loan->no_of_installment_interest == ($loan->interest_installment + 1)) {
+                                if (($loan->outstanding_interest_amount - $emi_amount) > 0) {
+                                    $emi_amount = $loan->outstanding_interest_amount;
+                                }
+                            }
+                            //////////////////////////////////////////////////////////////////////////////
+
+                            $data = [
+                                'loan_id' => $loan->id,
+                                'emi' => $emi_amount,
+                                'principal_amount' => null,
+                                'intrest_amount' => $emi_amount,
+                                'installment_no' => $loan->interest_installment + 1,
+                            ];
                         }
-                        //////////////////////////////////////////////////////////////////////////////
+                    } elseif ($loan->advanceType->advance_type == 'reducing') {
+                        $installment_no = $loan->principal_installment + 1;
+                        $emi_details = LoanMasterDetails::where('loan_id', $loan->id)->where('payment_no', $installment_no)->first();
+                        $emi_amount = $emi_details->payment;
 
                         $data = [
                             'loan_id' => $loan->id,
                             'emi' => $emi_amount,
-                            'principal_amount' => null,
-                            'intrest_amount' => $emi_amount,
-                            'installment_no' => $loan->interest_installment + 1,
+                            'principal_amount' => $emi_details->principal,
+                            'intrest_amount' => $emi_details->interest,
+                            'installment_no' => $installment_no
                         ];
                     }
-                } elseif ($loan->advanceType->advance_type == 'reducing') {
-                    $installment_no = $loan->principal_installment + 1;
-                    $emi_details = LoanMasterDetails::where('loan_id', $loan->id)->where('payment_no', $installment_no)->first();
-                    $emi_amount = $emi_details->payment;
 
-                    $data = [
-                        'loan_id' => $loan->id,
-                        'emi' => $emi_amount,
-                        'principal_amount' => $emi_details->principal,
-                        'intrest_amount' => $emi_details->interest,
-                        'installment_no' => $installment_no
+                    $json_data = json_encode($data);
+                    $salary_data = [
+                        'emp_code' => $loan->user->id,
+                        'sal_head_id' => $loan->advanceType->salary_head_id,
+                        'salary_head_code' => $loan->advanceType->salaryHead->code,
+                        'salary_head_name' => $loan->advanceType->salaryHead->name,
+                        'month' => $salary_block->month,
+                        'year' => $salary_block->year,
+                        'block_id' => $salary_block->id,
+                        'pay_head' => $loan->advanceType->salaryHead->pay_head,
+                        'working_days' => 30,
+                        'status' => 'draft',
+                        'amount' => $emi_amount,
+                        'detail_json' => $json_data,
                     ];
+
+                    salaryTemp::updateOrCreate(
+                        [
+                            'emp_id' => $loan->user->id,
+                            'sal_head_id' => $loan->advanceType->salary_head_id,
+                        ],
+                        $salary_data
+                    );
                 }
 
-                $json_data = json_encode($data);
-                $salary_data = [
-                    'emp_code' => $loan->user->id,
-                    'sal_head_id' => $loan->advanceType->salary_head_id,
-                    'salary_head_code' => $loan->advanceType->salaryHead->code,
-                    'salary_head_name' => $loan->advanceType->salaryHead->name,
-                    'month' => $salary_block->month,
-                    'year' => $salary_block->year,
-                    'block_id' => $salary_block->id,
-                    'pay_head' => $loan->advanceType->salaryHead->pay_head,
-                    'working_days' => 30,
-                    'status' => 'draft',
-                    'amount' => $emi_amount,
-                    'detail_json' => $json_data,
-                ];
-
-                salaryTemp::updateOrCreate(
-                    [
-                        'emp_id' => $loan->user->id,
-                        'sal_head_id' => $loan->advanceType->salary_head_id,
-                    ],
-                    $salary_data
-                );
             }
             $step_details->status = 'process';
             $step_details->save();
@@ -930,22 +1046,78 @@ class SalaryController extends Controller
 
     public function uploadKSS($id)
     {
+        $step_details = salaryProcessStep::where('id', $id)->first();
+        if (!CommonHelper::checkIsInOrder($step_details->order)) {
+            return redirect()->back()->with('error', 'Please maintaion process oeder');
+        }
         $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
-        return view('salary.kss-upload', compact('salary_block'));
+        return view('salary.kss-upload', compact('salary_block', 'id'));
     }
 
-    public function saveKSS(Request $request)
+    public function saveKSS(Request $request, $id)
     {
-        dd($request->all());
+        // dd($request->all());
+        $step_details = salaryProcessStep::where('id', $id)->first();
+        if (!CommonHelper::checkIsInOrder($step_details->order)) {
+            return redirect()->back()->with('error', 'Please maintaion process oeder');
+        }
         $request->validate([
             'excel_file' => 'required|mimes:xlsx,xls,csv',
         ]);
         try {
-            Excel::import(new kssFileImport, $request->file('excel_file'));
-            return redirect()->back()->with('success', 'Imported successfully.');
+            Excel::import(new kssFileImport(), $request->file('excel_file'));
+            $step_details->status = 'process';
+            $step_details->save();
+            return redirect()->route('salary-process', ['view' => 'process'])->with('success', 'Successfully Uploaded');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to import: ' . $e->getMessage());
         }
+    }
+
+
+    public function holdUnhold()
+    {
+        $employee = User::get();
+        return view('salary.hold-unhold-salary', compact('employee'));
+        // dd("ok");
+    }
+
+    public function holdSalary(Request $request)
+    {
+        // dd($request->all());
+        DB::beginTransaction();
+        try {
+            $user = user::where('id', $request->emp_id)->first();
+            user::where('id', $request->emp_id)->update(
+                ['salary_flag' => 'hold']
+            );
+
+            userHoldUnhold::create([
+                'emp_id' => $request->emp_id,
+                'emp_code' => $user->emp_code,
+                'type' => 'salary',
+                'from_date' => $request->from_date ?? null,
+                'to_date' => $request->to_date ?? null,
+                'holding_type' => $request->holding_type,
+                'holding reason' => $request->reason,
+                'status' => 'active',
+                'created_by' => Auth::user()->emp_code,
+            ]);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Try Again');
+        }
+        return redirect()->back()->with('success', 'Successfull');
+    }
+
+    public function unholdSalary($id)
+    {
+        $decrypt = Crypt::decrypt($id);
+        user::where('id', $decrypt)->update(['salary_flag' => 'open']);
+        userHoldUnhold::where('emp_id', $decrypt)->update(['status' => 'closed']);
+        return redirect()->back()->with('success', 'Successfull');
+
     }
 
 }

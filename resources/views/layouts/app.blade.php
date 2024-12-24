@@ -7,6 +7,7 @@
     <title>HRMIS | HRMIS - Human Resources Management Information System</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/logo/gmda-logo.png') }}">
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
@@ -98,7 +99,7 @@
                                                         aria-expanded="false" class="nav-link dropdown-toggle">
                                                         <img src="img/product/pro4.jpg" alt="" />
                                                         <span class="admin-name">{{ Auth::user()->name }}
-                                                            ({{ env('USER_NAME') }})</span>
+                                                            (Finance)</span>
                                                         <i class="fa fa-angle-down edu-icon edu-down-arrow"></i>
                                                     </a>
                                                     <ul role="menu"
@@ -112,16 +113,61 @@
                                                                 'status',
                                                                 'Active',
                                                             )->get();
+                                                            $logout_url = \App\Models\moduleUrl::where(
+                                                                'status',
+                                                                'Active',
+                                                            )
+                                                                ->where('id', 1)
+                                                                ->first();
                                                         @endphp
                                                         @foreach ($modules as $mod)
-                                                            <li><a
-                                                                    href="{{ $mod->url }}/{{ $mod->project_name }}{{ $mod->is_jwt_req == 1 ? '?token=' . session('jwt_token') : '' }}"><span
-                                                                        class="edu-icon edu-user-rounded author-log-ic"></span>{{ $mod->name }}</a>
-                                                            </li>
+                                                            @if (\App\Helpers\commonHelper::isPermissionExist($mod->permission_name))
+                                                                @if ($mod->id == 1)
+                                                                    <li style="display: flex"><a
+                                                                            href="{{ $mod->url }}{{ $mod->project_name }}/login?is_auth=yes{{ $mod->is_jwt_req == 1 ? '&token=' . session('jwt_token') : '' }}"><span
+                                                                                class="edu-icon edu-user-rounded author-log-ic"></span>{{ $mod->name }}</a>
+                                                                        @if ($mod->id == auth()->user()->landing_module)
+                                                                            <a href="javascript:void(0)"><span
+                                                                                    class="badge badge-success"
+                                                                                    style="font-size: 9px">
+                                                                                    <i
+                                                                                        class="fa-solid fa-arrow-right"></i>
+                                                                                </span></a>
+                                                                        @else
+                                                                            <a href="javascript:void(0)"
+                                                                                class="def"
+                                                                                data-id="{{ $mod->id }}"><span
+                                                                                    class="badge badge-secondary"
+                                                                                    style="font-size: 8px">Set
+                                                                                    default</span></a>
+                                                                        @endif
+                                                                    </li>
+                                                                @else
+                                                                    <li style="display: flex"><a
+                                                                            href="{{ $mod->url }}{{ $mod->project_name }}{{ $mod->is_jwt_req == 1 ? '?token=' . session('jwt_token') : '' }}"><span
+                                                                                class="edu-icon edu-user-rounded author-log-ic"></span>{{ $mod->name }}
+                                                                        </a>
+                                                                        @if ($mod->id == auth()->user()->landing_module)
+                                                                            <a href="javascript:void(0)"> <span
+                                                                                    class="badge badge-success"
+                                                                                    style="font-size: 9px"><i
+                                                                                        class="fa-solid fa-check"></i></span></a>
+                                                                        @else
+                                                                            <a href="javascript:void(0)"
+                                                                                class="def"
+                                                                                data-id="{{ $mod->id }}"><span
+                                                                                    class="badge badge-secondary"
+                                                                                    style="font-size: 8px">Set
+                                                                                    default</span></a>
+                                                                        @endif
+
+                                                                    </li>
+                                                                @endif
+                                                            @endif
                                                         @endforeach
                                                         <li>
                                                             <a
-                                                                href="{{ env('APP_URL') }}/GMDA/gmda-auth/public/logout-ano">
+                                                                href="{{ $logout_url->url }}{{ $logout_url->project_name }}/logout-ano">
                                                                 <span
                                                                     class="edu-icon edu-locked author-log-ic"></span>Log
                                                                 Out
@@ -203,7 +249,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.print.min.js"></script>
-
+    <script src="{{ asset('js/jquery.blockUI.js') }}"></script>
     @yield('js')
     <script>
         $(document).ready(function() {
@@ -258,6 +304,41 @@
                 toastr.error("{{ $error }}");
             @endforeach
         @endif
+
+        $(document).ready(function() {
+            $(".def").on("click", function(e) {
+                e.preventDefault();
+                // Collect form data
+                let formData = {
+                    id: $(this).attr('data-id'),
+                    _token: $('meta[name="csrf-token"]').attr("content") // CSRF token
+                };
+                $.blockUI({
+                    message: '<h1>Just a moment...</h1>'
+                });
+                // AJAX POST request
+                $.ajax({
+                    url: "{{ route('set-default') }}",
+                    type: "POST",
+                    data: formData,
+                    success: function(response) {
+                        $.unblockUI();
+                        toastr.success(response.message);
+                        console.log(response);
+                        if (response.success) {
+                            window.location.reload();
+                        }
+                    },
+                    error: function(xhr) {
+                        // Handle error
+                        //alert("An error occurred. Please try again.");
+                        $.unblockUI();
+                        toastr.error(response.message);
+                        console.log(xhr.responseText);
+                    }
+                });
+            });
+        });
     </script>
 </body>
 
