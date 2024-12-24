@@ -33,14 +33,18 @@ class AdvanceController extends Controller
         $departments = Department::select('id', 'name')->get();
         $designations = AuthDesignation::get();
 
-        $query = Advance::with('employee', 'advanceType');
-        $advanceRequests = $query->orderBy('created_at', 'desc')->where("interest_amount", 0)->orWhereNull('interest_amount')
-            ->get()
-            ->map(function ($advance) {
-                // Check if the advance has a reference number in LoanMaster
-                $advance->has_loan_master = LoanMaster::where('reference_no', $advance->reference_no)->exists();
-                return $advance;
-            });
+        $query = Advance::with('employee', 'advanceType')
+            ->whereHas('advanceType', function($q) {
+                $q->where('type', 'advance');
+            })
+            ->orderBy('created_at', 'desc');
+
+        $advanceRequests = $query->get()->map(function ($advance) {
+            // Check if the advance has a reference number in LoanMaster
+            $advance->has_loan_master = LoanMaster::where('reference_no', $advance->reference_no)->exists();
+            return $advance;
+        });
+
         //->paginate(10);
         //dd($advanceRequests);
         $advanceTypes = AdvanceType::all();
