@@ -29,7 +29,7 @@ class AdvanceController extends Controller
 {
     public function index()
     {
-        $emp = Employee::select('*')->get();
+        $emp = Employee::select('*')->orderBy('first_name', 'asc')->get();
         $departments = Department::select('id', 'name')->get();
         $designations = AuthDesignation::get();
 
@@ -41,7 +41,7 @@ class AdvanceController extends Controller
 
         $advanceRequests = $query->get()->map(function ($advance) {
             // Check if the advance has a reference number in LoanMaster
-            $advance->has_loan_master = LoanMaster::where('reference_no', $advance->reference_no)->exists();
+            $advance->has_loan_master = LoanMaster::where('advances_id', $advance->id)->exists();
             return $advance;
         });
 
@@ -454,6 +454,8 @@ class AdvanceController extends Controller
                         'month' => $salary_block->month, //salary month
                         'year' => $salary_block->year, //salary year
                         'advance_id' => $advance->id,
+                        'processed_at' => now(),
+                        'processed_by_id' => auth()->user()->id,
                         'status' => AdvanceProcess::$ACTIVE,
                     ];
 
@@ -517,10 +519,10 @@ class AdvanceController extends Controller
                 return $query->whereHas("employee", function ($query) {
                     return $query->where("department_id", request("department_id"));
                 });
+            })
+            ->whereHas('advanceType', function($q) {
+                $q->where('type', 'advance');
             });
-        /*->whereHas('advances', function ($query) {
-            return $query->where("interest_amount", "=", 0);
-        })*/
 
         if (request("export") == "excel") {
             return $this->exportToExcel($processed_data_query, request("month"), request("year"));
@@ -651,7 +653,7 @@ class AdvanceController extends Controller
         $month = str_pad($currentDate->format('m'), 2, '0', STR_PAD_LEFT);
 
         // Get the last reference number
-        $lastRefNo = AdvanceRequest::whereNotNull('reference_no')
+        $lastRefNo = Advance::whereNotNull('reference_no')
             ->where('reference_no', 'LIKE', "ADV/{$year}/{$month}/%")
             ->orderBy('id', 'desc')
             ->first();
@@ -671,7 +673,7 @@ class AdvanceController extends Controller
         $referenceNo = "ADV/{$year}/{$month}/{$sequence}";
 
         $advance = new Advance();
-        $advance->reference_no = $request->reference_no;
+        $advance->reference_no = $referenceNo;
         $advance->user_id = $request->employee_id;
         // Get employee details
         $employee = Employee::where('user_id', $request->employee_id)->first();
@@ -699,7 +701,8 @@ class AdvanceController extends Controller
         $advance->payslip_3 = $data['payslip_3'];
         $advance->document_path = $data['document_path'];*/
         $advance->save();
-
+        
+        $advanceId = $advance->id;
 
         $employee = Employee::where('user_id', $request->employee_id)->first();
         $emp_code = $employee->code;
@@ -708,7 +711,8 @@ class AdvanceController extends Controller
         //dd($emp_code, $emp_dept, $emp_desig);
 
         $loanMasterData = [
-            'reference_no' => $request->reference_no,
+            'advances_id' => $advanceId,
+            'reference_no' => $referenceNo,
             'user_id' => $request->employee_id,
             'emp_code' => $emp_code ?? null,
             'fld_deptid' => $emp_dept,

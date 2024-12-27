@@ -129,9 +129,9 @@
                 </th>
                 <th>SL.</th>
                 <th>Employee Code</th>
+                <th>Employee Name</th>
                 <th>Advance Type</th>
                 <th>Salary Head</th>
-                <th>Employee Name</th>
                 <th class="text-right">Monthly Installment</th>
                 <!-- <th width="100px">Start Date</th>
                 <th>End Date</th> -->
@@ -154,12 +154,12 @@
                 </td>
                 <td>{{ $key+1 }}</td>
                 <td>{{ optional($advance->employee)->code ?? 'N/A' }}</td>
+                <td>{{ optional($advance->employee)->first_name ?? 'N/A' }} {{ optional($advance->employee)->last_name ?? 'N/A' }}</td>
                 <td>{{ optional($advance->advanceType)->type_name }}</td>
                 <td>
                     {{ optional($advance->salhead)->name ?? 'N/A' }}
                     <input type="hidden" name="datas[{{$key}}][loan_head_id]" value={{ $advance->sal_block_id }}>
                 </td>
-                <td>{{ optional($advance->employee)->first_name ?? 'N/A' }}</td>
                 <td class="text-right">
                     <input type="number" name="datas[{{$key}}][monthly_premium]" value={{$advance->principal_installment }} disabled="disabled">
                 </td>

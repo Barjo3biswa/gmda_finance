@@ -23,8 +23,8 @@
     <div class="card">
         <div class="card-header">
             <i class="fa fa-filter"></i> Filter
-            <a class="btn btn-sm btn-outline-primary float-right mr-1" href="{{route("advance.processadvance")}}">
-                <i class="fa fa-list"></i> Process Advance Data
+            <a class="btn btn-sm btn-outline-primary float-right mr-1" href="{{route("loan.processloan")}}">
+                <i class="fa fa-list"></i> Process Loan Data
             </a>
         </div>
         <div class="card-body">
@@ -73,13 +73,13 @@
     </div>
     <div class="card">
         <div class="card-header">
-            <i class="fa fa-list-alt"></i> ADVANCE RECORDS
+            <i class="fa fa-list-alt"></i> LOAN RECORDS
             <!-- <a class="btn btn-sm btn-outline-success float-right mr-1" href="{{ route("advance.processed_data_list", request()->merge(["export" => "excel"])->all())}}">
                 <i class="fa fa-file-excel-o"></i> Export
             </a> -->
         </div>
         <div class="card-body">
-            <form action="{{ route('advance.process_advance_data_post') }}" method="POST">
+            <form action="" method="POST">
             @csrf
             <input type="hidden" name="month" value="{{ request("month") }}">
             <input type="hidden" name="year" value="{{ request("year") }}">
