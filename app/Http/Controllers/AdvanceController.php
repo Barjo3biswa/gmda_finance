@@ -555,7 +555,7 @@ class AdvanceController extends Controller
 
     public function createExisting()
     {
-        $employees = Employee::select('*')->get();
+        $employees = Employee::select('*')->orderBy('first_name')->get();
         $designations = AuthDesignation::get();
         $advanceGroups = AdvanceGroup::all();
         $advanceTypes = AdvanceType::all();

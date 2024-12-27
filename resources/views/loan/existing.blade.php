@@ -149,11 +149,7 @@
                             <option value="l" {{ old('adj_interest_emi_in') == 'l' ? 'selected' : '' }}>Last Installment</option>
                         </select>
 					</div>
-                    
-                </div>
-
-				<div class="form-group row">
-					<div class="col-md-3">
+                    <div class="col-md-3 mt-5">
 						<label for="wef_month">W.E.F. Month</label>
                         <select name="wef_month" id="wef_month" class="form-control">
 							<option value="">Select Month</option>
@@ -171,7 +167,7 @@
 							<option value="12" {{ old('wef_month') == '12' ? 'selected' : '' }}>December</option>
 						</select>
 					</div>
-					<div class="col-md-3">
+					<div class="col-md-3 mt-5">
 						<label for="wef_year">W.E.F. Year</label>
                         <select name="wef_year" id="wef_year" class="form-control">
 							<option value="">Select Year</option>
@@ -180,7 +176,8 @@
 							@endfor
 						</select>
 					</div>
-				</div>
+                </div>
+
 
 				<div class="row mt-5">
 					<div class="col-md-12">

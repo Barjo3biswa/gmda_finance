@@ -12,6 +12,7 @@ use App\Models\salaryHead;
 use App\Models\salaryBlock;
 use App\Models\AdvanceRequest;
 use App\Models\LoanMaster;
+use App\Models\LoanMasterDetail;
 use App\Models\LoanProcessLog;
 
 use Illuminate\Support\Facades\DB;
@@ -63,14 +64,14 @@ class LoanController extends Controller
      */
     public function create()
     {
-        $employees = Employee::select('*')->get();
+        $employees = Employee::select('*')->orderBy('first_name')->get();
         $designations = AuthDesignation::get();
         $advanceGroups = AdvanceGroup::all();
-        $advanceTypes = AdvanceType::where('type', 'loan')->get();
+        $advanceTypes = DB::select("SELECT * FROM advance_types WHERE type = ?", ['loan']);
+        //dd($advanceTypes);
         $salaryheads = SalaryHead::all();
-        $advanceTypes = AdvanceType::all();
-        $salaryheads = salaryHead::all();
-        return view("loan.create", compact('employees', 'advanceTypes', 'salaryheads', 'advanceGroups'));
+        $salaryblocks = salaryBlock::all();
+        return view("loan.create", compact('employees', 'advanceTypes', 'salaryheads', 'salaryblocks', 'advanceGroups'));
     }
 
     /**
@@ -78,6 +79,9 @@ class LoanController extends Controller
      */
     public function store(Request $request)
     {
+        // $tableData = json_decode($request->input('table_data'), true);
+        // dd($tableData);
+
         // Generate reference number
         $currentDate = now();
         $year = $currentDate->format('y');
@@ -110,7 +114,7 @@ class LoanController extends Controller
         $employee = Employee::where('user_id', $request->employee_id)->first();
         $advance->emp_code = $employee ? $employee->code : '';
         $advance->advance_id = $request->loan_head_id;
-        $advance->loan_head_id = $request->sal_block_id;
+        $advance->loan_head_id = $request->loan_head_id;
         $advance->principal_amount = $request->principal_amount;
         $advance->monthly_installment = $request->monthly_emi;
         //$advance->recovered_amount = $request->recovered_amount;
@@ -165,7 +169,7 @@ class LoanController extends Controller
             'from_yyyy' => $request->wef_year,
             'from_mm' => $request->wef_month,
             'applied_on' => now(),
-            'applied_for' => 'Existing Loan'
+            'applied_for' => 'New Loan'
         ];
 
         // dd($loanMasterData);
@@ -191,6 +195,26 @@ class LoanController extends Controller
             $loanMasterData
         );
 
+        $loanid=LoanMaster::where('reference_no', $referenceNo)->value('id');
+
+        $tableData = json_decode($request->input('table_data'), true);
+
+        foreach ($tableData as $row) {
+            LoanMasterDetail::create([
+                'emp_id' => $request->employee_id,
+                'emp_code' => $emp_code,
+                'loan_type_id'=> $request->loan_head_id,
+                'loan_id' => $loanid,
+                'payment_no'=>$row['sl'],
+                'payment_date'=>'01-'.$request->wef_month.'-'.$request->wef_year,
+                'begining_balance'=>$row['balance'],
+                'payment' => $row['emi'],
+                'interest' => $row['int'],
+                'principal' => $row['principal'],
+                'ending_balance' => $row['balance']
+            ]);
+        }
+
         return redirect()->route('loan.index')->with('success', 'New loan added successfully');
     }
 
@@ -213,8 +237,8 @@ class LoanController extends Controller
     public function edit(string $id)
     {
         // Fetch the loan data
-        $loan = Advance::findOrFail($id);
-
+        $loan = LoanMaster::where('advances_id', $id)->first(); // findOrFail($id);
+        //dd($loan);
         // Fetch related data (e.g., employees, loan types, salary heads)
         $employees = Employee::all();
         $advanceTypes = AdvanceType::all();
@@ -254,10 +278,10 @@ class LoanController extends Controller
         $advance->payslip_3 = $data['payslip_3'];
         $advance->document_path = $data['document_path'];*/
         
-        $advance = Advance::where('reference_no', $request->reference_no)->first();
+        $advance = Advance::where('id', $request->advances_id)->first();
         $advance->update();
 
-        $advance->update() - where('reference_no', $request->reference_no);
+        //$advance->update() - where('reference_no', $request->reference_no);
 
         $employee = Employee::where('user_id', $request->employee_id)->first();
         $emp_code = $employee->code;
@@ -275,7 +299,7 @@ class LoanController extends Controller
             'loan_amount' => $request->loan_amount,
             'loan_interest_rate' => $request->loan_interest_rate,
             'principal_amount' => $request->principal_amount,
-            'outstanding_principal' => $request->principal_amount,
+            'outstanding_principal' => $request->outstanding_principal,
             'no_of_installment' => $request->no_of_installment,
             'principal_installment' => $request->monthly_emi,
             'monthly_emi' => $request->monthly_emi,
@@ -283,16 +307,14 @@ class LoanController extends Controller
             'adj_emi_in' => $request->adj_emi_in,
             'interest_amount' => $request->interest_amount,
             'no_of_installment_interest' => $request->no_of_installment_interest,
-            'outstanding_interest_amount' => $request->interest_amount,
-            'interest_installment' => 0,
+            'outstanding_interest_amount' => $request->outstanding_interest_amount,
+            // 'interest_installment' => 0,
             'interest_emi' => $request->interest_installment,
             'adj_interest_emi' => $request->adj_interest_emi,
             'adj_interest_emi_in' => $request->adj_interest_emi_in,
             'sal_block_id' => $request->sal_block_id,
             'from_yyyy' => $request->wef_year,
-            'from_mm' => $request->wef_month,
-            'applied_on' => now(),
-            'applied_for' => 'New Loan'
+            'from_mm' => $request->wef_month
         ];
 
         //dd($loanMasterData);
@@ -312,7 +334,7 @@ class LoanController extends Controller
 
         //dd($loanMasterData);
         LoanMaster::updateOrCreate(
-            ['reference_no' => $request->reference_no],
+            ['id' => $request->loan_id],
             $loanMasterData
         );
 
@@ -329,7 +351,7 @@ class LoanController extends Controller
 
     public function createExisting()
     {
-        $employees = Employee::select('*')->get();
+        $employees = Employee::select('*')->orderBy('first_name')->get();
         $designations = AuthDesignation::get();
         $advanceGroups = AdvanceGroup::all();
         $advanceTypes = AdvanceType::all();
@@ -428,7 +450,7 @@ class LoanController extends Controller
 
         // Get the last reference number
         $lastRefNo = AdvanceRequest::whereNotNull('reference_no')
-            ->where('reference_no', 'LIKE', "ADV/{$year}/{$month}/%")
+            ->where('reference_no', 'LIKE', "LN/{$year}/{$month}/%")
             ->orderBy('id', 'desc')
             ->first();
 
@@ -442,10 +464,10 @@ class LoanController extends Controller
             }
         }
 
-        $referenceNo = "ADV/{$year}/{$month}/{$sequence}";
+        $referenceNo = "LN/{$year}/{$month}/{$sequence}";
 
         $advance = new Advance();
-        $advance->reference_no = $request->reference_no;
+        $advance->reference_no = $referenceNo;
         $advance->user_id = $request->employee_id;
         // Get employee details
         $employee = Employee::where('user_id', $request->employee_id)->first();
@@ -454,7 +476,7 @@ class LoanController extends Controller
         $advance->loan_head_id = $request->sal_block_id;
         $advance->principal_amount = $request->principal_amount;
         //$advance->outstanding_principal = $request->outstanding_principal;
-        $advance->monthly_installment = $request->monthly_installment;
+        $advance->monthly_installment = $request->monthly_emi;
         $advance->recovered_amount = $request->recovered_amount;
         $advance->interest_amount = $request->interest_amount;
         $advance->interest_recovered = $request->interest_recovered;

@@ -78,11 +78,6 @@
                  <a class="btn btn-success btn btn-xs float-right mr-1" href="{{route("loan.existing")}}"><i class="fa fa-plus"></i> Old Loan</a>
             </div>
             <div class="card-body">
-                @if ($message = Session::get('success'))
-                <div class="alert alert-success">
-                    <p>{{ $message }}</p>
-                </div>
-                @endif
                 <div class="table-responsive">
                 <table class="table table-bordered table-sm font-12">
                     <tbody>
@@ -121,13 +116,13 @@
                                     <a href="{{route('loan.close',['id' => $data->id])}}" class="btn btn-danger btn-xs">Close Loan</a>
                                 @endif
                             </td>
-                            <td>
+                            <!-- <td>
                             @if ($data->has_loan_master)
                                                                 <span class="badg badge-succes">for processing</span>
                                                             @else
                                                                 <span class="badg badge-warning">Pending</span>
                                                             @endif
-                                    </td>
+                                    </td> -->
                         </tr>
                         @endforeach
                     </tbody>
