@@ -14,6 +14,7 @@ class AdvanceType extends Model
         'type_name',
         'description',
         'max_amount',
+        'type',
         'requires_recommender'
     ];
 }

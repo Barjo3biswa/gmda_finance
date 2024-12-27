@@ -1,7 +1,26 @@
 @extends('layouts.app')
 @section('content')
 
-<div class="container">
+<div class="single-pro-review-area mt-t-30 mg-b-15">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                            <div class="breadcome-heading">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                            <ul class="breadcome-menu">
+                                <li><a href="#">Dashboard</a> <span class="bread-slash">/</span>
+                                </li>
+                                <li><span class="bread-blod">Process Policy</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="product-payment-inner-st">
+                        <div id="myTabContent" class="tab-content custom-product-edit">
     <div class="card">
         <div class="card-header">
             Employee Details
@@ -38,11 +57,11 @@
 						{{$advance->advanceType->type_name}}
                         <input type="hidden" class="form-control" id="loan_type_id" name="loan_type_id" value="{{$advance->advance_id ?? ''}}">
 					</div>
-                    <div class=" col-md-4">
+                    <!-- <div class=" col-md-4">
 						<label for="">Salary Head:</label>
 						{{$advance->salhead->name ?? 'NA'}}
                         <input type="hidden" class="form-control" id="sal_block_id" name="sal_block_id" value="{{$advance->salhead->id ?? ''}}">
-					</div>
+					</div> -->
                 </div>
                 <br>
                 <div class="form-group row">
@@ -226,6 +245,14 @@
             </form>
         </div>
     </div>
+    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
 </div>
 @endsection
 @section('js')
@@ -295,45 +322,41 @@
 </script>
 
 <script>
-document.getElementById("loan_amount").addEventListener("change", calculatePrincipalAmount);
-document.getElementById("loan_interest_rate").addEventListener("change", calculatePrincipalAmount);
-document.getElementById("no_of_installment").addEventListener("change", calculatePrincipalAmount);
-document.getElementById("no_of_installment_interest").addEventListener("change", calculatePrincipalAmount);
 
-function calculatePrincipalAmount() {
-    // Get values from the form
-    const loanAmount = parseFloat(document.getElementById("loan_amount").value);
-    const interestRate = parseFloat(document.getElementById("loan_interest_rate").value);
-    const duration = parseInt(document.getElementById("no_of_installment").value);
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('loan_amount');
+    const durationInput = document.getElementById('no_of_installment');
+    const installmentInput = document.getElementById('monthly_emi');
+    const adjustableInstallmentInput = document.getElementById('adj_emi');
+    const adjustInSelect = document.getElementById('adjust_in');
 
-    if (isNaN(loanAmount) || isNaN(interestRate) || isNaN(duration) || loanAmount <= 0 || interestRate < 0 || duration <= 0) {
-        document.getElementById("principal_amount").value = 0;
-        return;
+    function calculateInstallment() {
+        const amount = parseFloat(amountInput.value) || 0;
+        const duration = parseInt(durationInput.value) || 1;
+
+        // Calculate base installment and round up to nearest integer
+        let installment = Math.ceil(amount / duration);
+
+        // Calculate total after rounding up
+        const totalAfterRounding = installment * duration;
+
+        // Calculate adjustment needed
+        const adjustment = totalAfterRounding - amount;
+
+        // Set the adjustable installment (the difference for first/last month)
+        if (adjustment > 0) {
+            const adjustedInstallment = installment - adjustment;
+            adjustableInstallmentInput.value = adjustedInstallment.toFixed(2);
+        } else {
+            adjustableInstallmentInput.value = installment.toFixed(2);
+        }
+
+        installmentInput.value = installment.toFixed(2);
     }
-    const monthlyRate = interestRate / 100 / 12;
 
-    if (monthlyRate === 0) {
-        alert("z");
-        document.getElementById("principal_amount").value = loanAmount;
-        return;
-    }
-
-    const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, duration)) / (Math.pow(1 + monthlyRate, duration) - 1);
-    alert("emi: " + emi);
-    document.getElementById("monthly_emi").value = Math.round(emi);
-
-    const principalAmount = (emi * (Math.pow(1 + monthlyRate, duration) - 1)) / (monthlyRate * Math.pow(1 + monthlyRate, duration));
-    alert("principalAmount: " + principalAmount);
-    document.getElementById("principal_amount").value = Math.round(principalAmount);
-    const totalAmount = emi * duration;
-    const interestAmount = totalAmount - loanAmount;
-    document.getElementById("interest_amount").value = Math.round(interestAmount);
-    
-    // Calculate interest installment
-    const noOfInstallmentsInterest = parseInt(document.getElementById("no_of_installment_interest").value) || duration;
-    alert("noOfInstallmentsInterest: " + noOfInstallmentsInterest);
-    const interestInstallment = interestAmount / noOfInstallmentsInterest;
-    document.getElementById("interest_installment").value = Math.round(interestInstallment);
-}
+    amountInput.addEventListener('input', calculateInstallment);
+    durationInput.addEventListener('input', calculateInstallment);
+    //adjustInSelect.addEventListener('change', calculateInstallment);
+});
 </script>
 @endsection

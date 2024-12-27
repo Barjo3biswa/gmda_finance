@@ -75,7 +75,7 @@
 <div class="card mt-2">
             <div class="card-header">
                 <!-- <a class="btn btn-success btn btn-xs float-right mr-1" href="{{route("advance.create")}}"><i class="fa fa-plus"></i> New Advance</a> | -->
-                 <a class="btn btn-success btn btn-xs float-right mr-1" href="{{route("loan.existing")}}"><i class="fa fa-plus"></i> Old Advance</a>
+                 <a class="btn btn-success btn btn-xs float-right mr-1" href="{{route("loan.existing")}}"><i class="fa fa-plus"></i> Old Loan</a>
             </div>
             <div class="card-body">
                 @if ($message = Session::get('success'))
@@ -93,8 +93,8 @@
                             <th>Total Amount</th>
                             <th class="text-right">Monthly Installment</th>
                             <!-- <th class="text-right">Recoverd Amount</th> -->
-                            <th width="100px">WEF Month</th>
-                            <th>WEF Year</th>
+                            <!-- <th width="100px">WEF Month</th>
+                            <th>WEF Year</th> -->
                             <th width="230px">Action</th>
                         </tr> <!-- Modal -->
                     </tbody>
@@ -107,18 +107,26 @@
                             <td class="text-right">{{$data->principal_amount}}</td>
                             <td class="text-right">{{ $data->monthly_installment }}</td>
                             <!-- <td class="text-right">{{$data->recovered_amount}}</td> -->
-                            <td>{{ date('F', mktime(0, 0, 0, $data->installment_month, 1)) }}</td>
-                            <td>{{$data->installment_year }}</td>
+                            <!-- <td>{{ date('F', mktime(0, 0, 0, $data->installment_month, 1)) }}</td>
+                            <td>{{$data->installment_year }}</td> -->
                             <td>
                                 {{-- <a href="" class="btn btn-danger btn-sm">Delete</a> --}}
-                                <a href="{{route('loan.edit',['id' => $data->id])}}" class="btn btn-success btn-xs">View/Update</a>
+                                @if ($data->has_loan_master)
+                                    <a href="{{route('loan.show',['id' => $data->id])}}" class="btn btn-info btn-xs">View Loan</a>
+                                @else
+                                    <a href="{{route('loan.edit',['id' => $data->id])}}" class="btn btn-success btn-xs">Update</a>
+                                @endif
+
+                                @if ($data->has_loan_master)
+                                    <a href="{{route('loan.close',['id' => $data->id])}}" class="btn btn-danger btn-xs">Close Loan</a>
+                                @endif
                             </td>
                             <td>
-                                        @if($data->has_loan_master)
-                                            <span class="badge badge-success">Processed</span>
-                                        @else
-                                            <span class="badge badge-warning">Pending</span>
-                                        @endif
+                            @if ($data->has_loan_master)
+                                                                <span class="badg badge-succes">for processing</span>
+                                                            @else
+                                                                <span class="badg badge-warning">Pending</span>
+                                                            @endif
                                     </td>
                         </tr>
                         @endforeach
