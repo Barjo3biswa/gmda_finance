@@ -38,6 +38,8 @@
                 @csrf
                 @method('PUT')
                 <div class="row">
+                <input type="hidden" name="loan_id" id="" value="{{ old('loan_id', $loan->id) }}">
+                <input type="hidden" name="advances_id" id="" value="{{ old('advances_id', $loan->advances_id) }}">
                 <input type="hidden" name="emp_code" id="emp_code" value="{{ old('emp_code', $loan->emp_code) }}">
                 <input type="hidden" name="sal_block_id" id="sal_block_id" value="{{ old('sal_block_id', $loan->sal_block_id) }}">
                 
@@ -58,7 +60,7 @@
                     <select name="loan_type_id" id="loan_type_id" class="form-control" required>
                         <option value="">--SELECT--</option>
                         @foreach($advanceTypes as $advanceType)
-                            <option value="{{ $advanceType->id }}" {{ $loan->advance_id == $advanceType->id ? 'selected' : '' }}>
+                            <option value="{{ $advanceType->id }}" {{ $loan->loan_type_id == $advanceType->id ? 'selected' : '' }}>
                                 {{ $advanceType->type_name }}
                             </option>
                         @endforeach
@@ -84,7 +86,7 @@
                     <label for="reference_no">Application No</label>
                     <input type="text" name="reference_no" id="reference_no" class="form-control" value="{{ old('reference_no', $loan->reference_no) }}" required>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label for="loan_amount">Loan Amount</label>
                     <input type="number" name="loan_amount" id="loan_amount" class="form-control" value="{{ old('loan_amount', $loan->principal_amount) }}" required>
                 </div>
@@ -94,29 +96,33 @@
                 </div>
                 <div class="col-md-2">
                     <label for="no_of_installment">No of installment</label>
-                    <input type="number" class="form-control" id="no_of_installment" name="no_of_installment" value="{{ old('no_of_installment', $loan->duration) }}"></input>
+                    <input type="number" class="form-control" id="no_of_installment" name="no_of_installment" value="{{ old('no_of_installment', $loan->no_of_installment) }}"></input>
                 </div>
                 <div class="col-md-2">
                     <label for="principal_amount">Principal Amount</label>
                     <input type="number" class="form-control" id="principal_amount" name="principal_amount" step="0.01" value="{{ old('principal_amount', $loan->principal_amount) }}"></input>
                 </div>
+                <div class="col-md-2">
+						<label for="outstanding_principal">Outstanding Principal</label>
+						<input type="number" class="form-control" id="outstanding_principal" name="outstanding_principal" step="0.01"  value="{{ old('outstanding_principal', $loan->outstanding_principal) }}"></input>
+					</div>
             </div>
 
             <div class="form-group row">
                 <div class="col-md-3">
                     <label for="monthly_emi">Monthly Installment</label>
-                    <input type="number" class="form-control" id="monthly_emi" name="monthly_emi" value="{{ old('monthly_emi', $loan->monthly_installment) }}"></input>
+                    <input type="number" class="form-control" id="monthly_emi" name="monthly_emi" value="{{ old('monthly_emi', $loan->monthly_emi) }}"></input>
                 </div>
                 <div class="col-md-3">
                     <label for="adj_emi">Adjustable Installment</label>
-                    <input type="number" class="form-control" id="adj_emi" name="adj_emi" value="{{ old('adj_emi', $loan->adjustable_installment) }}"></input>
+                    <input type="number" class="form-control" id="adj_emi" name="adj_emi" value="{{ old('adj_emi', $loan->adj_emi) }}"></input>
                 </div>
                 <div class="col-md-3">
                     <label for="adj_emi_in">Adjust in</label>
                     <select name="adj_emi_in" id="adj_emi_in" class="form-control">
                         <option value="">Select</option>
-                        <option value="f" {{ old('adj_emi_in', $loan->adjust_in) == 'f' ? 'selected' : '' }}>First Installment</option>
-                        <option value="l" {{ old('adj_emi_in', $loan->adjust_in) == 'l' ? 'selected' : '' }}>Last Installment</option>
+                        <option value="f" {{ old('adj_emi_in', $loan->adj_emi_in) == 'f' ? 'selected' : '' }}>First Installment</option>
+                        <option value="l" {{ old('adj_emi_in', $loan->adj_emi_in) == 'l' ? 'selected' : '' }}>Last Installment</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -124,55 +130,60 @@
                     <input type="number" name="interest_amount" id="interest_amount" class="form-control" step="0.01" required value="{{ old('interest_amount', $loan->interest_amount) }}">
                 </div>
                 <div class="col-md-3 mt-5">
+                        <label for="outstanding_interest_amount">Outstanding Interest Amount</label>
+                        <input type="number" name="outstanding_interest_amount" id="outstanding_interest_amount" class="form-control" step="0.01" required value="{{ old('outstanding_interest_amount', $loan->outstanding_interest_amount) }}">
+					</div>
+                <div class="col-md-3 mt-5">
                         <label for="no_of_installment_interest">No of installment(Interest)</label>
-                        <input type="number" name="no_of_installment_interest" id="no_of_installment_interest" class="form-control" step="0.01" required value="0">
+                        <input type="number" name="no_of_installment_interest" id="no_of_installment_interest" class="form-control" required value="{{ old('no_of_installment_interest', $loan->no_of_installment_interest) }}">
 					</div>
                     <div class="col-md-3 mt-5">
                         <label for="interest_installment">Interest Installment</label>
-                        <input type="number" name="interest_installment" id="interest_installment" class="form-control" step="0.01" required value="0">
+                        <input type="number" name="interest_installment" id="interest_installment" class="form-control" step="0.01" required value="{{ old('interest_installment', $loan->interest_emi) }}">
 					</div>
                     <div class="col-md-3 mt-5">
                         <label for="adj_interest_emi">Adjustable Interest Installment</label>
-                        <input type="number" name="adj_interest_emi" id="adj_interest_emi" class="form-control" step="0.01" required value="0">
+                        <input type="number" name="adj_interest_emi" id="adj_interest_emi" class="form-control" step="0.01" required value="{{ old('adj_interest_emi', $loan->adj_interest_emi) }}">
 					</div>
                     <div class="col-md-3 mt-5">
 						<label for="adj_interest_emi_in">Adjust in</label>
 						<select name="adj_interest_emi_in" id="adj_interest_emi_in" class="form-control">
                             <option value="">Select</option>
-                            <option value="f" {{ old('adj_interest_emi_in') == 'f' ? 'selected' : '' }}>First Installment</option>
-                            <option value="l" {{ old('adj_interest_emi_in') == 'l' ? 'selected' : '' }}>Last Installment</option>
+                            <option value="f" {{ old('adj_interest_emi_in', $loan->adj_interest_emi_in) == 'f' ? 'selected' : '' }}>First Installment</option>
+                            <option value="l" {{ old('adj_interest_emi_in', $loan->adj_interest_emi_in) == 'l' ? 'selected' : '' }}>Last Installment</option>
                         </select>
 					</div>
-            </div>
-
-            <div class="form-group row">
-                <div class="col-md-3">
+                    <div class="col-md-3 mt-5">
                     <label for="wef_month">W.E.F. Month</label>
                     <select name="wef_month" id="wef_month" class="form-control">
                         <option value="">Select Month</option>
-                        <option value="1" {{ old('wef_month', $loan->installment_month) == '1' ? 'selected' : '' }}>January</option>
-                        <option value="2" {{ old('wef_month', $loan->installment_month) == '2' ? 'selected' : '' }}>February</option>
-                        <option value="3" {{ old('wef_month', $loan->installment_month) == '3' ? 'selected' : '' }}>March</option>
-                        <option value="4" {{ old('wef_month', $loan->installment_month) == '4' ? 'selected' : '' }}>April</option>
-                        <option value="5" {{ old('wef_month', $loan->installment_month) == '5' ? 'selected' : '' }}>May</option>
-                        <option value="6" {{ old('wef_month', $loan->installment_month) == '6' ? 'selected' : '' }}>June</option>
-                        <option value="7" {{ old('wef_month', $loan->installment_month) == '7' ? 'selected' : '' }}>July</option>
-                        <option value="8" {{ old('wef_month', $loan->installment_month) == '8' ? 'selected' : '' }}>August</option>
-                        <option value="9" {{ old('wef_month', $loan->installment_month) == '9' ? 'selected' : '' }}>September</option>
-                        <option value="10" {{ old('wef_month', $loan->installment_month) == '10' ? 'selected' : '' }}>October</option>
-                        <option value="11" {{ old('wef_month', $loan->installment_month) == '11' ? 'selected' : '' }}>November</option>
-                        <option value="12" {{ old('wef_month', $loan->installment_month) == '12' ? 'selected' : '' }}>December</option>
+                        <option value="1" {{ old('wef_month', $loan->from_mm) == '1' ? 'selected' : '' }}>January</option>
+                        <option value="2" {{ old('wef_month', $loan->from_mm) == '2' ? 'selected' : '' }}>February</option>
+                        <option value="3" {{ old('wef_month', $loan->from_mm) == '3' ? 'selected' : '' }}>March</option>
+                        <option value="4" {{ old('wef_month', $loan->from_mm) == '4' ? 'selected' : '' }}>April</option>
+                        <option value="5" {{ old('wef_month', $loan->from_mm) == '5' ? 'selected' : '' }}>May</option>
+                        <option value="6" {{ old('wef_month', $loan->from_mm) == '6' ? 'selected' : '' }}>June</option>
+                        <option value="7" {{ old('wef_month', $loan->from_mm) == '7' ? 'selected' : '' }}>July</option>
+                        <option value="8" {{ old('wef_month', $loan->from_mm) == '8' ? 'selected' : '' }}>August</option>
+                        <option value="9" {{ old('wef_month', $loan->from_mm) == '9' ? 'selected' : '' }}>September</option>
+                        <option value="10" {{ old('wef_month', $loan->from_mm) == '10' ? 'selected' : '' }}>October</option>
+                        <option value="11" {{ old('wef_month', $loan->from_mm) == '11' ? 'selected' : '' }}>November</option>
+                        <option value="12" {{ old('wef_month', $loan->from_mm) == '12' ? 'selected' : '' }}>December</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3 mt-5">
                     <label for="wef_year">W.E.F. Year</label>
                     <select name="wef_year" id="wef_year" class="form-control">
                         <option value="">Select Year</option>
-                        @for ($year = 2025; $year <= 2035; $year++)
-                            <option value="{{ $year }}" {{ old('wef_year', $loan->installment_year) == $year ? 'selected' : '' }}>{{ $year }}</option>
+                        @for ($year = 2020; $year <= 2035; $year++)
+                            <option value="{{ $year }}" {{ old('wef_year', $loan->from_yyyy) == $year ? 'selected' : '' }}>{{ $year }}</option>
                         @endfor
                     </select>
                 </div>
+            </div>
+
+            <div class="form-group row">
+                
             </div>
             <hr>
             <div class="form-group row">
