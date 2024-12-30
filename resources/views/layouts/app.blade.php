@@ -4,11 +4,11 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>HRMIS | HRMIS - Human Resources Management Information System</title>
+    <title>{{ env('APP_NAME') }} | HRMIS - Human Resources Management Information System</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/logo/gmda-logo.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('logo/logo.png') }}">
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/font-awesome.min.css') }}">
@@ -46,9 +46,9 @@
 </head>
 
 <body>
-    <div class="left-sidebar-pro" style="display: none">
+    {{-- <div class="left-sidebar-pro" style="display: none">
         @include('layouts.sidebar')
-    </div>
+    </div> --}}
     <div class="all-content-wrapper">
         <div class="navbar-main-container header-top-area">
             <div class="top-bar-nav container-fluid">
@@ -57,8 +57,8 @@
                         <div class="logo-container">
 
                             <div class="logo-div">
-                                <a href="{{ env('APP_URL') }}/GMDA/gmda-leave/public/"><img class="main-logo"
-                                        src="{{ asset('img/logo/gmda-logo.png') }}" alt=""
+                                <a href="{{ route('home') }}"><img class="main-logo"
+                                        src="{{ asset('logo/logo.png') }}" alt=""
                                         style="max-width: 75px;" /></a>
                             </div>
                             <h4>Human Resource Management Information System</h4>
