@@ -107,9 +107,10 @@
                             <td>
                                 {{-- <a href="" class="btn btn-danger btn-sm">Delete</a> --}}
                                 @if ($data->has_loan_master)
-                                    <a href="{{route('loan.show',['id' => $data->id])}}" class="btn btn-info btn-xs">View Loan</a>
+                                    
                                 @else
                                     <a href="{{route('loan.edit',['id' => $data->id])}}" class="btn btn-success btn-xs">Update</a>
+                                    <a href="{{route('loan.show',['id' => $data->id])}}" class="btn btn-info btn-xs">View Loan</a>
                                 @endif
 
                                 @if ($data->has_loan_master)

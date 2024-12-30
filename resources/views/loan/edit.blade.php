@@ -45,7 +45,7 @@
                 
                 <div class="col-md-3">
                     <label for="">Employee</label>
-                    <select class="form-control select2" id="employee_id" name="employee_id">
+                    <select class="form-control select2" id="employee_id" name="employee_id" readonly>
                         <option value="">--SELECT--</option>
                         @foreach ($employees as $key => $emp)
                             <option value="{{ $emp->user_id }}" {{ $loan->user_id == $emp->user_id ? 'selected' : '' }}>

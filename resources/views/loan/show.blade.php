@@ -53,7 +53,7 @@
                 
                 <div class="col-md-3">
                     <label for="">Loan Type</label>
-                        <input type="text" class="form-control" value="{{ $loan->advanceType->type_name }}" disabled>
+                        <input type="text" class="form-control" value="{{ $loan->advanceType->type_name ?? '' }}" disabled>
                 </div>
 
             </div>
@@ -214,6 +214,63 @@
 						</select>
                     </div>
                 </div>
+
+
+                <div class="row">
+                <div class="col-lg-6">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title"><h5>Reducing Rate</h5></div>
+                            <div class="ibox-content">
+                                <div class="row">
+                                <div class="col-sm-12 b-r">
+                                    <!-- <form role="form">
+                                        <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <label>Loan Amount</label>
+                                                <input type="text" id="DispPAmtR" name="DispPAmtR" class="form-control" placeholder="0.00" readonly="true">
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <label>Int. Payable</label>
+                                                <input type="text" id="DispRIntP" name="DispRIntP" placeholder="0.00" class="form-control" readonly="true">
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <label>Total Payable</label>
+                                                <input type="text" min="0" step="1" id="DispRTotPayable" name="DispRTotPayable" placeholder="0.00" class="form-control"  readonly="true">
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </form> -->
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 b-r">
+                                    <table id="memListTable" class="table table-responsive table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>SL</th>
+                                                <th>EMI</th>
+                                                <th>INT</th>
+                                                <th>PRINCIPAL</th>
+                                                <th>BALANCE</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="reducingDiv">
+                                            @foreach ($loanmasterdetail as $installment)
+                                                <tr>
+                                                    <td>{{ $loop->iteration }}</td>
+                                                    <td>{{ $installment->payment }}</td>
+                                                    <td>{{ $installment->interest }}</td>
+                                                    <td>{{ $installment->principal }}</td>
+                                                    <td>{{ $installment->ending_balance }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            </form>
+                            </div>
 
             </form>
         </div>

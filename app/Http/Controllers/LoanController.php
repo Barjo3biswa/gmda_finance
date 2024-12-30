@@ -224,11 +224,16 @@ class LoanController extends Controller
     public function show(string $id)
     {
         $refno=advance::where('id', $id)->value('reference_no');
-        $loan = LoanMaster::with('employee', 'advanceType')->where('reference_no', $refno)->first();
+        $loanid=LoanMaster::where('advances_id', $id)->value('id');
+        // dd($loanid);
+        $loan = LoanMaster::with('employee', 'advanceType')->where('id', $loanid)->first();
+        $loanmasterdetail = LoanMasterDetail::where('loan_id', $loanid)->get();
+        // dd($loanmasterdetail);
+        // dd($loan);
         $employees = Employee::all();
         $advanceTypes = AdvanceType::all();
         $salaryheads = SalaryHead::all();
-        return view('loan.show', compact('loan', 'employees', 'advanceTypes', 'salaryheads'));
+        return view('loan.show', compact('loan', 'loanmasterdetail', 'employees', 'advanceTypes', 'salaryheads'));
     }
 
     /**
@@ -241,7 +246,9 @@ class LoanController extends Controller
         //dd($loan);
         // Fetch related data (e.g., employees, loan types, salary heads)
         $employees = Employee::all();
-        $advanceTypes = AdvanceType::all();
+        $advanceTypes = DB::table('advance_types')
+                  ->where('type', 'loan')
+                  ->get();
         $salaryheads = salaryHead::all();
 
         // Return the edit view with the current loan data
