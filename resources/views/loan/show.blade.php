@@ -53,7 +53,14 @@
                 
                 <div class="col-md-3">
                     <label for="">Loan Type</label>
-                        <input type="text" class="form-control" value="{{ $loan->advanceType->type_name ?? '' }}" disabled>
+                        <!-- <input type="text" class="form-control" value="{{ $loan->advanceType->type_name ?? '' }}" disabled> -->
+                        <select name="loan_type_id" id="loan_type_id" class="form-control" readonly>
+                        @foreach($advanceTypes as $advanceType)
+                            <option value="{{ $advanceType->id }}" {{ $loan->loan_type_id == $advanceType->id ? 'selected' : '' }}>
+                                {{ $advanceType->type_name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
             </div>

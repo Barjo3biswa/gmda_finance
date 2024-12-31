@@ -231,8 +231,9 @@ class LoanController extends Controller
         // dd($loanmasterdetail);
         // dd($loan);
         $employees = Employee::all();
-        $advanceTypes = AdvanceType::all();
+        $advanceTypes = DB::select('SELECT * FROM advance_types WHERE type = ?', ['loan']);;
         $salaryheads = SalaryHead::all();
+        // dd($loan)
         return view('loan.show', compact('loan', 'loanmasterdetail', 'employees', 'advanceTypes', 'salaryheads'));
     }
 

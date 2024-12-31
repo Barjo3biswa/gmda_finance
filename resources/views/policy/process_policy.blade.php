@@ -89,12 +89,6 @@
             </div>
             <div class="card-body">
 
-
-    @if ($message = Session::get('success'))
-    <div class="alert alert-success">
-        <p>{{ $message }}</p>
-    </div>
-    @endif
     <form action="{{ route('policy.process_policy_data') }}" method="POST">
     @csrf
     <input type="hidden" name="salary_block_id" value="{{ $salarystatus->id }}">

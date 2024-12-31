@@ -55,10 +55,10 @@
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="name">Employee</label>
-                        <select name="employee_id" id="categories" class="form-control select2">
+                        <select name="employee_id" id="categories" class="js-example-basic-multiple form-control">
                             <option value="">--All--</option>
                             @foreach ($emp as $employee)
-                                <option value="{{$employee->id}}">{{$employee->full_name_with_code}}</option>
+                                <option value="{{$employee->id}}">{{$employee->first_name}} {{$employee->last_name}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -103,9 +103,9 @@
     </div>
 </div>
         <div class="card">
-            <div class="card-header">
+            <!-- <div class="card-header">
                 <i class="fa fa-list-alt"></i> ADVANCE RECORDS
-            </div>
+            </div> -->
             <div class="card-body">
 
     @if ($message = Session::get('success'))
@@ -118,6 +118,7 @@
         <p>No active salary block found. Please create or activate a salary block first.</p>
     </div>
     @else
+    <b>Month:</b> {{ date('F', mktime(0, 0, 0, $salarystatus->month, 1)) }} <b>Year:</b> {{ $salarystatus->year }}
     <form action="{{ route('advance.process_advance_data') }}" method="POST">
     @csrf
     <input type="hidden" name="salary_block_id" value="{{ $salarystatus->id }}">
@@ -161,7 +162,7 @@
                     <input type="hidden" name="datas[{{$key}}][loan_head_id]" value={{ $advance->sal_block_id }}>
                 </td>
                 <td class="text-right">
-                    <input type="number" name="datas[{{$key}}][monthly_premium]" value={{$advance->principal_installment }} disabled="disabled">
+                    <input type="number" name="datas[{{$key}}][monthly_premium]" value={{$advance->principal_installment }} readonly>
                 </td>
                 <!-- <td>{{ $advance->start_date}}</td>
                 <td>{{$advance->closing_date }}</td> -->

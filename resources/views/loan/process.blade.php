@@ -66,7 +66,7 @@
                                                         <option value="">--All--</option>
                                                         @foreach ($emp as $employee)
                                                             <option value="{{ $employee->id }}">
-                                                                {{ $employee->full_name_with_code }}</option>
+                                                                {{ $employee->first_name }} {{ $employee->last_name }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -142,9 +142,9 @@
                                 </div>
                             </div>
                             <div class="card">
-                                <div class="card-header">
+                                <!-- <div class="card-header">
                                     <i class="fa fa-list-alt"></i> Pending Loan List
-                                </div>
+                                </div> -->
                                 <div class="card-body">
 
                                     @if ($message = Session::get('success'))
@@ -158,6 +158,7 @@
                                             </p>
                                         </div>
                                     @else
+                                    <b>Month:</b> {{ date('F', mktime(0, 0, 0, $salarystatus->month, 1)) }} <b>Year:</b> {{ $salarystatus->year }}
                                         <form action="{{ route('loan.process_loan_data') }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="salary_block_id" value="{{ $salarystatus->id }}">
@@ -229,14 +230,13 @@
                                                             <td class="text-right">
                                                                 <input type="number"
                                                                     name="datas[{{ $key }}][monthly_premium]"
-                                                                    value={{ $advance->principal_installment }}
-                                                                    disabled="disabled">
+                                                                    value={{ $advance->principal_installment }} disabled="disabled" readonly>
                                                             </td>
                                                             <td class="text-right">
                                                                 <input type="number"
                                                                     name="datas[{{ $key }}][monthly_premium]"
                                                                     value={{ $advance->interest_emi }}
-                                                                    disabled="disabled">
+                                                                    disabled="disabled" readonly>
                                                             </td>
                                                             <!-- <td>{{ $advance->start_date }}</td>
                                                         <td>{{ $advance->closing_date }}</td> -->

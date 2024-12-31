@@ -39,7 +39,7 @@
 					<input type="hidden" name="sal_block_id" id="sal_block_id">
 					<div class="col-md-3">
 						<label for="">Employee</label>
-						<select class="form-control select2" id="employee_id" name="employee_id">
+						<select class="js-example-basic-multiple form-control" id="employee_id" name="employee_id">
 							<option value="">--SELECT--</option>
 							@foreach ($employees as $key => $emp)
 								<option value="{{ $emp->user_id }}">{{ $emp->first_name }} {{ $emp->last_name }}</option>

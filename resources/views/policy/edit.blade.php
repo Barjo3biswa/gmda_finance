@@ -33,7 +33,7 @@
                 <div class="form-group row">
                     <div class=" col-md-6">
                         <label for="inputname">Employee Name</label>
-                        <select class="form-control" id="employee_id" name="employee_id" readonly>
+                        <select class="js-example-basic-multiple form-control" id="employee_id" name="employee_id" readonly>
                             @foreach($employees as $key=>$employee)
                             <option value="{{$employee->user_id}}" id="employee_id" {{$policies->employee_id == $employee->user_id ? "selected" : ""}}>{{$employee->first_name}} {{$employee->last_name}}</option>
                             @endforeach
