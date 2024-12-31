@@ -27,12 +27,13 @@
             <a href="{{route('policy.index')}}" class="btn btn-success float-right mr-1"><i class="fa fa-arrow-left"></i> Back</a>
         </div>
         <div class="card-body">
-            <form action="{{route('policy.store')}}" method="POST" enctype="multipart/form-data">
+            <form action="{{route('policy.update',[$policies->id])}}" method="POST">
                 @csrf
+                {{ method_field('PUT') }}
                 <div class="form-group row">
                     <div class=" col-md-6">
                         <label for="inputname">Employee Name</label>
-                        <select class="form-control" id="employee_id" name="employee_id">
+                        <select class="form-control" id="employee_id" name="employee_id" readonly>
                             @foreach($employees as $key=>$employee)
                             <option value="{{$employee->user_id}}" id="employee_id" {{$policies->employee_id == $employee->user_id ? "selected" : ""}}>{{$employee->first_name}} {{$employee->last_name}}</option>
                             @endforeach

@@ -130,6 +130,10 @@ Route::group(['middleware' => 'auth.jwt'], function () {
 
     Route::post('policy/process-policy-search', [PolicyController::class, 'process_policy_search'])->name('policy.search');
 
+    Route::get('policy/delete/{id}', [PolicyController::class, 'destroy'])->name('policy.delete');
+
+    Route::put('policy/{id}/update', [PolicyController::class, 'update'])->name('policy.update');
+
 
     Route::post('/set-default', [App\Http\Controllers\defaultOptionController::class, 'setDefault'])->name('set-default');
 });

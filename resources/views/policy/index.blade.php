@@ -46,7 +46,7 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="name">Employee</label>
-                        <select name="employee_id" id="categories" class="form-control select2">
+                        <select name="employee_id" id="categories" class="js-example-basic-multiple form-control">
                             <option value="">--All--</option>
                             @foreach ($emp as $employee)
                                 <option value="{{$employee->id}}">{{$employee->first_name}} {{$employee->last_name}}</option>
@@ -83,7 +83,7 @@
                             <th>Employee Code</th>
                             <th class="text-right">Monthly Premium</th>
                             <th width="100px">Start Date</th>
-                            <th>Last Date of deduction</th>
+                            <th>Closing Date</th>
                             <th>Last Month/year</th>
                             <th width="230px">Action</th>
                         </tr> <!-- Modal -->
@@ -95,14 +95,18 @@
                             <td>{{ $data->employees->first_name}} {{ $data->employees->last_name}}</td>
                             <td>{{$data->employees->code}}</td>
                             <td class="text-right">{{ $data->monthly_premium }}</td>
-                            <td>{{$data->start_date}}</td>
-                            <td>{{$data->closing_date }}</td>
+                            <td>
+                                {{ \Carbon\Carbon::parse($data->start_date)->format('d-m-Y') ?? '' }}
+                            </td>
+                            <td>
+                                {{ \Carbon\Carbon::parse($data->closing_date)->format('d-m-Y') ?? '' }}
+                            </td>
                             <td>{{$data->closing_month}}/{{$data->closing_year}}</td>
                             <td>
                                 {{-- <a href="" class="btn btn-primary">View</a> --}}
 
-                                <a href="" class="btn btn-danger btn-sm">Delete</a>
-                                <a href="{{route('policy.edit',['id' => $data->id])}}" class="btn btn-success btn-sm">View/Edit</a>
+                                <!-- <a href="{{route('policy.delete',['id' => $data->id])}}" class="btn btn-danger btn-sm">Delete</a> -->
+                                <a href="{{route('policy.edit',['id' => $data->id])}}" class="btn btn-success btn-xs">View/Edit</a>
                             </td>
                         </tr>
                         @endforeach

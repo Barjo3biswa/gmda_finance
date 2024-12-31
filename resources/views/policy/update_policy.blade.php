@@ -42,7 +42,7 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="name">Emp code {{request("id")}}</label>
-                        <select name="id" id="categories" class="form-control select2">
+                        <select name="id" id="categories" class="js-example-basic-multiple form-control">
                             @foreach ($emp as $key=>$data)
                               <option value="{{$data->code}}" {{request("id") == $data->code ? "selected"  : ""}}>{{$data->first_name}} {{$data->last_name}}</option>
                             @endforeach

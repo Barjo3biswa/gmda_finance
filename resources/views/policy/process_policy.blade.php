@@ -46,7 +46,7 @@
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="name">Employee</label>
-                        <select name="employee_id" id="categories" class="form-control select2">
+                        <select name="employee_id" id="categories" class="js-example-basic-multiple form-control">
                             <option value="">--All--</option>
                             @foreach ($emp as $employee)
                                 <option value="{{$employee->user_id}}">{{$employee->first_name}} {{$employee->last_name}}</option>

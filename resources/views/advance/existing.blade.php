@@ -5,7 +5,26 @@
     }
 </style>
 @section('content')
-<div class="container" style="margin-bottom: 100px; margin-top: 100px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);">
+<div class="single-pro-review-area mt-t-30 mg-b-15">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                            <div class="breadcome-heading">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                            <ul class="breadcome-menu">
+                                <li><a href="#">Dashboard</a> <span class="bread-slash">/</span>
+                                </li>
+                                <li><span class="bread-blod">Existing Loan</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="product-payment-inner-st">
+                        <div id="myTabContent" class="tab-content custom-product-edit">
 	<div class="card">
 		<div class="card-header">
 			EXISTING ADVANCE DETAILS
@@ -167,7 +186,10 @@
 			</form>
 		</div>
 	</div>
+	</div>
+    
 </div>
+
 @endsection
 @section('js')
 <script>
@@ -189,6 +211,7 @@ function calculatePrincipalAmount() {
     if (isNaN(loanAmount) || isNaN(duration) || loanAmount <= 0 || duration <= 0) {
         document.getElementById("principal_amount").value = 0;
         document.getElementById("monthly_emi").value = 0;
+        document.getElementById("adj_emi").value = 0;
         return;
     }
 
@@ -198,8 +221,10 @@ function calculatePrincipalAmount() {
     // If there is no interest rate, just set principal amount and EMI directly
     if (monthlyRate === 0) {
         console.log("No interest rate, setting principal and EMI directly.");
+        const monthlyEmi = loanAmount / duration;
         document.getElementById("principal_amount").value = loanAmount;
-        document.getElementById("monthly_emi").value = loanAmount / duration;
+        document.getElementById("monthly_emi").value = Math.round(loanAmount / duration); // loanAmount / duration;
+        document.getElementById("adj_emi").value = Math.round(monthlyEmi * 1.05);
         return;
     }
 
@@ -207,7 +232,7 @@ function calculatePrincipalAmount() {
     const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, duration)) / (Math.pow(1 + monthlyRate, duration) - 1);
     console.log("Calculated EMI:", emi);
 
-    document.getElementById("monthly_emi").value = Math.round(emi);
+    document.getElementById("monthly_emi").value = Math.floor(emi);
 
     // Calculate the principal amount based on the EMI
     const principalAmount = (emi * (Math.pow(1 + monthlyRate, duration) - 1)) / (monthlyRate * Math.pow(1 + monthlyRate, duration));

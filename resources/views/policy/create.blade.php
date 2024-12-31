@@ -37,7 +37,7 @@
 				<div class="form-group row">
 					<div class="col-md-4">
 						<label for="inputname">Employee Name</label>
-						<select class="form-control select2" id="employee_id" name="employee_id">
+						<select class="js-example-basic-multiple form-control" id="employee_id" name="employee_id">
 							<option value="">--SELECT--</option>
 							@foreach ($employees as $key => $emp)
 								<option value="{{ $emp->user_id }}">{{ $emp->first_name }} {{ $emp->last_name }}</option>
@@ -48,7 +48,7 @@
                      <label for="">Employee Code</label>
                     <select class="form-control" id="employee_code" name="employee_code">
                         @foreach ($employees as $key => $employee)
-                        <option value=" {{$employee->code}}" id="employee_id">{{$employee->code}}</option>
+                        	<option value=" {{$employee->code}}" id="employee_id">{{$employee->code}}</option>
                         @endforeach
                     </select>
                 </div> --}}
