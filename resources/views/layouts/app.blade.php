@@ -77,16 +77,18 @@
                                     </a>
                                     <ul role="menu"
                                         class="dropdown-header-top author-log dropdown-menu animated zoomIn">
-                                        <li><a href="#"><span
-                                                    class="edu-icon edu-user-rounded author-log-ic"></span>My
-                                                Profile</a>
-                                        </li>
+
                                         @php
                                             $modules = \App\Models\moduleUrl::where('status', 'Active')->get();
                                             $logout_url = \App\Models\moduleUrl::where('status', 'Active')
                                                 ->where('id', 1)
                                                 ->first();
                                         @endphp
+                                        <li><a
+                                                href="{{ $logout_url->url }}{{ $logout_url->project_name }}/viewprofile"><span
+                                                    class="edu-icon edu-user-rounded author-log-ic"></span>My
+                                                Profile</a>
+                                        </li>
                                         @foreach ($modules as $mod)
                                             @if (\App\Helpers\commonHelper::isPermissionExist($mod->permission_name))
                                                 @if ($mod->id == 1)
