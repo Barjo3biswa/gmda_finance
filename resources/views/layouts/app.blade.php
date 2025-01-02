@@ -70,23 +70,38 @@
                                 <li class="nav-item">
                                     <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"
                                         class="nav-link dropdown-toggle">
-                                        <img src="img/product/pro4.jpg" alt="" />
+                                        @php
+                                            $modules = \App\Models\moduleUrl::where('status', 'Active')->get();
+                                            $logout_url = \App\Models\moduleUrl::where('status', 'Active')
+                                                ->where('id', 1)
+                                                ->first();
+                                            $profile = \App\Models\Employee::where(
+                                                'user_id',
+                                                Auth::user()->id,
+                                            )->first();
+                                            if (isset($profile)) {
+                                                $photo =
+                                                    $logout_url->url .
+                                                        $logout_url->project_name .
+                                                        '/' .
+                                                        $profile->profile_path ??
+                                                    '';
+                                            } else {
+                                                $photo = '';
+                                            }
+                                        @endphp
+                                        <img src="{{ $photo }}" alt="" />
                                         <span class="admin-name">{{ Auth::user()->name }}
                                             (Finance)</span>
                                         <i class="fa fa-angle-down edu-icon edu-down-arrow"></i>
                                     </a>
                                     <ul role="menu"
                                         class="dropdown-header-top author-log dropdown-menu animated zoomIn">
-                                        <li><a href="#"><span
+                                        <li><a
+                                                href="{{ $logout_url->url }}{{ $logout_url->project_name }}/viewprofile"><span
                                                     class="edu-icon edu-user-rounded author-log-ic"></span>My
                                                 Profile</a>
                                         </li>
-                                        @php
-                                            $modules = \App\Models\moduleUrl::where('status', 'Active')->get();
-                                            $logout_url = \App\Models\moduleUrl::where('status', 'Active')
-                                                ->where('id', 1)
-                                                ->first();
-                                        @endphp
                                         @foreach ($modules as $mod)
                                             @if (\App\Helpers\commonHelper::isPermissionExist($mod->permission_name))
                                                 @if ($mod->id == 1)
