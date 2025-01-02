@@ -85,7 +85,7 @@
 
 
 
-                                        <img src="{{ asset($photo) }}" alt="profile" />
+                                        <img src="{{ asset($photo) }}" alt="" />
                                         <span class="admin-name">{{ Auth::user()->name }}
                                             (Finance)</span>
                                         <i class="fa fa-angle-down edu-icon edu-down-arrow"></i>
