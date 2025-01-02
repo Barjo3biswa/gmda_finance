@@ -70,7 +70,22 @@
                                 <li class="nav-item">
                                     <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"
                                         class="nav-link dropdown-toggle">
-                                        <img src="img/product/pro4.jpg" alt="" />
+                                        @php
+                                            $profile = \App\Models\Employee::where(
+                                                'user_id',
+                                                Auth::user()->id,
+                                            )->first();
+                                            if (isset($profile)) {
+                                                $photo = $profile->profile_path ?? '';
+                                            } else {
+                                                $photo = '';
+                                            }
+                                        @endphp
+
+
+
+
+                                        <img src="{{ asset($photo) }}" alt="profile" />
                                         <span class="admin-name">{{ Auth::user()->name }}
                                             (Finance)</span>
                                         <i class="fa fa-angle-down edu-icon edu-down-arrow"></i>
