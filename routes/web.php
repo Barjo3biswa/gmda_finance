@@ -95,6 +95,9 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::get('advance/view-advances-list', [AdvanceController::class, 'ViewAdvances'])->name('advance.viewadvances');
     Route::get('advance/view-advance-details/{id}', [AdvanceController::class, 'ViewAdvanceDetails'])->name('advance.viewadvancedetails');
 
+    Route::get('advance/close/{id}', [AdvanceController::class, 'close'])->name('advance.close');
+    Route::put('advance/{id}/close', [AdvanceController::class, 'closeAdvance'])->name('advance.closeAdvance');
+
     //loan
     Route::get('loan', [LoanController::class, 'index'])->name('loan.index');
     Route::get('loan/create', [LoanController::class, 'create'])->name('loan.create');

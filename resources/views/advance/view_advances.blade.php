@@ -60,7 +60,7 @@
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="name">Employee</label>
-                                                    <select name="employee_id" id="categories" class="form-control select2">
+                                                    <select name="employee_id" id="categories" class="form-control js-example-basic-multiple">
                                                         <option value="">--All--</option>
                                                         @foreach ($emp as $employee)
                                                             <option value="{{ $employee->id }}"
@@ -96,39 +96,37 @@
                                             <thead>
                                                 <tr>
                                                     <th>SL</th>
-                                                    <th>Reference No</th>
+                                                    {{-- <th>Reference No</th> --}}
                                                     <th>Emp. Name</th>
                                                     <th>Type</th>
                                                     <th>Principal Amount</th>
                                                     <th class="text-right">Monthly EMI</th>
-                                                    <th class="text-right">Interest Amount</th>
-                                                    <th>Interest EMI</th>
+                                                    {{-- <th class="text-right">Interest Amount</th>
+                                                    <th>Interest EMI</th> 
                                                     <th>Block Month</th>
-                                                    <th>Block Year</th>
-                                                    <th width="100px">Action</th>
+                                                    <th>Block Year</th> --}}
+                                                    <th width="100px"></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @forelse ($advances as $key => $advance)
                                                     <tr>
                                                         <td>{{ $key + 1 }}</td>
-                                                        <td>{{ $advance->reference_no }}</td>
-                                                        <td>{{ optional($advance->employee)->first_name }}
-                                                            ({{ optional($advance->employee)->code }})
-                                                        </td>
+                                                        {{-- <td>{{ $advance->reference_no }}</td> --}}
+                                                        <td>{{ optional($advance->employee)->first_name  }} {{ optional($advance->employee)->last_name }} ({{ optional($advance->employee)->code }})</td>
                                                         <td>{{ optional($advance->advanceType)->type_name }}</td>
                                                         <td class="text-right">
                                                             {{ number_format($advance->principal_amount, 2) }}</td>
                                                         <td class="text-right">
                                                             {{ number_format($advance->principal_installment, 2) }}
                                                         </td>
-                                                        <td class="text-right">
+                                                        {{-- <td class="text-right">
                                                             {{ number_format($advance->interest_amount, 2) }}</td>
                                                         <td class="text-right">
                                                             {{ number_format($advance->interest_installment, 2) }}</td>
                                                         <td>{{ date('F', mktime(0, 0, 0, $advance->sal_block_month, 1)) }}
                                                         </td>
-                                                        <td>{{ $advance->sal_block_yr }}</td>
+                                                        <td>{{ $advance->sal_block_yr }}</td> --}}
                                                         <td>
                                                             <a href="{{ route('advance.viewadvancedetails', $advance->id) }}"
                                                                 class="btn btn-info btn-xs">

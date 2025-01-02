@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Redirect;
 use Str;
 use App\Models\LoanMaster;
+use Illuminate\Support\Facades\Auth;
 
 class AdvanceController extends Controller
 {
@@ -78,6 +79,63 @@ class AdvanceController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
+
+        // Generate reference number
+        $currentDate = now();
+        $year = $currentDate->format('y');
+        $month = str_pad($currentDate->format('m'), 2, '0', STR_PAD_LEFT);
+
+        // Get the last reference number from Advance model
+        $lastAdvanceRefNo = Advance::whereNotNull('reference_no')
+            ->where('reference_no', 'LIKE', "ADV/{$year}/{$month}/%")
+            ->orderBy('id', 'desc')
+            ->first();
+
+        // Get the last reference number from Loan model
+        $lastLoanRefNo = Loan::whereNotNull('reference_no')
+            ->where('reference_no', 'LIKE', "ADV/{$year}/{$month}/%")
+            ->orderBy('id', 'desc')
+            ->first();
+
+        // Function to extract the numeric part of the reference number
+        function extractNumericPart($referenceNo)
+        {
+            if (preg_match('/\d+$/', $referenceNo, $matches)) {
+                return (int)$matches[0];  // Return the numeric part as an integer
+            }
+            return 0;  // Return 0 if no numeric part is found
+        }
+
+        // Initialize the sequence variable
+        $sequence = '0001';
+
+        // Compare the numeric parts of both Advance and Loan reference numbers
+        if ($lastAdvanceRefNo && $lastLoanRefNo) {
+            // Extract the numeric parts
+            $advanceNum = extractNumericPart($lastAdvanceRefNo->reference_no);
+            $loanNum = extractNumericPart($lastLoanRefNo->reference_no);
+
+            // Get the largest numeric part
+            $largestSequence = max($advanceNum, $loanNum);
+            $sequence = str_pad($largestSequence + 1, 4, '0', STR_PAD_LEFT);
+        } elseif ($lastAdvanceRefNo) {
+            // If only Advance record exists
+            $advanceNum = extractNumericPart($lastAdvanceRefNo->reference_no);
+            $sequence = str_pad($advanceNum + 1, 4, '0', STR_PAD_LEFT);
+        } elseif ($lastLoanRefNo) {
+            // If only Loan record exists
+            $loanNum = extractNumericPart($lastLoanRefNo->reference_no);
+            $sequence = str_pad($loanNum + 1, 4, '0', STR_PAD_LEFT);
+        }
+
+        // Now generate the reference number
+        $referenceNo = "ADV/{$year}/{$month}/{$sequence}";
+
+        dd($referenceNo);
+
+        if(!empty($request->ref_no) && $request->ref_no != "NA"){
+            $referenceNo = $request->ref_no;
+        }
 
         DB::beginTransaction();
 
@@ -210,6 +268,7 @@ class AdvanceController extends Controller
 
             $loanAmnt = $request->principal_amount + $request->interest_amount;
             $loanMasterData = [
+                'advances_id'=> $advance->id,
                 'reference_no' => $request->ref_no,
                 'user_id' => $request->employee_id,
                 'emp_code' => $request->emp_code ?? null,
@@ -558,7 +617,7 @@ class AdvanceController extends Controller
         $employees = Employee::select('*')->orderBy('first_name')->get();
         $designations = AuthDesignation::get();
         $advanceGroups = AdvanceGroup::all();
-        $advanceTypes = AdvanceType::all();
+        $advanceTypes = AdvanceType::where('type', 'advance')->get();
         $salaryheads = salaryHead::all();
         return view("advance.existing", compact('employees', 'advanceTypes', 'salaryheads', 'advanceGroups'));
     }
@@ -652,25 +711,53 @@ class AdvanceController extends Controller
         $year = $currentDate->format('y');
         $month = str_pad($currentDate->format('m'), 2, '0', STR_PAD_LEFT);
 
-        // Get the last reference number
-        $lastRefNo = Advance::whereNotNull('reference_no')
+        // Get the last reference number from Advance model
+        $lastAdvanceRefNo = Advance::whereNotNull('reference_no')
             ->where('reference_no', 'LIKE', "ADV/{$year}/{$month}/%")
             ->orderBy('id', 'desc')
             ->first();
 
-        $sequence = '0001';
+        // Get the last reference number from Loan model
+        $lastLoanRefNo = LoanMaster::whereNotNull('reference_no')
+            ->where('reference_no', 'LIKE', "ADV/{$year}/{$month}/%")
+            ->orderBy('id', 'desc')
+            ->first();
 
-        if ($lastRefNo) {
-            $parts = explode('/', $lastRefNo->reference_no);
-            if (count($parts) == 4) {
-                $lastSequence = intval($parts[3]);
-                $sequence = str_pad($lastSequence + 1, 4, '0', STR_PAD_LEFT);
+        // Function to extract the numeric part of the reference number
+        function extractNumericPart($referenceNo)
+        {
+            if (preg_match('/\d+$/', $referenceNo, $matches)) {
+                return (int)$matches[0];  // Return the numeric part as an integer
             }
+            return 0;  // Return 0 if no numeric part is found
         }
 
-        //dd($request->all());
+        // Initialize the sequence variable
+        $sequence = '0001';
 
+        // Compare the numeric parts of both Advance and Loan reference numbers
+        if ($lastAdvanceRefNo && $lastLoanRefNo) {
+            // Extract the numeric parts
+            $advanceNum = extractNumericPart($lastAdvanceRefNo->reference_no);
+            $loanNum = extractNumericPart($lastLoanRefNo->reference_no);
+
+            // Get the largest numeric part
+            $largestSequence = max($advanceNum, $loanNum);
+            $sequence = str_pad($largestSequence + 1, 4, '0', STR_PAD_LEFT);
+        } elseif ($lastAdvanceRefNo) {
+            // If only Advance record exists
+            $advanceNum = extractNumericPart($lastAdvanceRefNo->reference_no);
+            $sequence = str_pad($advanceNum + 1, 4, '0', STR_PAD_LEFT);
+        } elseif ($lastLoanRefNo) {
+            // If only Loan record exists
+            $loanNum = extractNumericPart($lastLoanRefNo->reference_no);
+            $sequence = str_pad($loanNum + 1, 4, '0', STR_PAD_LEFT);
+        }
+
+        // Now generate the reference number
         $referenceNo = "ADV/{$year}/{$month}/{$sequence}";
+
+        // dd($referenceNo);
 
         $advance = new Advance();
         $advance->reference_no = $referenceNo;
@@ -760,12 +847,14 @@ class AdvanceController extends Controller
 
     public function ViewAdvances()
     {
-        $emp = Employee::all();
+        $emp = Employee::orderBy('first_name', 'asc')->get();
         $departments = Department::select('id', 'name')->get();
         $advanceTypes = AdvanceType::all();
 
         $advances = LoanMaster::filter()
-            ->with(['employee', 'advanceType', 'salhead'])->where("interest_amount", "=", 0)
+            ->with(['employee', 'advanceType', 'salhead'])->whereHas('advanceType', function($q) {
+                $q->where('type', 'advance');
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -782,5 +871,58 @@ class AdvanceController extends Controller
         }
 
         return view('advance.viewadvancedetails', compact('loanMaster'));
+    }
+
+
+    public function close(string $id)
+    {
+        $refno=advance::where('id', $id)->value('reference_no');
+        $advance = LoanMaster::where('reference_no', $refno)->first();
+        // Fetch related data (e.g., employees, loan types, salary heads)
+        $employees = Employee::all();
+        $advanceTypes = AdvanceType::all();
+        $salaryheads = SalaryHead::all();
+
+        // dd($advance);
+
+        // Return the edit view with the current loan data
+        return view('advance.close', compact('advance', 'employees', 'advanceTypes', 'salaryheads'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function closeAdvance(Request $request, string $id)
+    {
+        //  dd($request->all());
+        
+        $advance = new Advance();
+        $advance->close_advance = $request->close_advance;
+        $advance->closed_from_month = $request->closed_from_month;
+        $advance->closed_from_year = $request->closed_from_year;
+        $advance->closed_to_month = $request->closed_to_month;
+        $advance->closed_to_year = $request->closed_to_year;
+        
+        $advance = Advance::where('id', $request->advance_id)->first();
+        $advance->update();
+
+        $loanMasterData = [
+            'close_advance' => $request->close_advance,
+            'closed_from_month' => $request->closed_from_month,
+            'closed_from_year' => $request->closed_from_year,
+            'closed_to_month' => $request->closed_to_month,
+            'closed_to_year' => $request->closed_to_year,
+            'updated_by' => Auth::user()->id
+        ];
+
+        // dd($loanMasterData);
+
+        //dd($loanMasterData);
+        LoanMaster::updateOrCreate(
+            ['advances_id' => $request->advance_id],
+            $loanMasterData
+        );
+
+        return redirect()->route('loan.index')->with('success', 'loan updated successfully');
     }
 }

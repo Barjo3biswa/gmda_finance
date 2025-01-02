@@ -63,7 +63,7 @@
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="name">Employee</label>
-                                                    <select name="employee_id" id="categories" class="form-control select2">
+                                                    <select name="employee_id" id="categories" class="form-control js-example-basic-multiple">
                                                         <option value="">--All--</option>
                                                         @foreach ($emp as $employee)
                                                             <option value="{{ $employee->id }}"
@@ -88,15 +88,9 @@
                                 <div class="card-header">
                                     <!-- <a class="btn btn-success btn btn-xs float-right mr-1" href="{{ route('advance.create') }}"><i class="fa fa-plus"></i> New Advance</a> | -->
                                     <a class="btn btn-success btn btn-xs float-right mr-1"
-                                        href="{{ route('advance.existing') }}"><i class="fa fa-plus"></i> Existing
-                                        Advance</a>
+                                        href="{{ route('advance.existing') }}"><i class="fa fa-plus"></i> Existing Advance</a>
                                 </div>
                                 <div class="card-body">
-                                    @if ($message = Session::get('success'))
-                                        <div class="alert alert-success">
-                                            <p>{{ $message }}</p>
-                                        </div>
-                                    @endif
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-sm font-12">
                                             <tbody>
@@ -106,11 +100,9 @@
                                                     <th>Type</th>
                                                     <th>Total Amount</th>
                                                     <th class="text-right">Deduction Amount</th>
-                                                    <th class="text-right">Recoverd Amount</th>
                                                     <th width="100px">WEF Month</th>
                                                     <th>WEF Year</th>
-                                                    <th width="230px">Action</th>
-                                                    <th></th>
+                                                    <th width="230px"></th>
                                                 </tr> <!-- Modal -->
                                             </tbody>
                                             <tbody>
@@ -122,14 +114,24 @@
                                                         <td>{{ $data->advanceType->type_name ?? 'NA' }}</td>
                                                         <td class="text-right">{{ $data->principal_amount }}</td>
                                                         <td class="text-right">{{ $data->monthly_installment }}</td>
-                                                        <td class="text-right">{{ $data->recovered_amount }}</td>
                                                         <td>{{ date('F', mktime(0, 0, 0, $data->installment_month, 1)) }}
                                                         </td>
                                                         <td>{{ $data->installment_year }}</td>
                                                         <td>
                                                             {{-- <a href="" class="btn btn-danger btn-sm">Delete</a> --}}
-                                                            <a href="{{ route('advance.edit', ['id' => $data->id]) }}"
+
+                                                            @if ($data->has_loan_master)
+                                                            <a href="{{ route('advance.viewadvancedetails', $data->id) }}"
+                                                                class="btn btn-info btn-xs">
+                                                                <i class="fa fa-eye"></i> View
+                                                            </a>
+                                                                @else
+                                                                <a href="{{ route('advance.edit', ['id' => $data->id]) }}"
                                                                 class="btn btn-success btn-xs">View/Update</a>
+                                                            @endif
+
+                                                                <a href="{{ route('advance.close', ['id' => $data->id]) }}"
+                                                                class="btn btn-danger btn-xs">Close</a>
                                                         </td>
                                                         <td>
                                                             @if ($data->has_loan_master)

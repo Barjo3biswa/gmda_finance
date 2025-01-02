@@ -87,23 +87,51 @@ class LoanController extends Controller
         $year = $currentDate->format('y');
         $month = str_pad($currentDate->format('m'), 2, '0', STR_PAD_LEFT);
 
-        // Get the last reference number
-        $lastRefNo = LoanMaster::whereNotNull('reference_no')
-            ->where('reference_no', 'LIKE', "LN/{$year}/{$month}/%")
+        // Get the last reference number from Advance model
+        $lastAdvanceRefNo = Advance::whereNotNull('reference_no')
+            ->where('reference_no', 'LIKE', "LOAN/{$year}/{$month}/%")
             ->orderBy('id', 'desc')
             ->first();
 
-        $sequence = '0001';
+        // Get the last reference number from Loan model
+        $lastLoanRefNo = LoanMaster::whereNotNull('reference_no')
+            ->where('reference_no', 'LIKE', "LOAN/{$year}/{$month}/%")
+            ->orderBy('id', 'desc')
+            ->first();
 
-        if ($lastRefNo) {
-            $parts = explode('/', $lastRefNo->reference_no);
-            if (count($parts) == 4) {
-                $lastSequence = intval($parts[3]);
-                $sequence = str_pad($lastSequence + 1, 4, '0', STR_PAD_LEFT);
+        // Function to extract the numeric part of the reference number
+        function extractNumericPart($referenceNo)
+        {
+            if (preg_match('/\d+$/', $referenceNo, $matches)) {
+                return (int)$matches[0];  // Return the numeric part as an integer
             }
+            return 0;  // Return 0 if no numeric part is found
         }
 
-        $referenceNo = "LN/{$year}/{$month}/{$sequence}";
+        // Initialize the sequence variable
+        $sequence = '0001';
+
+        // Compare the numeric parts of both Advance and Loan reference numbers
+        if ($lastAdvanceRefNo && $lastLoanRefNo) {
+            // Extract the numeric parts
+            $advanceNum = extractNumericPart($lastAdvanceRefNo->reference_no);
+            $loanNum = extractNumericPart($lastLoanRefNo->reference_no);
+
+            // Get the largest numeric part
+            $largestSequence = max($advanceNum, $loanNum);
+            $sequence = str_pad($largestSequence + 1, 4, '0', STR_PAD_LEFT);
+        } elseif ($lastAdvanceRefNo) {
+            // If only Advance record exists
+            $advanceNum = extractNumericPart($lastAdvanceRefNo->reference_no);
+            $sequence = str_pad($advanceNum + 1, 4, '0', STR_PAD_LEFT);
+        } elseif ($lastLoanRefNo) {
+            // If only Loan record exists
+            $loanNum = extractNumericPart($lastLoanRefNo->reference_no);
+            $sequence = str_pad($loanNum + 1, 4, '0', STR_PAD_LEFT);
+        }
+
+        // Now generate the reference number
+        $referenceNo = "LOAN/{$year}/{$month}/{$sequence}";
 
         // dd($referenceNo);
 
@@ -456,23 +484,53 @@ class LoanController extends Controller
         $year = $currentDate->format('y');
         $month = str_pad($currentDate->format('m'), 2, '0', STR_PAD_LEFT);
 
-        // Get the last reference number
-        $lastRefNo = AdvanceRequest::whereNotNull('reference_no')
-            ->where('reference_no', 'LIKE', "LN/{$year}/{$month}/%")
+        // Get the last reference number from Advance model
+        $lastAdvanceRefNo = Advance::whereNotNull('reference_no')
+            ->where('reference_no', 'LIKE', "LOAN/{$year}/{$month}/%")
             ->orderBy('id', 'desc')
             ->first();
 
-        $sequence = '0001';
+        // Get the last reference number from Loan model
+        $lastLoanRefNo = LoanMaster::whereNotNull('reference_no')
+            ->where('reference_no', 'LIKE', "LOAN/{$year}/{$month}/%")
+            ->orderBy('id', 'desc')
+            ->first();
 
-        if ($lastRefNo) {
-            $parts = explode('/', $lastRefNo->reference_no);
-            if (count($parts) == 4) {
-                $lastSequence = intval($parts[3]);
-                $sequence = str_pad($lastSequence + 1, 4, '0', STR_PAD_LEFT);
+        // Function to extract the numeric part of the reference number
+        function extractNumericPart($referenceNo)
+        {
+            if (preg_match('/\d+$/', $referenceNo, $matches)) {
+                return (int)$matches[0];  // Return the numeric part as an integer
             }
+            return 0;  // Return 0 if no numeric part is found
         }
 
-        $referenceNo = "LN/{$year}/{$month}/{$sequence}";
+        // Initialize the sequence variable
+        $sequence = '0001';
+
+        // Compare the numeric parts of both Advance and Loan reference numbers
+        if ($lastAdvanceRefNo && $lastLoanRefNo) {
+            // Extract the numeric parts
+            $advanceNum = extractNumericPart($lastAdvanceRefNo->reference_no);
+            $loanNum = extractNumericPart($lastLoanRefNo->reference_no);
+
+            // Get the largest numeric part
+            $largestSequence = max($advanceNum, $loanNum);
+            $sequence = str_pad($largestSequence + 1, 4, '0', STR_PAD_LEFT);
+        } elseif ($lastAdvanceRefNo) {
+            // If only Advance record exists
+            $advanceNum = extractNumericPart($lastAdvanceRefNo->reference_no);
+            $sequence = str_pad($advanceNum + 1, 4, '0', STR_PAD_LEFT);
+        } elseif ($lastLoanRefNo) {
+            // If only Loan record exists
+            $loanNum = extractNumericPart($lastLoanRefNo->reference_no);
+            $sequence = str_pad($loanNum + 1, 4, '0', STR_PAD_LEFT);
+        }
+
+        // Now generate the reference number
+        $referenceNo = "LOAN/{$year}/{$month}/{$sequence}";
+
+        dd($referenceNo);
 
         $advance = new Advance();
         $advance->reference_no = $referenceNo;
@@ -850,7 +908,6 @@ class LoanController extends Controller
         $advance->update();
 
         $loanMasterData = [
-            'reference_no' => $request->reference_no,
             'close_advance' => $request->close_advance,
             'closed_from_month' => $request->closed_from_month,
             'closed_from_year' => $request->closed_from_year,
@@ -867,6 +924,6 @@ class LoanController extends Controller
             $loanMasterData
         );
 
-        return redirect()->route('loan.index')->with('success', 'loan updated successfully');
+        return redirect()->route('advance.index')->with('success', 'Advance updated successfully');
     }
 }

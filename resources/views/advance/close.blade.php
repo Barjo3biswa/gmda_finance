@@ -27,9 +27,10 @@
             <a href="{{route('advance.index')}}" class="btn btn-success float-right btn-xs mr-1"><i class="fa fa-arrow-left"></i> Back</a>
         </div>
         <div class="card-body">
-            <form action="{{route('advance.update',[$advance->id])}}" method="POST" enctype="multipart/form-data">
+            <form action="{{route('advance.closeAdvance',$advance->id)}}" method="POST">
                 @csrf
-                {{ method_field('PUT') }}
+                @method('PUT')
+                <input type="hidden" name="advance_id" id="advance_id" value="{{ $advance->id }}">
                 <div class="form-group row">
                     <div class=" col-md-6">
                         <label for="inputname">Employee Name</label>
@@ -67,7 +68,7 @@
                 <div class="form-group row">
                     <div class=" col-md-3">
                         <label for="loan_amount">Loan Amount</label>
-                        <input type="number" name="loan_amount" id="loan_amount" class="form-control"  value="{{$advance->principal_amount ?? 0}}" required>
+                        <input type="number" name="loan_amount" id="loan_amount" class="form-control"  value="{{$advance->principal_amount ?? 0}}" required readonly>
                     </div>
                     <!-- <div class=" col-md-3">
                         <label for="loan_interest_rate">Interest Rate</label>
@@ -75,29 +76,28 @@
                     </div> -->
                     <div class="col-md-3">
 						<label for="no_of_installment">No of installment</label>
-						<input type="number" class="form-control" id="no_of_installment" name="no_of_installment" value="{{$advance->duration}}"></input>
+						<input type="number" class="form-control" id="no_of_installment" name="no_of_installment" value="{{$advance->no_of_installment}}" disabled>
 					</div>
                     <div class="col-md-3">
 						<label for="principal_amount">Principal Amount</label>
-						<input type="number" class="form-control" id="principal_amount" name="principal_amount" step="0.01"  value="{{$advance->principal_amount ?? 0}}"></input>
+						<input type="number" class="form-control" id="principal_amount" name="principal_amount" step="0.01"  value="{{$advance->principal_amount ?? 0}}" readonly>
 					</div>
 				</div>
 
                 <div class="form-group row">
                     <div class="col-md-3">
 						<label for="monthly_emi">Installment</label>
-						<input type="number" class="form-control" id="monthly_emi" name="monthly_emi" value="{{$advance->monthly_installment ?? 0}}" ></input>
+						<input type="number" class="form-control" id="monthly_emi" name="monthly_emi" value="{{$advance->monthly_emi ?? 0}}" disabled>
 					</div>
                     <div class="col-md-3">
 						<label for="adj_emi">Adjustable Installment</label>
-						<input type="number" class="form-control" id="adj_emi" name="adj_emi" value="{{old('adj_emi') ?? $advance->adjustable_installment ?? 0}}" ></input>
+						<input type="number" class="form-control" id="adj_emi" name="adj_emi" value="{{old('adj_emi') ?? $advance->adj_emi ?? 0}}" disabled>
 					</div>
                     <div class="col-md-3">
 						<label for="adj_emi_in">Adjust in</label>
-						<select name="adj_emi_in" id="adj_emi_in" class="form-control">
-                            <option value="">Select</option>
-                            <option value="f" {{ old('adj_emi_in',$advance->adjust_in) == 'f' ? 'selected' : '' }}>First Installment</option>
-                            <option value="l" {{ old('adj_emi_in',$advance->adjust_in) == 'l' ? 'selected' : '' }}>Last Installment</option>
+						<select name="adj_emi_in" id="adj_emi_in" class="form-control" disabled>
+                            <option value="f" {{ old('adj_emi_in',$advance->adj_emi_in) == 'f' ? 'selected' : '' }}>First Installment</option>
+                            <option value="l" {{ old('adj_emi_in',$advance->adj_emi_in) == 'l' ? 'selected' : '' }}>Last Installment</option>
                         </select>
 					</div>
                     <!-- <div class="col-md-3">
@@ -137,28 +137,26 @@
 				<div class="form-group row">
 					<div class="col-md-3">
 						<label for="wef_month">W.E.F. Month</label>
-                        <select name="wef_month" id="wef_month" class="form-control">
-							<option value="">Select Month</option>
-							<option value="1" {{ old('wef_month', (string) $advance->installment_month) == '1' ? 'selected' : '' }}>January</option>
-                            <option value="2" {{ old('wef_month', (string) $advance->installment_month) == '2' ? 'selected' : '' }}>February</option>
-                            <option value="3" {{ old('wef_month', (string) $advance->installment_month) == '3' ? 'selected' : '' }}>March</option>
-                            <option value="4" {{ old('wef_month', (string) $advance->installment_month) == '4' ? 'selected' : '' }}>April</option>
-                            <option value="5" {{ old('wef_month', (string) $advance->installment_month) == '5' ? 'selected' : '' }}>May</option>
-                            <option value="6" {{ old('wef_month', (string) $advance->installment_month) == '6' ? 'selected' : '' }}>June</option>
-                            <option value="7" {{ old('wef_month', (string) $advance->installment_month) == '7' ? 'selected' : '' }}>July</option>
-                            <option value="8" {{ old('wef_month', (string) $advance->installment_month) == '8' ? 'selected' : '' }}>August</option>
-                            <option value="9" {{ old('wef_month', (string) $advance->installment_month) == '9' ? 'selected' : '' }}>September</option>
-                            <option value="10" {{ old('wef_month', (string) $advance->installment_month) == '10' ? 'selected' : '' }}>October</option>
-                            <option value="11" {{ old('wef_month', (string) $advance->installment_month) == '11' ? 'selected' : '' }}>November</option>
-                            <option value="12" {{ old('wef_month', (string) $advance->installment_month) == '12' ? 'selected' : '' }}>December</option>
+                        <select name="wef_month" id="wef_month" class="form-control" disabled>
+							<option value="1" {{ old('wef_month', (string) $advance->from_mm) == '1' ? 'selected' : '' }}>January</option>
+                            <option value="2" {{ old('wef_month', (string) $advance->from_mm) == '2' ? 'selected' : '' }}>February</option>
+                            <option value="3" {{ old('wef_month', (string) $advance->from_mm) == '3' ? 'selected' : '' }}>March</option>
+                            <option value="4" {{ old('wef_month', (string) $advance->from_mm) == '4' ? 'selected' : '' }}>April</option>
+                            <option value="5" {{ old('wef_month', (string) $advance->from_mm) == '5' ? 'selected' : '' }}>May</option>
+                            <option value="6" {{ old('wef_month', (string) $advance->from_mm) == '6' ? 'selected' : '' }}>June</option>
+                            <option value="7" {{ old('wef_month', (string) $advance->from_mm) == '7' ? 'selected' : '' }}>July</option>
+                            <option value="8" {{ old('wef_month', (string) $advance->from_mm) == '8' ? 'selected' : '' }}>August</option>
+                            <option value="9" {{ old('wef_month', (string) $advance->from_mm) == '9' ? 'selected' : '' }}>September</option>
+                            <option value="10" {{ old('wef_month', (string) $advance->from_mm) == '10' ? 'selected' : '' }}>October</option>
+                            <option value="11" {{ old('wef_month', (string) $advance->from_mm) == '11' ? 'selected' : '' }}>November</option>
+                            <option value="12" {{ old('wef_month', (string) $advance->from_mm) == '12' ? 'selected' : '' }}>December</option>
 						</select>
 					</div>
 					<div class="col-md-3">
 						<label for="wef_year">W.E.F. Year</label>
-                        <select name="wef_year" id="wef_year" class="form-control">
-							<option value="">Select Year</option>
+                        <select name="wef_year" id="wef_year" class="form-control" disabled>
 							@for ($year = 2020; $year <= 2035; $year++)
-								<option value="{{ $year }}" {{ old('wef_year', $advance->installment_year) == $year ? 'selected' : '' }}>{{ $year }}</option>
+								<option value="{{ $year }}" {{ old('wef_year', $advance->from_yyyy) == $year ? 'selected' : '' }}>{{ $year }}</option><option value="{{ $year }}" {{ old('wef_year', $advance->from_yyear) == $year ? 'selected' : '' }}>{{ $year }}</option>
 							@endfor
 						</select>
 					</div>
@@ -176,7 +174,7 @@
 				</div> -->
 
                 <div class="form-group row">
-                    {{-- <div class="col-md-3">
+                    <div class="col-md-3">
                         <label for="close_advance">Close Advance</label>
                         <select class="form-control" id="close_advance" placeholder="close advance" name="close_advance" value="{{$advance->close_advance}}">
                             <option value="">--SELECT--</option>
@@ -237,11 +235,10 @@
 								<option value="{{ $year }}" {{ old('closed_to_year') == $year ? 'selected' : '' }}>{{ $year }}</option>
 							@endfor
 						</select>
-                    </div> --}}
-
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-sm">Update & Confirm</button>
+                <button type="submit" class="btn btn-primary btn-sm">Close Advance</button>
 
             </form>
         </div>
@@ -283,81 +280,5 @@
     $('#closing_date').Zebra_DatePicker({
         format: 'Y/m/d',
     });
-</script>
-<script>
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     const amountInput = document.getElementById('principal_amount');
-    //     const durationInput = document.getElementById('duration');
-    //     const installmentInput = document.getElementById('monthly_installment');
-    //     const adjustableInstallmentInput = document.getElementById('adjustable_installment');
-    //     const adjustInSelect = document.getElementById('adjust_in');
-
-    //     function calculateInstallment() {
-    //         const amount = parseFloat(amountInput.value) || 0;
-    //         const duration = parseInt(durationInput.value) || 1;
-            
-    //         // Calculate base installment and round up to nearest integer
-    //         let installment = Math.ceil(amount / duration);
-            
-    //         // Calculate total after rounding up
-    //         const totalAfterRounding = installment * duration;
-            
-    //         // Calculate adjustment needed
-    //         const adjustment = totalAfterRounding - amount;
-            
-    //         // Set the adjustable installment (the difference for first/last month)
-    //         if (adjustment > 0) {
-    //             const adjustedInstallment = installment - adjustment;
-    //             //adjustableInstallmentInput.value = adjustedInstallment.toFixed(2);
-    //         } else {
-    //             //adjustableInstallmentInput.value = installment.toFixed(2);
-    //         }
-            
-    //         installmentInput.value = installment.toFixed(2);
-    //     }
-
-    //     amountInput.addEventListener('input', calculateInstallment);
-    //     durationInput.addEventListener('input', calculateInstallment);
-    //     //adjustInSelect.addEventListener('change', calculateInstallment);
-    // });
-</script>
-
-<script>
-
-document.addEventListener('DOMContentLoaded', function() {
-    const amountInput = document.getElementById('loan_amount');
-    const durationInput = document.getElementById('no_of_installment');
-    const installmentInput = document.getElementById('monthly_emi');
-    const adjustableInstallmentInput = document.getElementById('adj_emi');
-    const adjustInSelect = document.getElementById('adjust_in');
-
-    function calculateInstallment() {
-        const amount = parseFloat(amountInput.value) || 0;
-        const duration = parseInt(durationInput.value) || 1;
-
-        // Calculate base installment and round up to nearest integer
-        let installment = Math.ceil(amount / duration);
-
-        // Calculate total after rounding up
-        const totalAfterRounding = installment * duration;
-
-        // Calculate adjustment needed
-        const adjustment = totalAfterRounding - amount;
-
-        // Set the adjustable installment (the difference for first/last month)
-        if (adjustment > 0) {
-            const adjustedInstallment = installment - adjustment;
-            adjustableInstallmentInput.value = adjustedInstallment.toFixed(2);
-        } else {
-            adjustableInstallmentInput.value = installment.toFixed(2);
-        }
-
-        installmentInput.value = installment.toFixed(2);
-    }
-
-    amountInput.addEventListener('input', calculateInstallment);
-    durationInput.addEventListener('input', calculateInstallment);
-    //adjustInSelect.addEventListener('change', calculateInstallment);
-});
 </script>
 @endsection
