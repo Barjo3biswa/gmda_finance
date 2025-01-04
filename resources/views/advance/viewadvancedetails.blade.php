@@ -55,7 +55,7 @@
                     <th>Adjustable Installment In</th>
                     <td>{{ $loanMaster->adj_emi_in == 'f' ? 'First Installment' : 'Last Installment' }}</td>
                 </tr>
-                <!-- <tr>
+                {{-- <tr>
                     <th>Interest Amount</th>
                     <td>{{ number_format($loanMaster->interest_amount, 2) }}</td>
                 </tr>
@@ -67,13 +67,17 @@
                     <th>Interest Installment</th>
                     <td>{{ number_format($loanMaster->interest_installment, 2) }}</td>
                 </tr>
-                <tr>
+                 <tr>
                     <th>Adujstable Interest Installment</th>
                     <td>{{ number_format($loanMaster->adj_interest_emi, 2) }}</td>
-                </tr> -->
+                </tr> --}}
                 <tr>
                     <th>Installment Month</th>
-                    <td>{{ number_format($loanMaster->adj_interest_emi, 2) }}</td>
+                    <td>{{ date('F', mktime(0, 0, 0, $loanMaster->from_mm, 1)) }}</td>
+                </tr>
+                <tr>
+                    <th>Installment Year</th>
+                    <td>{{ $loanMaster->from_yyyy }}</td>
                 </tr>
                 <tr>
                     <th>Status</th>

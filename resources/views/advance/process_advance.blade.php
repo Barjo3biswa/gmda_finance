@@ -20,15 +20,15 @@
                     </div>
                     <div class="product-payment-inner-st">
                         <div id="myTabContent" class="tab-content custom-product-edit">
-                            <div class="card">
+                             <div class="card">
                                 <div class="card-header">
-                                    <i class="fa fa-filter"></i> Filter
+                                    <!-- <i class="fa fa-filter"></i> Filter -->
                                     <a class="btn btn-sm btn-outline-primary float-right mr-1"
                                         href="{{ route('advance.processed_data_list') }}">
-                                        <i class="fa fa-list"></i> View processed Advance data
+                                        <i class="fa fa-list"></i> View processed data
                                     </a>
                                 </div>
-                                <div class="card-body">
+                                {{--  <div class="card-body">
                                     <form method="get" action="">
                                         <div class="row">
                                             <div class="col-md-2">
@@ -62,11 +62,11 @@
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="name">Employee</label>
-                                                    <select name="employee_id" id="categories" class="form-control select2">
+                                                    <select name="employee_id" id="categories" class="form-control js-example-basic-multiple">
                                                         <option value="">--All--</option>
                                                         @foreach ($emp as $employee)
                                                             <option value="{{ $employee->id }}">
-                                                                {{ $employee->full_name_with_code }}</option>
+                                                                {{ $employee->first_name }} {{ $employee->last_name }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -136,25 +136,20 @@
                                         <button type="submit" class='btn btn-primary text-white btn-sm'>Search </button>
 
                                     </form>
-                                </div>
-                            </div>
+                                </div> --}}
+                            </div> 
                             <div class="card">
-                                <div class="card-header">
+                                <!-- <div class="card-header">
                                     <i class="fa fa-list-alt"></i> ADVANCE RECORDS
-                                </div>
+                                </div> -->
                                 <div class="card-body">
 
-                                    @if ($message = Session::get('success'))
-                                        <div class="alert alert-success">
-                                            <p>{{ $message }}</p>
-                                        </div>
-                                    @endif
                                     @if (!$salarystatus)
                                         <div class="alert alert-warning">
-                                            <p>No active salary block found. Please create or activate a salary block first.
-                                            </p>
+                                            <p>No active salary block found. Please create or activate a salary block first.</p>
                                         </div>
                                     @else
+                                    <b>Month:</b> {{ date('F', mktime(0, 0, 0, $salarystatus->month, 1)) }} <b>Year:</b> {{ $salarystatus->year }}
                                         <form action="{{ route('advance.process_advance_data') }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="salary_block_id" value="{{ $salarystatus->id }}">
@@ -179,12 +174,11 @@
                                                         <tr>
                                                             <td>
                                                                 @if ($advance->advancesprocessdata)
-                                                                    @if ($salarystatus->isAdvanceProcessed())
+                                                                    {{-- @if ($salarystatus->isAdvanceProcessed()) --}}
                                                                         <strong class="text-danger">Processed</strong>
-                                                                    @else
-                                                                        <strong class="text-info">Added for
-                                                                            processing</strong>
-                                                                    @endif
+                                                                    {{-- @else
+                                                                        <strong class="text-info">Added for processing</strong>
+                                                                    @endif --}}
                                                                 @else
                                                                     <input name="datas[{{ $key }}][advance_id]"
                                                                         type="checkbox" value="{{ $advance->id }}"
@@ -192,8 +186,7 @@
                                                                         id="checkbox-{{ $advance->id }}" />
                                                                     <input name="allrows[{{ $key }}][advance_id]"
                                                                         type="checkbox" value="{{ $advance->id }}"
-                                                                        id="allcheck-{{ $advance->id }}" checked
-                                                                        hidden />
+                                                                        id="allcheck-{{ $advance->id }}" checked hidden />
                                                                 @endif
                                                             </td>
                                                             <td>{{ $key + 1 }}</td>
@@ -211,7 +204,7 @@
                                                                 <input type="number" class="form-control"
                                                                     name="datas[{{ $key }}][monthly_premium]"
                                                                     value={{ $advance->principal_installment }}
-                                                                    disabled="disabled">
+                                                                    readonly >
                                                             </td>
                                                         </tr>
                                                     @empty
@@ -226,7 +219,7 @@
                                                     <th colspan="6" class="text-right">Total</th>
                                                     <th class="text-right">
                                                         @php
-                                                            //echo number_format((float)$advance->sum("principal_installment"), 2);
+                                                            echo number_format((float)$advance->sum("principal_installment"), 2);
                                                         @endphp
                                                     </th>
                                                     <th colspan="2"></th>
@@ -236,8 +229,7 @@
                                         {{ $advances->links() }}
                                         <input type="submit" class="btn btn-primary btn-sm"
                                             value="Submit for Processing" id="process">
-                                        <a class="btn btn-outline-primary btn-sm"
-                                            href="{{ route('advance.processed_data_list') }}">
+                                        <a class="btn btn-outline-primary btn-sm" href="{{ route('advance.processed_data_list') }}" target="_blank">
                                             <i class="fa fa-list"></i> View processed Advance data
                                         </a>
                                     </form>
@@ -259,34 +251,33 @@
 @endsection
 @section('js')
 <script>
-    disableProcessButton = function() {
-        if ($('#employee_table input:checkbox:checked').not("#checkAll").length > 0) {
+    disableProcessButton = function(){
+        if($('#employee_table input:checkbox:checked').not("#checkAll").length > 0){
             $('#process').prop('disabled', false);
-        } else {
+        }else{
             $('#process').prop('disabled', true);
         }
     }
     disableProcessButton();
-    $(document).ready(function() {
-        $("#checkAll").click(function() {
+    $(document).ready(function(){
+        $("#checkAll").click(function(){
             $('#employee_table input:checkbox').not(this).prop('checked', this.checked);
             disableProcessButton();
         });
-        $("#process").click(function() {
-            if ($("#employee_table input:checkbox:checked").length == 0) {
+        $("#process").click(function(){
+            if($("#employee_table input:checkbox:checked").length == 0){
                 alert('Please select at least one policy');
                 return false;
             }
         });
         // toggle selectAll checkbox
-        $('#employee_table input:checkbox').click(function() {
-            if ($('#employee_table input:checkbox:checked').length == $(
-                    '#employee_table input:checkbox').length) {
+        $('#employee_table input:checkbox').click(function(){
+            if($('#employee_table input:checkbox:checked').length == $('#employee_table input:checkbox').length){
                 $('#checkAll').prop('checked', true);
-                //enable all input number of the table
+               //enable all input number of the table
                 $('.enableme').prop('disabled', false);
 
-            } else {
+            }else{
                 $('#checkAll').prop('checked', false);
                 // $('.enableme').prop('disabled', true);
 
@@ -295,22 +286,23 @@
         });
     });
 
-    //     $("#checkall").click(function (){
-    //     if ($("#checkall").is(':checked')){
-    //        $(".checkboxes").each(function (){
-    //           $(this).prop("checked", true);
-    //           });
-    //        }else{
-    //           $(".checkboxes").each(function (){
-    //                $(this).prop("checked", false);
-    //           });
-    //        }
-    // });
+//     $("#checkall").click(function (){
+//     if ($("#checkall").is(':checked')){
+//        $(".checkboxes").each(function (){
+//           $(this).prop("checked", true);
+//           });
+//        }else{
+//           $(".checkboxes").each(function (){
+//                $(this).prop("checked", false);
+//           });
+//        }
+// });
 
     function chkBox(obj) {
         console.log(obj);
         $(obj).parents("tr").find("input[type='number']").prop('disabled', !$(obj).is(":checked"));
         $(obj).parents("tr").find("input[type='hidden']").prop('disabled', !$(obj).is(":checked"));
     }
+
 </script>
 @endsection

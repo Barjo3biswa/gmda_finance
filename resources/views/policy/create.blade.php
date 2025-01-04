@@ -50,7 +50,7 @@
                      <label for="">Employee Code</label>
                     <select class="form-control" id="employee_code" name="employee_code">
                         @foreach ($employees as $key => $employee)
-                        <option value=" {{$employee->code}}" id="employee_id">{{$employee->code}}</option>
+                        	<option value=" {{$employee->code}}" id="employee_id">{{$employee->code}}</option>
                         @endforeach
                     </select>
                 </div> --}}

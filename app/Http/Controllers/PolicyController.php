@@ -11,6 +11,7 @@ use App\Models\salaryHead;
 use App\Models\LicProcessData;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 
 use Illuminate\Http\Request;
 
@@ -26,7 +27,7 @@ class PolicyController extends Controller
             ->filter()
             ->latest()
             ->paginate(10);
-        $emp = Employee::get();  //active()->get();
+        $emp = Employee::orderBy('first_name', 'ASC')->get();  //active()->get();
         $departments = Department::select('id', 'name')->get();
         // $employees = Employee::select('*')->active()->get();
         $designations = AuthDesignation::get();
@@ -41,7 +42,7 @@ class PolicyController extends Controller
     {
         $policies = Policy::orderBy('id', 'desc')
             ->paginate(10);
-        $employees = Employee::select('*')
+        $employees = Employee::orderBy('first_name', 'ASC') // select('*')
             ->get();
         $designations = AuthDesignation::get();
         return view('policy.create', compact('policies', 'employees', 'designations'));
@@ -79,7 +80,8 @@ class PolicyController extends Controller
         $salary_block = salaryBlock::where('sal_process_status', "Unblock")->where('is_finalized', 0)->first();
 
         // $closing_date  = $request->closing_date;
-        $closing_year = substr(date('Y', strtotime($closing_date)), 2, 4);
+        // $closing_year = substr(date('Y', strtotime($closing_date)), 2, 4);
+        $closing_year = date('Y', strtotime($closing_date));
         $closing_month = date("n", strtotime($closing_date));
         $cls = sprintf("%02d", $closing_month);
         $clsyymm = $closing_year . $cls;
@@ -161,7 +163,7 @@ class PolicyController extends Controller
         }
         DB::commit();
         $request->session()->flash('success', 'Successfully added');
-        return back();
+        return Redirect::route('policy.index');
     }
 
     /**
@@ -190,7 +192,49 @@ class PolicyController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // $closing_year = substr(date('Y', strtotime($request->closing_date)), 2, 4);
+        $closing_year = date('Y', strtotime($request->closing_date));
+        // dd($closing_year);
+        $closing_month = date("n", strtotime($request->closing_date));
+        $cls = sprintf("%02d", $closing_month);
+        $clsyymm = $closing_year . $cls;
+        //Wef date
+        $wef_year = substr($request->wef_year, 2, 4);
+        $wef_month = $request->wef_month;
+        $wefyymm = $wef_year . $wef_month;
 
+        // Validate the incoming request
+        $validatedData = [
+            'policy_no' => $request->policy_no,
+            'policy_name' => $request->policy_name,
+            'dependent_name' => $request->dependent_name,
+            'amount' => $request->monthly_premium,
+            'monthly_premium' => $request->monthly_premium,
+            'wef_month' => $request->wef_month,
+            'wef_year' => $request->wef_year,
+            'wef_yy_mm' => $wefyymm,
+            'start_date'      => $request->start_date,
+            'maturity_date' => $request->maturity_date,
+            'closing_date'    => $request->closing_date,
+            'closing_year' => $closing_year,
+            'cls_yy_mm' => $clsyymm,
+            'closing_month' => $closing_month,
+        ];
+
+        try {
+            // Find the policy
+            $policy = Policy::findOrFail($id);
+
+            // Update the policy with validated data
+            $policy->update($validatedData);
+
+            // Redirect with success message
+            return redirect()->route('policy.index')
+                ->with('success', 'Policy updated successfully.');
+        } catch (\Exception $e) {
+            // Handle any errors
+            return back()->with('error', 'Failed to update policy: ' . $e->getMessage());
+        }
     }
 
     public function update_policy()
@@ -248,14 +292,23 @@ class PolicyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(LicProcessData $model)
+    public function destroy($id)
     {
-        if (!$model->isProcessingAllowed()) {
+        $policy = Policy::find($id);
+        if (!$policy) {
+            return redirect()
+                ->back()
+                ->with("error", "Record not found.");
+        }
+
+        if (!$policy->isProcessingAllowed()) {
             return redirect()
                 ->back()
                 ->with("error", "This record is already processed. Unable to delete.");
         }
-        $model->update([
+        
+        $policy = Policy::find($id);
+        $policy->update([
             "status" => 0,
         ]);
         return redirect()

@@ -62,4 +62,9 @@ class Policy extends Model
         return $this->hasOne(LicProcessData::class, 'policy_id', 'id')->where("status", 1);
     }
 
+    public function isProcessingAllowed()
+    {
+        return $this->process_allowed;
+    }
+
 }

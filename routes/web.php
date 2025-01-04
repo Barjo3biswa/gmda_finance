@@ -87,13 +87,16 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::post('advance/process-advance-data', [AdvanceController::class, 'process_advance_data'])->name('advance.process_advance_data');
     Route::get('advance/processed-data-list', [AdvanceController::class, 'processed_data_list'])->name('advance.processed_data_list');
     Route::post('advance/process-data-list', [AdvanceController::class, 'process_advance_data_post'])->name('advance.process_advance_data_post');
-    Route::get('advance/processed-data-list/{id}', [AdvanceController::class, 'processed_data_list_delete'])->name('advance.processed_data_list_delete');
+    Route::get('advance/processed-data-list/{id}', [AdvanceController::class, 'deleteProcessedData'])->name('advance.processed_data_list_delete');
 
     Route::get('advance/existing', [AdvanceController::class, 'createExisting'])->name('advance.existing');
     Route::post('advance/store-existing', [AdvanceController::class, 'storeExisting'])->name('advance.store-existing');
 
     Route::get('advance/view-advances-list', [AdvanceController::class, 'ViewAdvances'])->name('advance.viewadvances');
     Route::get('advance/view-advance-details/{id}', [AdvanceController::class, 'ViewAdvanceDetails'])->name('advance.viewadvancedetails');
+
+    Route::get('advance/close/{id}', [AdvanceController::class, 'close'])->name('advance.close');
+    Route::put('advance/{id}/close', [AdvanceController::class, 'closeAdvance'])->name('advance.closeAdvance');
 
     //loan
     Route::get('loan', [LoanController::class, 'index'])->name('loan.index');
@@ -129,6 +132,10 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::get('policy/processed-policy-list/{id}', [PolicyController::class, 'processed_policy_list_delete'])->name('policy.processed_policy_list_delete');
 
     Route::post('policy/process-policy-search', [PolicyController::class, 'process_policy_search'])->name('policy.search');
+
+    Route::get('policy/delete/{id}', [PolicyController::class, 'destroy'])->name('policy.delete');
+
+    Route::put('policy/{id}/update', [PolicyController::class, 'update'])->name('policy.update');
 
 
     Route::post('/set-default', [App\Http\Controllers\defaultOptionController::class, 'setDefault'])->name('set-default');

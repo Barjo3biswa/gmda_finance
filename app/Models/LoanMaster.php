@@ -99,7 +99,7 @@ class LoanMaster extends Model
 
     public function advanceType()
     {
-        return $this->belongsTo(AdvanceType::class, 'loan_type_id');
+        return $this->belongsTo(AdvanceType::class, 'loan_type_id', 'id');
     }
 
     public function employee()

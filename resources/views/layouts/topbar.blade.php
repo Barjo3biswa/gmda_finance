@@ -60,7 +60,7 @@
                 <div role="menu" class="dropdown-menu animated zoomIn">
                     <a href="{{ route('advance.index') }}" class="dropdown-item">Approved Advances</a>
                     <!-- <a href="{{ route('advance.existing') }}" class="dropdown-item">Create Advance(Existing)</a> -->
-                    <a href="{{ route('advance.viewadvances') }}" class="dropdown-item">View Advances</a>
+                    <a href="{{ route('advance.viewadvances') }}" class="dropdown-item">Advances</a>
                     <a href="{{ route('advance.processadvance') }}" class="dropdown-item">Process Advance</a>
                     <a href="{{ route('advance.processed_data_list') }}" class="dropdown-item">Process List</a>
                 </div>

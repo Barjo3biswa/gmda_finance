@@ -89,7 +89,7 @@
                         <th>SL.</th>
                         <th>Emp. Code</th>
                         <th>Emp Name</th>
-                        <th>Ref. No</th>
+                        <!-- <th>Ref. No</th> -->
                         <th>Advance Type</th>
                         <th class="text-right">Installment Amt.</th>
                         <th>Month</th>
@@ -102,8 +102,8 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $row->employee->code ?? 'N/A' }}</td>
-                            <td>{{ $row->employee->first_name ?? 'N/A' }}</td>
-                            <td>{{ $row->reference_no ?? 'N/A' }}</td>
+                            <td>{{ $row->employee->first_name ?? 'N/A' }} {{ $row->employee->last_name ?? 'N/A' }}</td>
+                            <!-- <td>{{ $row->reference_no ?? 'N/A' }}</td> -->
                             <td>{{ $row->advanceType->type_name ?? "NA" }}</td>
                             <td class="text-right">{{ $row->amount ?? 'N/A' }}</td>
                             <td>{{ \App\Helpers\CommonHelper::getMonthName($row->month) ?? 'N/A' }}</td>
