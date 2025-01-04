@@ -37,6 +37,7 @@ ul.tab-review-design li.active a {
 
 .all-content-wrapper {
   position: relative;
+  min-height: 100vh;
 }
 
 .footer-copyright-area {
