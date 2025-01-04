@@ -44,9 +44,10 @@ ul.tab-review-design li.active a {
   /* position: fixed;
   bottom: 0; */
   position: absolute;
-  bottom: 0;
+  /* bottom: 0; */
   width: 100%;
   padding: 4px 0px !important;
+  margin-top: 20px;
 }
 
 .mb-5 {
