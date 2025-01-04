@@ -72,7 +72,7 @@
                 <div role="menu" class="dropdown-menu animated zoomIn">
                     <a href="{{ route('loan.index') }}" class="dropdown-item">View Loans</a>
                     <a href="{{ route('loan.create') }}" class="dropdown-item">Create New Loan</a>
-                    <a href="{{ route('loan.existing') }}" class="dropdown-item">Create Loan(Existing)</a>
+                    <!-- <a href="{{ route('loan.existing') }}" class="dropdown-item">Create Loan(Existing)</a> -->
                     <!-- <a href="{{-- route('loan.viewloan') --}}" class="dropdown-item">View Loan</a> -->
                     <a href="{{ route('loan.processloan') }}" class="dropdown-item">Process Loan</a>
                     <a href="{{ route('loan.processed_loan_list') }}" class="dropdown-item">Processed List</a>
