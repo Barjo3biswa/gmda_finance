@@ -24,35 +24,49 @@ class LoanController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $emp = Employee::select('*')->get();
+        // Fetch employees, departments, and designations
+        $emp = Employee::select('*')->orderBy('first_name', 'asc')->get();
         $departments = Department::select('id', 'name')->get();
         $designations = AuthDesignation::get();
 
+        // Initialize the base query for advances
         $query = Advance::with('employee', 'advanceType')
             ->whereHas('advanceType', function($q) {
-                $q->where('type', 'loan');
+                $q->where('type', 'loan'); // Filter by loan type
             })
             ->orderBy('created_at', 'desc');
 
+        // Apply filtering for advance type if selected
+        if ($request->has('advance_type_id') && $request->advance_type_id != '') {
+            $query->where('advance_id', $request->advance_type_id);
+        }
+
+        // Apply filtering for department if selected
+        if ($request->has('department_id') && $request->department_id != '') {
+            $query->whereHas('employee', function($q) use ($request) {
+                $q->where('department_id', $request->department_id);
+            });
+        }
+
+        // Apply filtering for employee if selected
+        if ($request->has('employee_id') && $request->employee_id != '') {
+            $query->where('user_id', $request->employee_id);
+        }
+
+        // Fetch filtered advance requests
         $advanceRequests = $query->get()->map(function ($advance) {
             // Check if the advance has a reference number in LoanMaster
             $advance->has_loan_master = LoanMaster::where('reference_no', $advance->reference_no)->exists();
             return $advance;
         });
-        $query = Advance::with('employee', 'advanceType');
-        $advanceRequests = $query->orderBy('created_at', 'desc')->where("interest_amount", ">", 0)
-            ->paginate(10);
-        //dd($advanceRequests);
-        $advanceTypes = AdvanceType::where('type', 'loan')->get();
-        //dd($advanceTypes);
-        // ->whereNotNull('type_name')
-        // ->where('deleted_at', null)
-        // ->pluck("type_name", "id")
-        // ->toArray();
 
-        if (empty($advanceTypes)) {
+        // Fetch available advance types
+        $advanceTypes = DB::table('advance_types')
+            ->where('type', 'loan')
+            ->get();
+        if ($advanceTypes->isEmpty()) {
             $advanceTypes = [];
         }
 
@@ -271,8 +285,9 @@ class LoanController extends Controller
     public function edit(string $id)
     {
         // Fetch the loan data
-        $loan = LoanMaster::where('advances_id', $id)->first(); // findOrFail($id);
-        //dd($loan);
+        //$loan = LoanMaster::where('advances_id', $id)->first(); // findOrFail($id);
+        $loan = Advance::where('id', $id)->first();
+        // dd($loan);
         // Fetch related data (e.g., employees, loan types, salary heads)
         $employees = Employee::all();
         $advanceTypes = DB::table('advance_types')
@@ -326,6 +341,7 @@ class LoanController extends Controller
         //dd($emp_code, $emp_dept, $emp_desig);
 
         $loanMasterData = [
+            'advances_id' => $request->advances_id,
             'reference_no' => $request->reference_no,
             'user_id' => $request->employee_id,
             'emp_code' => $emp_code ?? null,
@@ -370,7 +386,7 @@ class LoanController extends Controller
 
         //dd($loanMasterData);
         LoanMaster::updateOrCreate(
-            ['id' => $request->loan_id],
+            ['advances_id' => $request->advances_id],
             $loanMasterData
         );
 
@@ -644,7 +660,9 @@ class LoanController extends Controller
                     return $query->where("year", optional($salarystatus)->year)
                         ->where("month", optional($salarystatus)->month);
                 }
-            ], 'employee', 'advanceType', 'salhead')->where("interest_amount", ">", 0)
+            ], 'employee', 'advanceType', 'salhead')->whereHas('advanceType', function($q) {
+                $q->where('type', 'loan');
+            })
             ->orderBy('user_id', 'desc')
             ->paginate(100);
 
@@ -652,7 +670,7 @@ class LoanController extends Controller
         $advances = $query->orderBy('created_at', 'desc')->paginate(10);*/
 
         $advanceTypes = AdvanceType::all();
-        //dd($advances);
+        dd($advances);
 
         return view('loan.process', compact('salarystatus', 'emp', 'departments', 'advances', "advanceTypes"));
     }

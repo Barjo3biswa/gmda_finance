@@ -28,37 +28,51 @@ use Illuminate\Support\Facades\Auth;
 
 class AdvanceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        // Get Employees, Departments, and Designations
         $emp = Employee::select('*')->orderBy('first_name', 'asc')->get();
         $departments = Department::select('id', 'name')->get();
         $designations = AuthDesignation::get();
-
+    
+        // Start the Advance query
         $query = Advance::with('employee', 'advanceType')
             ->whereHas('advanceType', function($q) {
                 $q->where('type', 'advance');
             })
             ->orderBy('created_at', 'desc');
-
+    
+        // Apply filter for advance type if provided
+        if ($request->has('advance_type_id') && $request->advance_type_id != '') {
+            $query->where('advance_id', $request->advance_type_id);
+        }
+    
+        // Apply filter for department if provided
+        if ($request->has('department_id') && $request->department_id != '') {
+            $query->whereHas('employee', function($q) use ($request) {
+                $q->where('department_id', $request->department_id);
+            });
+        }
+    
+        // Apply filter for employee if provided
+        if ($request->has('employee_id') && $request->employee_id != '') {
+            $query->where('user_id', $request->employee_id);
+        }
+    
+        // Fetch the filtered advance requests
         $advanceRequests = $query->get()->map(function ($advance) {
             // Check if the advance has a reference number in LoanMaster
             $advance->has_loan_master = LoanMaster::where('advances_id', $advance->id)->exists();
             return $advance;
         });
-
-        //->paginate(10);
-        //dd($advanceRequests);
+    
+        // Get all advance types
         $advanceTypes = AdvanceType::all();
-        //dd($advanceTypes);
-        // ->whereNotNull('type_name')
-        // ->where('deleted_at', null)
-        // ->pluck("type_name", "id")
-        // ->toArray();
-
         if (empty($advanceTypes)) {
             $advanceTypes = [];
         }
-
+    
+        // Return the filtered results to the view
         return view("advance.index", compact('emp', 'departments', 'designations', 'advanceRequests', 'advanceTypes'));
     }
 
@@ -506,6 +520,7 @@ class AdvanceController extends Controller
                     // ->update(array('recovered_amount', DB::raw('recovered_amount + $advance->monthly_installment')));
 
                     $query_data = [
+                        'loan_id' => $advance->id,
                         'employee_id' => $advance->user_id,
                         'emp_code' => $advance->emp_code,
                         'reference_no' => $advance->reference_no,
@@ -583,9 +598,7 @@ class AdvanceController extends Controller
                 $q->where('type', 'advance');
             });
 
-        if (request("export") == "excel") {
-            return $this->exportToExcel($processed_data_query, request("month"), request("year"));
-        }
+        
         $processed_data = $processed_data_query->orderBy('employee_id')->active()->get();
         // dd($processed_data);
         $advance_types = AdvanceType::query()
@@ -596,7 +609,7 @@ class AdvanceController extends Controller
         return view('advance.processed_data_list', compact('processed_data', 'departments', "employees", "salary_block", "advance_types"));
     }
 
-    public function deleteProcessedData(AdvancesProcess $id)
+    public function deleteProcessedData(AdvanceProcess $id)
     {
         if (!$id->isProcessingAllowed()) {
             return redirect()

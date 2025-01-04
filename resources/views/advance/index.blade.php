@@ -20,8 +20,7 @@
                     </div>
                     <div class="product-payment-inner-st">
                         <div id="myTabContent" class="tab-content custom-product-edit">
-                            {{-- <div class="container"
-                                style="margin-bottom: 100px; margin-top: 50px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);"> --}}
+                            
                             <div class="card mb-3">
                                 <div class="card-header">
                                     <i class="fa fa-filter"></i> Filter
@@ -30,13 +29,12 @@
                                     </a>
                                 </div>
                                 <div class="card-body">
-                                    <form method="get" action="">
+                                    <form method="GET" action="{{ route('advance.index') }}">
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="name">Type</label>
-                                                    <select name="advance_type_id" id="advance_type_id" class="form-control"
-                                                        required>
+                                                    <select name="advance_type_id" id="advance_type_id" class="form-control" required>
                                                         <option value="">--All--</option>
                                                         @foreach ($advanceTypes as $advanceType)
                                                             <option value="{{ $advanceType->id }}"
@@ -49,10 +47,9 @@
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="name">Department</label>
-                                                    <select name="department_id" id="department"
-                                                        class="form-control select2">
+                                                    <select name="department_id" id="department_id" class="form-control">
                                                         <option value="">--All--</option>
-                                                        @foreach ($departments as $key => $department)
+                                                        @foreach ($departments as $department)
                                                             <option value="{{ $department->id }}"
                                                                 {{ request('department') == $department->id ? 'selected' : '' }}>
                                                                 {{ $department->name }}</option>
@@ -63,7 +60,7 @@
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="name">Employee</label>
-                                                    <select name="employee_id" id="categories" class="form-control js-example-basic-multiple">
+                                                    <select name="employee_id" id="employee_id" class="form-control js-example-basic-multiple">
                                                         <option value="">--All--</option>
                                                         @foreach ($emp as $employee)
                                                             <option value="{{ $employee->id }}"
@@ -87,8 +84,7 @@
                             <div class="card mt-2">
                                 <div class="card-header">
                                     <!-- <a class="btn btn-success btn btn-xs float-right mr-1" href="{{ route('advance.create') }}"><i class="fa fa-plus"></i> New Advance</a> | -->
-                                    <a class="btn btn-success btn btn-xs float-right mr-1"
-                                        href="{{ route('advance.existing') }}"><i class="fa fa-plus"></i> Existing Advance</a>
+                                    
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -107,6 +103,9 @@
                                             </tbody>
                                             <tbody>
                                                 @foreach ($advanceRequests as $key => $data)
+                                                @if ($data->has_loan_master)
+                                                    @continue
+                                                @endif
                                                     <tr>
                                                         <td>{{ $key + 1 }}</td>
                                                         <td>{{ $data->employee->first_name }}({{ $data->employee->code }})
@@ -130,8 +129,7 @@
                                                                 class="btn btn-success btn-xs">View/Update</a>
                                                             @endif
 
-                                                                <a href="{{ route('advance.close', ['id' => $data->id]) }}"
-                                                                class="btn btn-danger btn-xs">Close</a>
+                                                                
                                                         </td>
                                                         <td>
                                                             @if ($data->has_loan_master)

@@ -87,7 +87,7 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::post('advance/process-advance-data', [AdvanceController::class, 'process_advance_data'])->name('advance.process_advance_data');
     Route::get('advance/processed-data-list', [AdvanceController::class, 'processed_data_list'])->name('advance.processed_data_list');
     Route::post('advance/process-data-list', [AdvanceController::class, 'process_advance_data_post'])->name('advance.process_advance_data_post');
-    Route::get('advance/processed-data-list/{id}', [AdvanceController::class, 'processed_data_list_delete'])->name('advance.processed_data_list_delete');
+    Route::get('advance/processed-data-list/{id}', [AdvanceController::class, 'deleteProcessedData'])->name('advance.processed_data_list_delete');
 
     Route::get('advance/existing', [AdvanceController::class, 'createExisting'])->name('advance.existing');
     Route::post('advance/store-existing', [AdvanceController::class, 'storeExisting'])->name('advance.store-existing');

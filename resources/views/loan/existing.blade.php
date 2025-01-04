@@ -67,8 +67,8 @@
                                                                 <select name="sal_block_id" id="sal_block_id" class="form-control" required>
                                                                     <option value="">--SELECT--</option>
                                                                     @foreach ($salaryheads as $salaryhead)
-    <option value="{{ $salaryhead->id }}" {{ old('sal_block_id') == $salaryhead->id ? 'selected' : '' }}>{{ $salaryhead->name }}</option>
-    @endforeach
+                                                                    <option value="{{ $salaryhead->id }}" {{ old('sal_block_id') == $salaryhead->id ? 'selected' : '' }}>{{ $salaryhead->name }}</option>
+                                                                    @endforeach
                                                                 </select>
                                                             </div> --}}
 
@@ -110,7 +110,7 @@
 
                                         <div class="form-group row">
                                             <div class="col-md-3">
-                                                <label for="monthly_emi">Installment</label>
+                                                <label for="monthly_emi">Monthly Installment</label>
                                                 <input type="number" class="form-control" id="monthly_emi"
                                                     name="monthly_emi" value="0"></input>
                                             </div>
@@ -238,50 +238,56 @@
 @endsection
 @section('js')
     <script>
-        document.getElementById("loan_amount").addEventListener("change", calculatePrincipalAmount);
-        document.getElementById("loan_interest_rate").addEventListener("change", calculatePrincipalAmount);
-        document.getElementById("no_of_installment").addEventListener("change", calculatePrincipalAmount);
-        document.getElementById("no_of_installment_interest").addEventListener("change", calculatePrincipalAmount);
+        function calculateLoanDetails() {
+            var loanAmount = parseFloat(document.getElementById('loan_amount').value) || 0;
+            var interestRate = parseFloat(document.getElementById('loan_interest_rate').value) || 0;
+            var numberOfInstallments = parseInt(document.getElementById('no_of_installment').value) || 0;
+            var noOfInstallmentsInterest = parseInt(document.getElementById('no_of_installment_interest').value) || 0;
 
-        function calculatePrincipalAmount() {
-            // Get values from the form
-            const loanAmount = parseFloat(document.getElementById("loan_amount").value);
-            const interestRate = parseFloat(document.getElementById("loan_interest_rate").value);
-            const duration = parseInt(document.getElementById("no_of_installment").value);
-            //alert("loanAmount: " + loanAmount + ", interestRate: " + interestRate + ", duration: " + duration);
+            var monthlyRate = (interestRate / 100) / 12;
 
-            if (isNaN(loanAmount) || isNaN(interestRate) || isNaN(duration) || loanAmount <= 0 || interestRate < 0 ||
-                duration <= 0) {
-                document.getElementById("principal_amount").value = 0;
-                return;
+            if (numberOfInstallments > 0 && loanAmount > 0 && monthlyRate > 0) {
+                var emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfInstallments)) / (Math.pow(1 + monthlyRate, numberOfInstallments) - 1);
+                emi = emi.toFixed(2);
+                document.getElementById('monthly_emi').value = emi;
+
+                var totalInterest = (emi * numberOfInstallments) - loanAmount;
+                totalInterest = totalInterest.toFixed(2);
+                document.getElementById('interest_amount').value = totalInterest;
+
+                document.getElementById('adj_emi').value = adjEmi;
+
+                if (noOfInstallmentsInterest > 0) {
+                    var interestInstallment = (totalInterest / noOfInstallmentsInterest).toFixed(2);
+                    document.getElementById('interest_installment').value = interestInstallment;
+                } else {
+                    document.getElementById('interest_installment').value = '0';
+                }
+                var interestInstallment = (totalInterest / numberOfInstallments).toFixed(2);
+                document.getElementById('interest_installment').value = interestInstallment;
+                document.getElementById('principal_amount').value = loanAmount;
+
+            } else {
+                document.getElementById('monthly_emi').value = '0';
+                document.getElementById('interest_amount').value = '0';
+                document.getElementById('adj_emi').value = '0';
+                document.getElementById('interest_installment').value = '0';
+                document.getElementById('adj_interest_emi').value = '0';
             }
-            const monthlyRate = interestRate / 100 / 12;
 
-            if (monthlyRate === 0) {
-                alert("z");
-                document.getElementById("principal_amount").value = loanAmount;
-                return;
+            if (noOfInstallmentsInterest > 0 && totalInterest > 0) {
+                var adjInterestEmi = (totalInterest / noOfInstallmentsInterest).toFixed(2);
+                document.getElementById('adj_interest_emi').value = adjInterestEmi;
+            } else {
+                document.getElementById('adj_interest_emi').value = '0';
             }
+        }
 
-            const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, duration)) / (Math.pow(1 + monthlyRate,
-                duration) - 1);
-            // alert("emi: " + emi);
-            document.getElementById("monthly_emi").value = Math.round(emi);
-
-            const principalAmount = (emi * (Math.pow(1 + monthlyRate, duration) - 1)) / (monthlyRate * Math.pow(1 +
-                monthlyRate, duration));
-            // alert("principalAmount: " + principalAmount);
-            document.getElementById("principal_amount").value = Math.round(principalAmount);
-            const totalAmount = emi * duration;
-            const interestAmount = totalAmount - loanAmount;
-            document.getElementById("interest_amount").value = Math.round(interestAmount);
-
-            // Calculate interest installment
-            const noOfInstallmentsInterest = parseInt(document.getElementById("no_of_installment_interest").value) ||
-                duration;
-            // alert("noOfInstallmentsInterest: " + noOfInstallmentsInterest);
-            const interestInstallment = interestAmount / noOfInstallmentsInterest;
-            document.getElementById("interest_installment").value = Math.round(interestInstallment);
+        window.onload = function() {
+            document.getElementById('loan_amount').addEventListener('input', calculateLoanDetails);
+            document.getElementById('loan_interest_rate').addEventListener('input', calculateLoanDetails);
+            document.getElementById('no_of_installment').addEventListener('input', calculateLoanDetails);
+            document.getElementById('no_of_installment_interest').addEventListener('input', calculateLoanDetails);
         }
     </script>
 @endsection

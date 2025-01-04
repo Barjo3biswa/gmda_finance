@@ -84,15 +84,14 @@
                                 <div class="card-body">
                                     <h5>Advance List</h5>
                                     <a class="btn btn-success btn btn-xs float-right mr-1"
-                                        href="{{ route('advance.existing') }}"><i class="fa fa-plus"></i> Existing
-                                        Advance</a>
-                                    @if ($message = Session::get('success'))
+                                        href="{{ route('advance.existing') }}"><i class="fa fa-plus"></i> Create Advance</a>
+                                    <!-- @if ($message = Session::get('success'))
                                         <div class="alert alert-success">
                                             <p>{{ $message }}</p>
                                         </div>
-                                    @endif
+                                    @endif -->
                                     <div class="table-responsive">
-                                        <table class="table table-bordered table-sm font-12">
+                                        <table class="table table-bordered table-sm ">
                                             <thead>
                                                 <tr>
                                                     <th>SL</th>
@@ -132,6 +131,9 @@
                                                                 class="btn btn-info btn-xs">
                                                                 <i class="fa fa-eye"></i> View
                                                             </a>
+
+                                                            <a href="{{ route('advance.close', ['id' => $advance->id]) }}"
+                                                                class="btn btn-danger btn-xs">Close</a>
                                                         </td>
                                                     </tr>
                                                 @empty

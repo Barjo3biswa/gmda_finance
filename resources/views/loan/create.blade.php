@@ -87,30 +87,30 @@
                                             </div>
                                             <div class=" col-md-3">
                                                 <label for="loan_amount">Loan Amount</label>
-                                                <input type="number" name="loan_amount" id="loan_amount" class="form-control"  value="0" required>
+                                                <input type="number" name="loan_amount" id="loan_amount" class="form-control"  value="0" required onchange="calculatePrincipalAmount()">
                                             </div>
                                             <div class=" col-md-2">
                                                 <label for="loan_interest_rate">Interest Rate</label>
-                                                <input type="number" name="loan_interest_rate" id="loan_interest_rate" class="form-control" step="0.01" value="{{old('loan_interest_rate') ?? 0}}" required>
+                                                <input type="number" name="loan_interest_rate" id="loan_interest_rate" class="form-control" step="0.01" value="{{old('loan_interest_rate') ?? 0}}" required onchange="calculatePrincipalAmount()">
                                             </div>
                                             <div class="col-md-2">
                                                 <label for="no_of_installment">No of installment</label>
-                                                <input type="number" class="form-control" id="no_of_installment" name="no_of_installment" value="0" onchange="ReducingInt()"></input>
+                                                <input type="number" class="form-control" id="no_of_installment" name="no_of_installment" value="0" onchange="ReducingInt() calculatePrincipalAmount()">
                                             </div>
                                             <div class="col-md-2">
                                                 <label for="principal_amount">Principal Amount</label>
-                                                <input type="number" class="form-control" id="principal_amount" name="principal_amount" step="0.01"  value="0"></input>
+                                                <input type="number" class="form-control" id="principal_amount" name="principal_amount" step="0.01"  value="0">
                                             </div>
                                         </div>
 
                                         <div class="form-group row">
                                             <div class="col-md-3">
                                                 <label for="monthly_emi">Monthly Installment(Principal)</label>
-                                                <input type="number" class="form-control" id="monthly_emi" name="monthly_emi" value="0" step="0.01" ></input>
+                                                <input type="number" class="form-control" id="monthly_emi" name="monthly_emi" value="0" step="0.01" >
                                             </div>
                                             <div class="col-md-3">
                                                 <label for="adj_emi">Adjustable Installment</label>
-                                                <input type="number" class="form-control" id="adj_emi" name="adj_emi" value="0" step="0.01" ></input>
+                                                <input type="number" class="form-control" id="adj_emi" name="adj_emi" value="0" step="0.01" >
                                             </div>
                                             <div class="col-md-3">
                                                 <label for="adj_emi_in">Adjust in</label>
@@ -263,7 +263,6 @@ function calculatePrincipalAmount() {
     const monthlyRate = interestRate / 100 / 12;
 
     if (monthlyRate === 0) {
-        alert("z");
         document.getElementById("principal_amount").value = loanAmount;
         return;
     }

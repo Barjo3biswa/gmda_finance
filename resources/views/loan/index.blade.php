@@ -28,7 +28,7 @@
         </a>
     </div>
     <div class="card-body">
-        <form method="get" action="">
+        <form method="GET" action="{{ route('loan.index') }}">
             <div class="row">
                 <div class="col-md-3">
                     <div class="form-group">
@@ -55,7 +55,7 @@
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="name">Employee</label>
-                        <select name="employee_id" id="categories" class="form-control select2">
+                        <select name="employee_id" id="categories" class="form-control js-example-basic-multiple">
                             <option value="">--All--</option>
                             @foreach ($emp as $employee)
                                 <option value="{{$employee->id}}" {{$employee->id == request("employee_id") ? "selected" : ""}}>{{$employee->first_name}} {{$employee->last_name}}</option>
@@ -75,7 +75,7 @@
 <div class="card mt-2">
             <div class="card-header">
                 <!-- <a class="btn btn-success btn btn-xs float-right mr-1" href="{{route("advance.create")}}"><i class="fa fa-plus"></i> New Advance</a> | -->
-                 <a class="btn btn-success btn btn-xs float-right mr-1" href="{{route("loan.existing")}}"><i class="fa fa-plus"></i> Old Loan</a>
+                 <!-- <a class="btn btn-success btn btn-xs float-right mr-1" href="{{route("loan.existing")}}"><i class="fa fa-plus"></i> Old Loan</a> -->
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -97,7 +97,7 @@
                         @foreach ($advanceRequests as $key=>$data)
                         <tr>
                             <td>{{ $key+1}}</td>
-                            <td>{{ $data->employee->first_name}}({{$data->employee->code}})</td>
+                            <td>{{ $data->employee->first_name}} {{ $data->employee->last_name}}({{$data->employee->code}})</td>
                             <td>{{$data->advanceType->type_name ?? 'NA'}}</td>
                             <td class="text-right">{{$data->principal_amount}}</td>
                             <td class="text-right">{{ $data->monthly_installment }}</td>

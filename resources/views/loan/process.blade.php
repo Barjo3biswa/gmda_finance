@@ -211,8 +211,7 @@
                                                             </td>
                                                             <td>
                                                                 {{ optional($advance->salhead)->name ?? 'N/A' }}
-                                                                <input type="hidden"
-                                                                    name="datas[{{ $key }}][loan_head_id]"
+                                                                <input type="hidden" name="datas[{{ $key }}][loan_head_id]"
                                                                     value={{ $advance->sal_block_id }}>
                                                             </td>
                                                             <td class="text-right">
@@ -250,13 +249,17 @@
                                             </tbody>
                                             <tfoot>
                                                 <tr>
-                                                    <th colspan="6" class="text-right">Total</th>
+                                                    <th colspan="9" class="text-right">Total</th>
                                                     <th class="text-right">
                                                         @php
-                                                            //echo number_format((float)$advance->sum("principal_installment"), 2);
+                                                            echo number_format((float)$advance->sum("principal_installment"), 2);
                                                         @endphp
                                                     </th>
-                                                    <th colspan="2"></th>
+                                                    <th class="text-right">
+                                                        @php
+                                                            echo number_format((float)$advance->sum("interest_emi"), 2);
+                                                        @endphp
+                                                    </th>
                                                 </tr>
                                             </tfoot>
                                         </table>
