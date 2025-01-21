@@ -410,7 +410,6 @@
 
         if (loanAmount > 0 && interestRate > 0 && numInstallments > 0) {
             document.getElementById('principal_amount').value = document.getElementById('loan_amount').value;
-            var ratePerMonth = interestRate / 100 / 12;
             var emi = Math.floor(loanAmount / numInstallments);
             document.getElementById('monthly_emi').value = emi.toFixed(0);
 
