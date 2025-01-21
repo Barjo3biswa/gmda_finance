@@ -17,4 +17,9 @@ class AdvanceType extends Model
         'type',
         'requires_recommender'
     ];
+
+    public function salaryHead()
+    {
+        return $this->hasOne(salaryHead::class, 'id', 'salary_head_id');
+    }
 }

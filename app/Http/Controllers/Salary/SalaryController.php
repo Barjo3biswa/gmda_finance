@@ -477,7 +477,7 @@ class SalaryController extends Controller
         // dd("ok");
         $step_details = salaryProcessStep::where('id', $id)->first();
         if (!CommonHelper::checkIsInOrder($step_details->order)) {
-            return redirect()->back()->with('error', 'Please maintaion process oeder');
+            return redirect()->back()->with('error', 'Please maintaion process order');
         }
         $sal_block_id = $step_details->block_id;
         $salary_block = salaryBlock::where('id', $sal_block_id)->first();
@@ -559,7 +559,7 @@ class SalaryController extends Controller
     {
         $step_details = salaryProcessStep::where('id', $id)->first();
         if (!CommonHelper::checkIsInOrder($step_details->order)) {
-            return redirect()->back()->with('error', 'Please maintaion process oeder');
+            return redirect()->back()->with('error', 'Please maintaion process order');
         }
         $sal_block_id = $step_details->block_id;
         $income_hed = salaryHead::where('pay_head', 'Income')->pluck('id')->toArray();
@@ -703,7 +703,7 @@ class SalaryController extends Controller
     {
         $step_details = salaryProcessStep::where('id', $id)->first();
         if (!CommonHelper::checkIsInOrder($step_details->order)) {
-            return redirect()->back()->with('error', 'Please maintaion process oeder');
+            return redirect()->back()->with('error', 'Please maintaion process order');
         }
 
         DB::beginTransaction();
@@ -879,7 +879,7 @@ class SalaryController extends Controller
         // dd($id);
         $step_details = salaryProcessStep::where('id', $id)->first();
         if (!CommonHelper::checkIsInOrder($step_details->order)) {
-            return redirect()->back()->with('error', 'Please maintaion process oeder');
+            return redirect()->back()->with('error', 'Please maintaion process order');
         }
         if ($step_details->status == 'process') {
             return redirect()->back()->with('error', 'Process is completed');
@@ -900,7 +900,7 @@ class SalaryController extends Controller
     {
         $step_details = salaryProcessStep::where('id', $id)->first();
         if (!CommonHelper::checkIsInOrder($step_details->order)) {
-            return redirect()->back()->with('error', 'Please maintaion process oeder');
+            return redirect()->back()->with('error', 'Please maintaion process order');
         }
         if ($step_details->status == 'process') {
             return redirect()->back()->with('error', 'Process is completed');
@@ -928,14 +928,15 @@ class SalaryController extends Controller
     {
         $step_details = salaryProcessStep::where('id', $id)->first();
         if (!CommonHelper::checkIsInOrder($step_details->order)) {
-            return redirect()->back()->with('error', 'Please maintaion process oeder');
+            return redirect()->back()->with('error', 'Please maintaion process order');
         }
         $sal_block_id = $step_details->block_id;
         $salary_block = salaryBlock::where('id', $sal_block_id)->first();
         DB::beginTransaction();
         try {
             $loans = LoanMaster::where('status', '!=', '5')->get();
-            foreach ($loans as $loan) {
+            // dd($loans);
+            foreach ($loans as $key => $loan) {
                 if ($loan->user->salary_flag == 'open') {
                     if ($loan->advanceType->advance_type == 'flat') {
                         if ($loan->no_of_installment > $loan->principal_installment) {
@@ -1019,6 +1020,7 @@ class SalaryController extends Controller
                         'working_days' => 30,
                         'status' => 'draft',
                         'amount' => $emi_amount,
+                        'last_amount' => 0.00,
                         'detail_json' => $json_data,
                     ];
 
@@ -1030,14 +1032,13 @@ class SalaryController extends Controller
                         $salary_data
                     );
                 }
-
             }
             $step_details->status = 'process';
             $step_details->save();
 
             DB::commit();
         } catch (\Exception $e) {
-            // dd($e);
+            dd($e);
             DB::rollBack();
             return redirect()->back()->with('error', 'Error');
         }
@@ -1048,7 +1049,7 @@ class SalaryController extends Controller
     {
         $step_details = salaryProcessStep::where('id', $id)->first();
         if (!CommonHelper::checkIsInOrder($step_details->order)) {
-            return redirect()->back()->with('error', 'Please maintaion process oeder');
+            return redirect()->back()->with('error', 'Please maintaion process order');
         }
         $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
         return view('salary.kss-upload', compact('salary_block', 'id'));
@@ -1059,7 +1060,7 @@ class SalaryController extends Controller
         // dd($request->all());
         $step_details = salaryProcessStep::where('id', $id)->first();
         if (!CommonHelper::checkIsInOrder($step_details->order)) {
-            return redirect()->back()->with('error', 'Please maintaion process oeder');
+            return redirect()->back()->with('error', 'Please maintaion process order');
         }
         $request->validate([
             'excel_file' => 'required|mimes:xlsx,xls,csv',
