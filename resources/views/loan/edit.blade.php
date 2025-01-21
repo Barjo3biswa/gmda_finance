@@ -331,17 +331,15 @@ function calculatePrincipalAmount() {
     if (loanAmount > 0 && interestRate > 0 && numInstallments > 0) {
         document.getElementById('principal_amount').value = document.getElementById('loan_amount').value;
         var ratePerMonth = interestRate / 100 / 12;
-        var emi = (loanAmount * ratePerMonth * Math.pow(1 + ratePerMonth, numInstallments)) / (Math.pow(1 + ratePerMonth, numInstallments) - 1);
-        
+        var emi=Math.floor(loanAmount/numInstallments);
         document.getElementById('monthly_emi').value = emi.toFixed(0);
 
         var totalInterest = emi.toFixed(0) * numInstallments - loanAmount;
-        totalInterest = totalInterest.toFixed(0);
+        totalInterest = Math.floor(numInstallments*((numInstallments+1)/2)*(emi/12)*(interestRate/100));
         document.getElementById('interest_amount').value = totalInterest;
 
-        // Interest installment (interest portion per EMI)
-        var interestInstallment = totalInterest / numInstallments;
-        interestInstallment = interestInstallment.toFixed(0);
+        var interestInstallment = Math.floor(totalInterest / numInstallments); 
+        // interestInstallment = interestInstallment.toFixed(0);
         // document.getElementById('interest_installment').value = interestInstallment.toFixed(2);
 
         var adjEmi = parseFloat(document.getElementById('adj_emi').value) || 0;
@@ -350,17 +348,16 @@ function calculatePrincipalAmount() {
         document.getElementById('adj_emi').value = adjustedEmi.toFixed(0);
 
         var noOfInstallmentsInterest = parseInt(document.getElementById('no_of_installment_interest').value) || 0;
-        alert(noOfInstallmentsInterest);
+        var noOfInstallmentsInterest = noOfInstallmentsInterest-1;
         if (noOfInstallmentsInterest > 0) {
-            var interestInstallment = (totalInterest / noOfInstallmentsInterest).toFixed(0);
-            alert(interestInstallment);
+            var interestInstallment = Math.floor(totalInterest/noOfInstallmentsInterest);
             document.getElementById('interest_installment').value = interestInstallment;
+            var adjInterestEmi = totalInterest-(interestInstallment * noOfInstallmentsInterest);
+            document.getElementById('adj_interest_emi').value = Math.round(adjInterestEmi);
         } else {
             document.getElementById('interest_installment').value = '0';
+            document.getElementById('adj_interest_emi').value = '0';
         }
-
-        var adjInterestEmi = totalInterest -interestInstallment * (noOfInstallmentsInterest-1);
-        document.getElementById('adj_interest_emi').value = Math.round(adjInterestEmi);
     } else {
         document.getElementById('monthly_emi').value = '0';
         document.getElementById('interest_amount').value = '0';
