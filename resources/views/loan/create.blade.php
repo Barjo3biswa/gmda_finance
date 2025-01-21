@@ -87,15 +87,15 @@
                                             </div>
                                             <div class=" col-md-3">
                                                 <label for="loan_amount">Loan Amount</label>
-                                                <input type="number" name="loan_amount" id="loan_amount" class="form-control"  value="0" required onchange="calculatePrincipalAmount()">
+                                                <input type="number" name="loan_amount" id="loan_amount" class="form-control"  value="0" required>
                                             </div>
                                             <div class=" col-md-2">
                                                 <label for="loan_interest_rate">Interest Rate</label>
-                                                <input type="number" name="loan_interest_rate" id="loan_interest_rate" class="form-control" step="0.01" value="{{old('loan_interest_rate') ?? 0}}" required onchange="calculatePrincipalAmount()">
+                                                <input type="number" name="loan_interest_rate" id="loan_interest_rate" class="form-control" step="0.01" value="{{old('loan_interest_rate') ?? 0}}" required>
                                             </div>
                                             <div class="col-md-2">
                                                 <label for="no_of_installment">No of installment</label>
-                                                <input type="number" class="form-control" id="no_of_installment" name="no_of_installment" value="0" onchange="ReducingInt() calculatePrincipalAmount()">
+                                                <input type="number" class="form-control" id="no_of_installment" name="no_of_installment" value="0" onchange="ReducingInt();">
                                             </div>
                                             <div class="col-md-2">
                                                 <label for="principal_amount">Principal Amount</label>
@@ -120,23 +120,26 @@
                                                     <option value="l" {{ old('adj_emi_in') == 'l' ? 'selected' : '' }}>Last Installment</option>
                                                 </select>
                                             </div>
+                                        </div>
+                                        <hr>
+                                        <div class="form-group row">
                                             <div class="col-md-3">
                                                 <label for="interest_amount">Total Interest Amount</label>
                                                 <input type="number" name="interest_amount" id="interest_amount" class="form-control" step="0.01" required value="0">
                                             </div>
-                                            <div class="col-md-3 mt-5">
+                                            <div class="col-md-3">
                                                 <label for="no_of_installment_interest">No of installment(Interest)</label>
-                                                <input type="number" name="no_of_installment_interest" id="no_of_installment_interest" class="form-control" required value="0">
+                                                <input type="number" name="no_of_installment_interest" id="no_of_installment_interest" class="form-control" required value="0" onchange="calculatePrincipalAmount();">
                                             </div>
-                                            <div class="col-md-3 mt-5">
+                                            <div class="col-md-2">
                                                 <label for="interest_installment">Interest Installment</label>
                                                 <input type="number" name="interest_installment" id="interest_installment" class="form-control" step="0.01" required value="0">
                                             </div>
-                                            <div class="col-md-3 mt-5">
+                                            <div class="col-md-2">
                                                 <label for="adj_interest_emi">Adjustable Interest Installment</label>
                                                 <input type="number" name="adj_interest_emi" id="adj_interest_emi" class="form-control" step="0.01" required value="0">
                                             </div>
-                                            <div class="col-md-3 mt-5">
+                                            <div class="col-md-2">
                                                 <label for="adj_interest_emi_in">Adjust in</label>
                                                 <select name="adj_interest_emi_in" id="adj_interest_emi_in" class="form-control">
                                                     <option value="">Select</option>
@@ -144,7 +147,6 @@
                                                     <option value="l" {{ old('adj_interest_emi_in') == 'l' ? 'selected' : '' }}>Last Installment</option>
                                                 </select>
                                             </div>
-                                            
                                         </div>
 
                                         <div class="form-group row">
@@ -178,7 +180,7 @@
                                         </div>
 
                                         <div class="row mt-5">
-                                            <div class="col-md-12">
+                                            <div class="col-md-12" style="text-align: right;">
                                                 <button type="submit" class="btn btn-primary btn-sm float-right">Submit</button>
                                             </div>
                                         </div>
@@ -244,52 +246,55 @@
 @endsection
 @section('js')
 <script>
-document.getElementById("loan_amount").addEventListener("change", calculatePrincipalAmount);
-document.getElementById("loan_interest_rate").addEventListener("change", calculatePrincipalAmount);
-document.getElementById("no_of_installment").addEventListener("change", calculatePrincipalAmount);
-document.getElementById("no_of_installment_interest").addEventListener("change", calculatePrincipalAmount);
-
 function calculatePrincipalAmount() {
-    // Get values from the form
-    const loanAmount = parseFloat(document.getElementById("loan_amount").value);
-    const interestRate = parseFloat(document.getElementById("loan_interest_rate").value);
-    const duration = parseInt(document.getElementById("no_of_installment").value);
-	// alert("loanAmount: " + loanAmount + ", interestRate: " + interestRate + ", duration: " + duration);
+    var loanAmount = parseFloat(document.getElementById('loan_amount').value) || 0;
+    var interestRate = parseFloat(document.getElementById('loan_interest_rate').value) || 0;
+    var numInstallments = parseInt(document.getElementById('no_of_installment').value) || 0;
 
-    if (isNaN(loanAmount) || isNaN(interestRate) || isNaN(duration) || loanAmount <= 0 || interestRate < 0 || duration <= 0) {
-        document.getElementById("principal_amount").value = 0;
-        return;
+    if (loanAmount > 0 && interestRate > 0 && numInstallments > 0) {
+        document.getElementById('principal_amount').value = document.getElementById('loan_amount').value;
+        var ratePerMonth = interestRate / 100 / 12;
+        var emi = (loanAmount * ratePerMonth * Math.pow(1 + ratePerMonth, numInstallments)) / (Math.pow(1 + ratePerMonth, numInstallments) - 1);
+        
+        document.getElementById('monthly_emi').value = emi.toFixed(0);
+
+        var totalInterest = emi.toFixed(0) * numInstallments - loanAmount;
+        totalInterest = totalInterest.toFixed(0);
+        document.getElementById('interest_amount').value = totalInterest;
+
+        // Interest installment (interest portion per EMI)
+        var interestInstallment = totalInterest / numInstallments;
+        interestInstallment = interestInstallment.toFixed(0);
+        // document.getElementById('interest_installment').value = interestInstallment;
+
+        var adjEmi = parseFloat(document.getElementById('adj_emi').value) || 0;
+        var f_installment = interestInstallment / numInstallments;
+        var adjustedEmi = emi + f_installment;
+        document.getElementById('adj_emi').value = adjustedEmi.toFixed(0);
+
+        var noOfInstallmentsInterest = parseInt(document.getElementById('no_of_installment_interest').value) || 0;
+        if (noOfInstallmentsInterest > 0) {
+            var interestInstallment = (totalInterest / noOfInstallmentsInterest).toFixed(0);
+            document.getElementById('interest_installment').value = interestInstallment;
+        } else {
+            document.getElementById('interest_installment').value = '0';
+        }
+
+        var adjInterestEmi = totalInterest -interestInstallment * (noOfInstallmentsInterest-1);
+        document.getElementById('adj_interest_emi').value = Math.round(adjInterestEmi);
+    } else {
+        document.getElementById('monthly_emi').value = '0';
+        document.getElementById('interest_amount').value = '0';
+        document.getElementById('interest_installment').value = '0';
+        document.getElementById('adj_emi').value = '0';
     }
-    const monthlyRate = interestRate / 100 / 12;
-
-    if (monthlyRate === 0) {
-        document.getElementById("principal_amount").value = loanAmount;
-        return;
-    }
-
-    const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, duration)) / (Math.pow(1 + monthlyRate, duration) - 1);
-    // alert("emi: " + emi);
-    document.getElementById("monthly_emi").value = Math.round(emi);
-
-    const principalAmount = (emi * (Math.pow(1 + monthlyRate, duration) - 1)) / (monthlyRate * Math.pow(1 + monthlyRate, duration));
-    // alert("principalAmount: " + principalAmount);
-    document.getElementById("principal_amount").value = Math.round(principalAmount);
-    const totalAmount = emi * duration;
-    const interestAmount = totalAmount - loanAmount;
-    document.getElementById("interest_amount").value = Math.round(interestAmount);
-    
-    // Calculate interest installment
-    const noOfInstallmentsInterest = parseInt(document.getElementById("no_of_installment_interest").value) || duration;
-    // alert("noOfInstallmentsInterest: " + noOfInstallmentsInterest);
-    const interestInstallment = interestAmount / noOfInstallmentsInterest;
-    document.getElementById("interest_installment").value = Math.round(interestInstallment);
-
-    var f_installment = interestInstallment / noOfInstallmentsInterest;
-	document.getElementById('adj_emi').value = Math.round(f_installment);
-
-    const adjInterestEmi = interestInstallment + (f_installment || 0);
-    document.getElementById('adj_interest_emi').value = Math.round(adjInterestEmi);
 }
+
+document.getElementById('loan_amount').addEventListener('input', calculatePrincipalAmount);
+document.getElementById('loan_interest_rate').addEventListener('input', calculatePrincipalAmount);
+document.getElementById('no_of_installment').addEventListener('input', calculatePrincipalAmount);
+document.getElementById('interest_amount').addEventListener('input', calculateInterestEMIAdjustment);
+document.getElementById('no_of_installment_interest').addEventListener('change', calculateInterestEMIAdjustment);
 
 
 function ReducingInt()
