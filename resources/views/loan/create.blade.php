@@ -253,12 +253,10 @@ function calculatePrincipalAmount() {
 
     if (loanAmount > 0 && interestRate > 0 && numInstallments > 0) {
         document.getElementById('principal_amount').value = document.getElementById('loan_amount').value;
-        var ratePerMonth = interestRate / 100 / 12;
         var emi = Math.floor(loanAmount/numInstallments);
         document.getElementById('monthly_emi').value = emi.toFixed(0);
 
-        var totalInterest = emi.toFixed(0) * numInstallments - loanAmount;
-        totalInterest = Math.floor(numInstallments*((numInstallments+1)/2)*(emi/12)*(interestRate/100));
+        var totalInterest = Math.floor(numInstallments*((numInstallments+1)/2)*(emi/12)*(interestRate/100));
         document.getElementById('interest_amount').value = totalInterest;
 
         var interestInstallment = Math.floor(totalInterest / numInstallments);
@@ -267,15 +265,14 @@ function calculatePrincipalAmount() {
 
         var adjEmi = parseFloat(document.getElementById('adj_emi').value) || 0;
         var f_installment = interestInstallment / numInstallments;
-        var adjustedEmi = emi + f_installment;
+        var adjustedEmi = loanAmount -( emi * (numInstallments-1));
         document.getElementById('adj_emi').value = adjustedEmi.toFixed(0);
 
         var noOfInstallmentsInterest = parseInt(document.getElementById('no_of_installment_interest').value) || 0;
-        var noOfInstallmentsInterest = noOfInstallmentsInterest-1;
         if (noOfInstallmentsInterest > 0) {
             var interestInstallment = Math.floor(totalInterest/noOfInstallmentsInterest);
             document.getElementById('interest_installment').value = interestInstallment;
-            var adjInterestEmi = totalInterest-(interestInstallment * noOfInstallmentsInterest);
+            var adjInterestEmi = totalInterest-(interestInstallment * (noOfInstallmentsInterest-1));
             document.getElementById('adj_interest_emi').value = Math.floor(adjInterestEmi);
         } else {
             document.getElementById('interest_installment').value = '0';
