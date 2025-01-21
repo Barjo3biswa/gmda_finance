@@ -424,150 +424,145 @@
 
             var adjEmi = parseFloat(document.getElementById('adj_emi').value) || 0;
             var f_installment = interestInstallment / numInstallments;
-            var adjustedEmi = emi + f_installment;
+            var adjustedEmi = loanAmount - (emi * (numInstallments - 1));
             document.getElementById('adj_emi').value = adjustedEmi.toFixed(0);
 
             var noOfInstallmentsInterest = parseInt(document.getElementById('no_of_installment_interest').value) || 0;
-            var noOfInstallmentsInterest = noOfInstallmentsInterest - 1;
             if (noOfInstallmentsInterest > 0) {
                 var interestInstallment = Math.floor(totalInterest / noOfInstallmentsInterest);
                 document.getElementById('interest_installment').value = interestInstallment;
-                var adjInterestEmi = totalInterest - (interestInstallment * noOfInstallmentsInterest);
+                var adjInterestEmi = totalInterest - (interestInstallment * (noOfInstallmentsInterest - 1));
                 document.getElementById('adj_interest_emi').value = Math.round(adjInterestEmi);
             } else {
+                document.getElementById('monthly_emi').value = '0';
+                document.getElementById('interest_amount').value = '0';
                 document.getElementById('interest_installment').value = '0';
-                document.getElementById('adj_interest_emi').value = '0';
+                document.getElementById('adj_emi').value = '0';
             }
-        } else {
-            document.getElementById('monthly_emi').value = '0';
-            document.getElementById('interest_amount').value = '0';
-            document.getElementById('interest_installment').value = '0';
-            document.getElementById('adj_emi').value = '0';
         }
-    }
-    document.getElementById('loan_amount').addEventListener('input', calculatePrincipalAmount);
-    document.getElementById('loan_interest_rate').addEventListener('input', calculatePrincipalAmount);
-    document.getElementById('no_of_installment').addEventListener('input', calculatePrincipalAmount);
-    document.getElementById('interest_amount').addEventListener('input', calculateInterestEMIAdjustment);
-    document.getElementById('no_of_installment_interest').addEventListener('change', calculateInterestEMIAdjustment);
+        document.getElementById('loan_amount').addEventListener('input', calculatePrincipalAmount);
+        document.getElementById('loan_interest_rate').addEventListener('input', calculatePrincipalAmount);
+        document.getElementById('no_of_installment').addEventListener('input', calculatePrincipalAmount);
+        document.getElementById('interest_amount').addEventListener('input', calculateInterestEMIAdjustment);
+        document.getElementById('no_of_installment_interest').addEventListener('change', calculateInterestEMIAdjustment);
 
 
-    function ReducingInt() {
-        var selectElement = document.getElementById("loan_type_id");
-        // Get the selected option
-        var selectedOption = selectElement.options[selectElement.selectedIndex];
-        // Get the text of the selected option
-        var selectedText = selectedOption.text;
-        // alert(selectedText);
-        if (selectedText != "New House Buiding Advance") {
-            // alert("New House Buiding Advance");
-            return false;
-        }
-        var p = document.getElementById("loan_amount").value;
-        var n = document.getElementById("no_of_installment").value;
-        var r = document.getElementById("loan_interest_rate").value;
-
-        var REMI = Math.abs(parseFloat(PMT(((r / 100) / 12), n, p))); //output */
-        var totalRPayable = parseFloat(REMI) * parseFloat(n);
-        $('#DispPAmtR').val(p);
-        $('#DispRIntP').val(Math.round(totalRPayable - p).toFixed(2));
-        //$('#DispRTotPayable').val(totalRPayable.toFixed(0));
-        $('#DispRTotPayable').val(Math.round(totalRPayable).toFixed(2));
-        var ReducingIntPerMonth = 0;
-        var ReducingPrincipal = p;
-        var table_body = '';
-        var dispTD = '';
-        var totP = 0;
-        var totI = 0;
-        var d = false;
-        var dd = 1;
-        for (var i = 0; i < n; i++) {
-            if ((i == n - 1 && d == true) || (i < n - 1)) {
-                dd = 2;
-                table_body += '<tr>';
+        function ReducingInt() {
+            var selectElement = document.getElementById("loan_type_id");
+            // Get the selected option
+            var selectedOption = selectElement.options[selectElement.selectedIndex];
+            // Get the text of the selected option
+            var selectedText = selectedOption.text;
+            // alert(selectedText);
+            if (selectedText != "New House Buiding Advance") {
+                // alert("New House Buiding Advance");
+                return false;
             }
-            for (var j = 0; j < 5; j++) {
-                if (j == 0)
-                    dispTD = (i + 1);
-                else if (j == 1 && i != n - 1)
-                    dispTD = parseFloat(REMI);
-                else if (j == 1 && i == n - 1)
-                    dispTD = Math.round(REMI) + (parseFloat(totalRPayable) - (Math.round(REMI) * n));
-                else if (j == 2) {
-                    ReducingIntPerMonth = (parseFloat(ReducingPrincipal) * 1 * (parseFloat(r) / 100)) / 12
-                    //dispTD = Math.round(ReducingIntPerMonth);
-                    dispTD = ReducingIntPerMonth;
-                    totI = totI + dispTD
+            var p = document.getElementById("loan_amount").value;
+            var n = document.getElementById("no_of_installment").value;
+            var r = document.getElementById("loan_interest_rate").value;
+
+            var REMI = Math.abs(parseFloat(PMT(((r / 100) / 12), n, p))); //output */
+            var totalRPayable = parseFloat(REMI) * parseFloat(n);
+            $('#DispPAmtR').val(p);
+            $('#DispRIntP').val(Math.round(totalRPayable - p).toFixed(2));
+            //$('#DispRTotPayable').val(totalRPayable.toFixed(0));
+            $('#DispRTotPayable').val(Math.round(totalRPayable).toFixed(2));
+            var ReducingIntPerMonth = 0;
+            var ReducingPrincipal = p;
+            var table_body = '';
+            var dispTD = '';
+            var totP = 0;
+            var totI = 0;
+            var d = false;
+            var dd = 1;
+            for (var i = 0; i < n; i++) {
+                if ((i == n - 1 && d == true) || (i < n - 1)) {
+                    dd = 2;
+                    table_body += '<tr>';
                 }
-                else if (j == 3) {
-                    dispTD = (parseFloat(REMI) - parseFloat(ReducingIntPerMonth));
-                    principalRefund = parseFloat(dispTD);
-                    totP += parseFloat(dispTD);
+                for (var j = 0; j < 5; j++) {
+                    if (j == 0)
+                        dispTD = (i + 1);
+                    else if (j == 1 && i != n - 1)
+                        dispTD = parseFloat(REMI);
+                    else if (j == 1 && i == n - 1)
+                        dispTD = Math.round(REMI) + (parseFloat(totalRPayable) - (Math.round(REMI) * n));
+                    else if (j == 2) {
+                        ReducingIntPerMonth = (parseFloat(ReducingPrincipal) * 1 * (parseFloat(r) / 100)) / 12
+                        //dispTD = Math.round(ReducingIntPerMonth);
+                        dispTD = ReducingIntPerMonth;
+                        totI = totI + dispTD
+                    }
+                    else if (j == 3) {
+                        dispTD = (parseFloat(REMI) - parseFloat(ReducingIntPerMonth));
+                        principalRefund = parseFloat(dispTD);
+                        totP += parseFloat(dispTD);
+                    }
+                    else if (j == 4) {
+                        dispTD = (parseFloat(ReducingPrincipal) - parseFloat(principalRefund));
+                        //alert(dispTD);
+                        ReducingPrincipal = (parseFloat(ReducingPrincipal) - parseFloat(principalRefund));
+                    }
+                    if (j != 0) {
+                        table_body += '<td>';
+                        table_body += Math.round(dispTD).toFixed(2);
+                        table_body += '</td>';
+                    } else {
+                        table_body += '<td>';
+                        table_body += dispTD;
+                        table_body += '</td>';
+                    }
                 }
-                else if (j == 4) {
-                    dispTD = (parseFloat(ReducingPrincipal) - parseFloat(principalRefund));
-                    //alert(dispTD);
-                    ReducingPrincipal = (parseFloat(ReducingPrincipal) - parseFloat(principalRefund));
-                }
-                if (j != 0) {
-                    table_body += '<td>';
-                    table_body += Math.round(dispTD).toFixed(2);
-                    table_body += '</td>';
-                } else {
-                    table_body += '<td>';
-                    table_body += dispTD;
-                    table_body += '</td>';
-                }
+                table_body += '</tr>';
             }
-            table_body += '</tr>';
+            table_body += '<tr><td></td><td></td>';
+            table_body += '<td><strong>';
+            table_body += Math.round(totI).toFixed(2);
+            table_body += '</strong></td><td><strong>';
+            table_body += Math.round(totP).toFixed(2);
+            table_body += '</strong></td></tr>';
+            /*table_body+='</table>';*/
+            $('#reducingDiv').html(table_body);
+
         }
-        table_body += '<tr><td></td><td></td>';
-        table_body += '<td><strong>';
-        table_body += Math.round(totI).toFixed(2);
-        table_body += '</strong></td><td><strong>';
-        table_body += Math.round(totP).toFixed(2);
-        table_body += '</strong></td></tr>';
-        /*table_body+='</table>';*/
-        $('#reducingDiv').html(table_body);
 
-    }
-
-    function PMT(i, n, p) {
-        return i * p * Math.pow((1 + i), n) / (1 - Math.pow((1 + i), n));
-    }
+        function PMT(i, n, p) {
+            return i * p * Math.pow((1 + i), n) / (1 - Math.pow((1 + i), n));
+        }
 </script>
 
 <script>
-    // Function to collect table data
-    function collectTableData() {
-        var tableData = [];
-        $("#memListTable tbody tr").each(function () {
-            var row = {};
-            var balance = $(this).find("td").eq(4).text().trim();
-            if (balance === "" || balance === "0.00") {
-                return;
-            }
-            $(this).find("td").each(function (index) {
-                switch (index) {
-                    case 0: row.sl = $(this).text(); break;
-                    case 1: row.emi = $(this).text(); break;
-                    case 2: row.int = $(this).text(); break;
-                    case 3: row.principal = $(this).text(); break;
-                    case 4: row.balance = $(this).text(); break;
+        // Function to collect table data
+        function collectTableData() {
+            var tableData = [];
+            $("#memListTable tbody tr").each(function () {
+                var row = {};
+                var balance = $(this).find("td").eq(4).text().trim();
+                if (balance === "" || balance === "0.00") {
+                    return;
                 }
+                $(this).find("td").each(function (index) {
+                    switch (index) {
+                        case 0: row.sl = $(this).text(); break;
+                        case 1: row.emi = $(this).text(); break;
+                        case 2: row.int = $(this).text(); break;
+                        case 3: row.principal = $(this).text(); break;
+                        case 4: row.balance = $(this).text(); break;
+                    }
+                });
+                tableData.push(row);
             });
-            tableData.push(row);
+            return tableData;
+        }
+
+        // Attach event to the form submission
+        $("form").on("submit", function (e) {
+            var data = collectTableData();
+            // Serialize data and set it in the hidden input
+            $('#tableData').val(JSON.stringify(data)); // Convert array to JSON string
+
+            // Form will now submit with the serialized data
         });
-        return tableData;
-    }
-
-    // Attach event to the form submission
-    $("form").on("submit", function (e) {
-        var data = collectTableData();
-        // Serialize data and set it in the hidden input
-        $('#tableData').val(JSON.stringify(data)); // Convert array to JSON string
-
-        // Form will now submit with the serialized data
-    });
 </script>
 @endsection
