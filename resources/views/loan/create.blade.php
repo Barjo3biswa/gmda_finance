@@ -120,23 +120,26 @@
                                                     <option value="l" {{ old('adj_emi_in') == 'l' ? 'selected' : '' }}>Last Installment</option>
                                                 </select>
                                             </div>
+                                        </div>
+                                        <hr>
+                                        <div class="form-group row">
                                             <div class="col-md-3">
                                                 <label for="interest_amount">Total Interest Amount</label>
                                                 <input type="number" name="interest_amount" id="interest_amount" class="form-control" step="0.01" required value="0">
                                             </div>
-                                            <div class="col-md-3 mt-5">
+                                            <div class="col-md-3">
                                                 <label for="no_of_installment_interest">No of installment(Interest)</label>
                                                 <input type="number" name="no_of_installment_interest" id="no_of_installment_interest" class="form-control" required value="0" onchange="calculatePrincipalAmount();">
                                             </div>
-                                            <div class="col-md-3 mt-5">
+                                            <div class="col-md-2">
                                                 <label for="interest_installment">Interest Installment</label>
                                                 <input type="number" name="interest_installment" id="interest_installment" class="form-control" step="0.01" required value="0">
                                             </div>
-                                            <div class="col-md-3 mt-5">
+                                            <div class="col-md-2">
                                                 <label for="adj_interest_emi">Adjustable Interest Installment</label>
                                                 <input type="number" name="adj_interest_emi" id="adj_interest_emi" class="form-control" step="0.01" required value="0">
                                             </div>
-                                            <div class="col-md-3 mt-5">
+                                            <div class="col-md-2">
                                                 <label for="adj_interest_emi_in">Adjust in</label>
                                                 <select name="adj_interest_emi_in" id="adj_interest_emi_in" class="form-control">
                                                     <option value="">Select</option>
@@ -144,7 +147,6 @@
                                                     <option value="l" {{ old('adj_interest_emi_in') == 'l' ? 'selected' : '' }}>Last Installment</option>
                                                 </select>
                                             </div>
-                                            
                                         </div>
 
                                         <div class="form-group row">
@@ -178,7 +180,7 @@
                                         </div>
 
                                         <div class="row mt-5">
-                                            <div class="col-md-12">
+                                            <div class="col-md-12" style="text-align: right;">
                                                 <button type="submit" class="btn btn-primary btn-sm float-right">Submit</button>
                                             </div>
                                         </div>
@@ -250,35 +252,35 @@ function calculatePrincipalAmount() {
     var numInstallments = parseInt(document.getElementById('no_of_installment').value) || 0;
 
     if (loanAmount > 0 && interestRate > 0 && numInstallments > 0) {
-        // Calculate Monthly EMI (Principal)
-        var ratePerMonth = interestRate / 100 / 12; // Monthly interest rate
+        document.getElementById('principal_amount').value = document.getElementById('loan_amount').value;
+        var ratePerMonth = interestRate / 100 / 12;
         var emi = (loanAmount * ratePerMonth * Math.pow(1 + ratePerMonth, numInstallments)) / (Math.pow(1 + ratePerMonth, numInstallments) - 1);
         
-        document.getElementById('monthly_emi').value = emi.toFixed(2);
+        document.getElementById('monthly_emi').value = emi.toFixed(0);
 
-        // Calculate Total Interest
-        var totalInterest = emi * numInstallments - loanAmount;
-        document.getElementById('interest_amount').value = totalInterest.toFixed(2);
+        var totalInterest = emi.toFixed(0) * numInstallments - loanAmount;
+        totalInterest = totalInterest.toFixed(0);
+        document.getElementById('interest_amount').value = totalInterest;
 
         // Interest installment (interest portion per EMI)
         var interestInstallment = totalInterest / numInstallments;
-        document.getElementById('interest_installment').value = interestInstallment.toFixed(2);
+        interestInstallment = interestInstallment.toFixed(0);
+        // document.getElementById('interest_installment').value = interestInstallment;
 
         var adjEmi = parseFloat(document.getElementById('adj_emi').value) || 0;
         var f_installment = interestInstallment / numInstallments;
         var adjustedEmi = emi + f_installment;
-        document.getElementById('adj_emi').value = adjustedEmi.toFixed(2);
+        document.getElementById('adj_emi').value = adjustedEmi.toFixed(0);
 
         var noOfInstallmentsInterest = parseInt(document.getElementById('no_of_installment_interest').value) || 0;
         if (noOfInstallmentsInterest > 0) {
-            var interestInstallment = (totalInterest / noOfInstallmentsInterest).toFixed(2);
+            var interestInstallment = (totalInterest / noOfInstallmentsInterest).toFixed(0);
             document.getElementById('interest_installment').value = interestInstallment;
         } else {
             document.getElementById('interest_installment').value = '0';
         }
 
-        // Calculate Adjusted Interest EMI
-        var adjInterestEmi = interestInstallment / noOfInstallmentsInterest;
+        var adjInterestEmi = totalInterest -interestInstallment * (noOfInstallmentsInterest-1);
         document.getElementById('adj_interest_emi').value = Math.round(adjInterestEmi);
     } else {
         document.getElementById('monthly_emi').value = '0';
