@@ -118,6 +118,8 @@ Route::group(['middleware' => 'auth.jwt'], function () {
 
     Route::get('loan/show/{id}', [LoanController::class, 'show'])->name('loan.show');
 
+    Route::get('loan/check-loan-type', [LoanController::class, 'checkLoanType'])->name('loan.checkLoanType');
+
 
     //policy
     Route::get('policy', [PolicyController::class, 'index'])->name('policy.index');
