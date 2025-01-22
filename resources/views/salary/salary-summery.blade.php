@@ -138,7 +138,7 @@
                                                                 }
                                                             @endphp
                                                             <tr>
-                                                                <td class="{{ $class }}">{{ $emp->name }}</td>
+                                                                <td class="{{ $class }}"><a href="{{ route('final-pay-slip',['id' => Crypt::encrypt($emp->id), 'sl_blk' => $view_salary_block]) }}">{{ $emp->name }}</a></td>
                                                                 <td class="{{ $class }}">{{ $emp->emp_code }}</td>
                                                                 @foreach ($salary_head as $hd)
                                                                     @php

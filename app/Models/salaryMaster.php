@@ -11,4 +11,9 @@ class salaryMaster extends Model
     use HasFactory;
     protected $guarded = ['id'];
     use SoftDeletes;
+
+    public function salaryTrans()
+    {
+        return $this->hasMany(salaryTrans::class, 'master_id', 'id');
+    }
 }

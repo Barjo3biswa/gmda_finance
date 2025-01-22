@@ -6,6 +6,7 @@ use App\Helpers\CommonHelper;
 use App\Http\Controllers\Controller;
 use App\Imports\EmployeeWiseImport;
 use App\Imports\HeadWiseImport;
+use App\Models\AdvanceType;
 use App\Models\AttendanceSummery;
 use App\Imports\kssFileImport;
 use App\Models\LoanMaster;
@@ -175,6 +176,16 @@ class SalaryController extends Controller
             ->first();
         // dd($is_editable_flag);
         return view("salary.payslip", compact('salary_block', 'salary_head', 'view_salary_block', 'emp_id', 'is_editable_flag', 'emp_details', 'attendance'));
+    }
+
+
+    public function finalPaySlip(Request $request, $id, $sl_blk)
+    {
+        $emp_id = Crypt::decrypt($id);
+        $salary_block = salaryBlock::where('id', $sl_blk)->get();
+        $emp_details = User::where('id', $emp_id)->first();
+        $salary = salaryMaster::with('salaryTrans')->where('emp_id', $emp_id)->where('sal_block_id', $sl_blk)->first();
+        return view('salary.final-payslip', compact('salary', 'emp_details'));
     }
 
     public function updateAmount(Request $request)
@@ -568,7 +579,7 @@ class SalaryController extends Controller
         if ($salary_block->is_finalized == 1) {
             return redirect()->back()->with('error', 'Already Finalized');
         }
-        $employee = User::get();
+        $employee = User::where('salary_flag', 'open')->get();
         DB::beginTransaction();
         try {
             foreach ($employee as $key => $emp) {
@@ -602,7 +613,7 @@ class SalaryController extends Controller
                     'net' => $net,
                 ];
                 // dd($data);
-                salaryMaster::create($data);
+                $created = salaryMaster::create($data);
 
                 $temp_salary = salaryTemp::where('emp_id', $emp->id)
                     ->where('status', 'draft')
@@ -615,6 +626,7 @@ class SalaryController extends Controller
                             $this->loanRecovery($row->detail_json, $salary_block);
                         }
                         $data = $row->makeHidden(['id', 'created_at', 'updated_at', 'deleted_at'])->toArray();
+                        $data['master_id'] = $created->id;
                         salaryTrans::create($data);
                     }
                 }
@@ -636,66 +648,68 @@ class SalaryController extends Controller
     public function loanRecovery($loan_detail, $salary_block)
     {
         // dd($loan_detail);
-        $loan = json_decode($loan_detail);
+        $loans = json_decode($loan_detail);
+        foreach ($loans as $loan) {
 
-        $loan_master = LoanMaster::where('id', $loan->loan_id)->first();
-        // dd($loan_master);
-        $principal_amount = $loan->principal_amount;
-        $intrest_amount = $loan->intrest_amount;
-        $principal_installment = 0;
-        $interest_installment = 0;
+            $loan_master = LoanMaster::where('id', $loan->loan_id)->first();
+            // dd($loan_master);
+            $principal_amount = $loan->principal_amount;
+            $intrest_amount = $loan->intrest_amount;
+            $principal_installment = 0;
+            $interest_installment = 0;
 
-        // dd($principal_amount);
-        if ($loan_master->advanceType->advance_type == 'flat') {
-            ///// flat loans/////
-            if ($principal_amount) {
+            // dd($principal_amount);
+            if ($loan_master->advanceType->advance_type == 'flat') {
+                ///// flat loans/////
+                if ($principal_amount) {
+                    $data = [
+                        'outstanding_principal' => $loan_master->outstanding_principal - $principal_amount,
+                        'principal_installment' => $loan_master->principal_installment + 1,
+                    ];
+                    $principal_installment = $loan_master->principal_installment + 1;
+                } elseif ($intrest_amount) {
+                    $data = [
+                        'outstanding_interest_amount' => $loan_master->outstanding_interest_amount - $intrest_amount,
+                        'interest_installment' => $loan_master->interest_installment + 1,
+                    ];
+                    $interest_installment = $loan_master->interest_installment + 1;
+                    if ($interest_installment == $loan_master->no_of_installment_interest) {
+                        $data['status'] = 5;
+                    }
+                }
+
+            } elseif ($loan_master->advanceType->advance_type == 'reducing') {
+                ///// reducing loans/////
                 $data = [
                     'outstanding_principal' => $loan_master->outstanding_principal - $principal_amount,
+                    'outstanding_interest_amount' => $loan_master->outstanding_interest_amount - $intrest_amount,
                     'principal_installment' => $loan_master->principal_installment + 1,
                 ];
-                $principal_installment = $loan_master->principal_installment + 1;
-            } elseif ($intrest_amount) {
-                $data = [
-                    'outstanding_interest_amount' => $loan_master->outstanding_interest_amount - $intrest_amount,
-                    'interest_installment' => $loan_master->interest_installment + 1,
-                ];
-                $interest_installment = $loan_master->interest_installment + 1;
-                if ($interest_installment == $loan_master->no_of_installment_interest) {
+                if (($loan_master->principal_installment + 1) == $loan_master->no_of_installment) {
                     $data['status'] = 5;
                 }
-            }
 
-        } elseif ($loan_master->advanceType->advance_type == 'reducing') {
-            ///// reducing loans/////
-            $data = [
-                'outstanding_principal' => $loan_master->outstanding_principal - $principal_amount,
-                'outstanding_interest_amount' => $loan_master->outstanding_interest_amount - $intrest_amount,
-                'principal_installment' => $loan_master->principal_installment + 1,
-            ];
-            if (($loan_master->principal_installment + 1) == $loan_master->no_of_installment) {
-                $data['status'] = 5;
             }
+            // dd($data);
+            LoanMaster::where('id', $loan->loan_id)->update($data);
 
+            LoanRecovery::create([
+                'emp_id' => $loan_master->user_id,
+                'emp_code' => $loan_master->emp_code,
+                'loan_id' => $loan_master->id,
+                'inst_no' => $loan->installment_no,
+                'principal_installment' => $principal_installment,
+                'interest_installment' => $interest_installment,
+                'principal_amount' => $principal_amount,
+                'interest_amount' => $intrest_amount,
+                'total_amount' => ($principal_amount + $intrest_amount),
+                // 'loan_type_id' =>
+                // 'recovery_type' =>
+                'month' => $salary_block->month,
+                'year' => $salary_block->year,
+                'sal_block_id' => $salary_block->id,
+            ]);
         }
-        // dd($data);
-        LoanMaster::where('id', $loan->loan_id)->update($data);
-
-        LoanRecovery::create([
-            'emp_id' => $loan_master->user_id,
-            'emp_code' => $loan_master->emp_code,
-            'loan_id' => $loan_master->id,
-            'inst_no' => $loan->installment_no,
-            'principal_installment' => $principal_installment,
-            'interest_installment' => $interest_installment,
-            'principal_amount' => $principal_amount,
-            'interest_amount' => $intrest_amount,
-            'total_amount' => ($principal_amount + $intrest_amount),
-            // 'loan_type_id' =>
-            // 'recovery_type' =>
-            'month' => $salary_block->month,
-            'year' => $salary_block->year,
-            'sal_block_id' => $salary_block->id,
-        ]);
 
     }
 
@@ -934,13 +948,16 @@ class SalaryController extends Controller
         $salary_block = salaryBlock::where('id', $sal_block_id)->first();
         DB::beginTransaction();
         try {
+            $advance_types = AdvanceType::get()->pluck('salary_head_id')->toArray();
+            $advance_types = array_unique($advance_types);
+            salaryTemp::whereIn('sal_head_id', $advance_types)->update(['amount' => 0, 'detail_json' => null]);
             $loans = LoanMaster::where('status', '!=', '5')->get();
-            // dd($loans);
             foreach ($loans as $key => $loan) {
                 if ($loan->user->salary_flag == 'open') {
                     if ($loan->advanceType->advance_type == 'flat') {
                         if ($loan->no_of_installment > $loan->principal_installment) {
-                            $emi_amount = $loan->principal_installment;
+                            $emi_amount = $loan->monthly_emi;
+                            // dd($emi_amount);
                             if (($loan->adj_interest_emi_in == 'F' && $loan->principal_installment == 0) || ($loan->adj_interest_emi_in == 'L' && $loan->no_of_installment == ($loan->principal_installment + 1))) {
                                 $emi_amount = $loan->adj_emi;
                             }
@@ -996,6 +1013,7 @@ class SalaryController extends Controller
                     } elseif ($loan->advanceType->advance_type == 'reducing') {
                         $installment_no = $loan->principal_installment + 1;
                         $emi_details = LoanMasterDetails::where('loan_id', $loan->id)->where('payment_no', $installment_no)->first();
+                        // dd($emi_details);
                         $emi_amount = $emi_details->payment;
 
                         $data = [
@@ -1006,36 +1024,72 @@ class SalaryController extends Controller
                             'installment_no' => $installment_no
                         ];
                     }
-
-                    $json_data = json_encode($data);
-                    $salary_data = [
-                        'emp_code' => $loan->user->id,
-                        'sal_head_id' => $loan->advanceType->salary_head_id,
-                        'salary_head_code' => $loan->advanceType->salaryHead->code,
-                        'salary_head_name' => $loan->advanceType->salaryHead->name,
-                        'month' => $salary_block->month,
-                        'year' => $salary_block->year,
-                        'block_id' => $salary_block->id,
-                        'pay_head' => $loan->advanceType->salaryHead->pay_head,
-                        'working_days' => 30,
-                        'status' => 'draft',
-                        'amount' => $emi_amount,
-                        'last_amount' => 0.00,
-                        'detail_json' => $json_data,
-                    ];
-
-                    salaryTemp::updateOrCreate(
-                        [
-                            'emp_id' => $loan->user->id,
+                    $check_is_exist = salaryTemp::where('emp_id', $loan->user->id)->where('sal_head_id', $loan->advanceType->salary_head_id)->first();
+                    if (!$check_is_exist) {
+                        $json_data = json_encode($data);
+                        $salary_data = [
+                            'emp_code' => $loan->user->id,
                             'sal_head_id' => $loan->advanceType->salary_head_id,
-                        ],
-                        $salary_data
-                    );
+                            'salary_head_code' => $loan->advanceType->salaryHead->code,
+                            'salary_head_name' => $loan->advanceType->salaryHead->name,
+                            'month' => $salary_block->month,
+                            'year' => $salary_block->year,
+                            'block_id' => $salary_block->id,
+                            'pay_head' => $loan->advanceType->salaryHead->pay_head,
+                            'working_days' => 30,
+                            'status' => 'draft',
+                            'amount' => $emi_amount,
+                            'last_amount' => 0.00,
+                            'detail_json' => $json_data,
+                        ];
+                        // dump($salary_data);
+                        salaryTemp::create($salary_data);
+                    } else {
+                        $old_json = $check_is_exist->detail_json;
+                        $new_data = $data;
+                        $old_data = json_decode($old_json, true);
+                        if (!is_array($old_data) || empty($old_data)) {
+                            $json_data = json_encode($new_data);
+                        } else {
+                            if (!isset($old_data[0])) {
+                                $old_data = [$old_data];
+                            }
+                            if (!isset($new_data[0])) {
+                                $new_data = [$new_data];
+                            }
+                            $combined_data = array_merge($old_data, $new_data);
+                            $json_data = json_encode($combined_data);
+                        }
+
+                        $salary_data = [
+                            'emp_code' => $loan->user->id,
+                            'sal_head_id' => $loan->advanceType->salary_head_id,
+                            'salary_head_code' => $loan->advanceType->salaryHead->code,
+                            'salary_head_name' => $loan->advanceType->salaryHead->name,
+                            'month' => $salary_block->month,
+                            'year' => $salary_block->year,
+                            'block_id' => $salary_block->id,
+                            'pay_head' => $loan->advanceType->salaryHead->pay_head,
+                            'working_days' => 30,
+                            'status' => 'draft',
+                            'amount' => $emi_amount + $check_is_exist->amount,
+                            'last_amount' => 0.00,
+                            'detail_json' => $json_data,
+                        ];
+                        // dump($salary_data);
+                        salaryTemp::updateOrCreate(
+                            [
+                                'emp_id' => $loan->user->id,
+                                'sal_head_id' => $loan->advanceType->salary_head_id,
+                            ],
+                            $salary_data
+                        );
+                    }
+
                 }
             }
             $step_details->status = 'process';
             $step_details->save();
-
             DB::commit();
         } catch (\Exception $e) {
             dd($e);
