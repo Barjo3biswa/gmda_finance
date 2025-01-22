@@ -96,6 +96,11 @@ class LoanController extends Controller
         // $tableData = json_decode($request->input('table_data'), true);
         // dd($tableData);
 
+        $status=1;
+        $advType = AdvanceType::find($request->loan_head_id);
+        if($advType->advance_type=="reducing"){
+            $status=2;
+        }
         // Generate reference number
         $currentDate = now();
         $year = $currentDate->format('y');
@@ -168,6 +173,7 @@ class LoanController extends Controller
         $advance->installment_month = $request->installment_month;
         $advance->adjustable_installment = $request->adjustable_installment;
         $advance->adjust_in = $request->adjust_in;
+        $advance->status = $status;
         /*$advance->payslip_1 = $data['payslip_1'];
         $advance->payslip_2 = $data['payslip_2'];
         $advance->payslip_3 = $data['payslip_3'];
@@ -196,7 +202,7 @@ class LoanController extends Controller
             'principal_amount' => $request->principal_amount,
             'outstanding_principal' => $request->principal_amount,
             'no_of_installment' => $request->no_of_installment,
-            'principal_installment' => $request->monthly_emi,
+            'principal_installment' => 0,
             'monthly_emi' => $request->monthly_emi,
             'adj_emi' => $request->adj_emi,
             'adj_emi_in' => $request->adj_emi_in,
@@ -211,7 +217,8 @@ class LoanController extends Controller
             'from_yyyy' => $request->wef_year,
             'from_mm' => $request->wef_month,
             'applied_on' => now(),
-            'applied_for' => 'New Loan'
+            'applied_for' => 'New Loan',
+            'status' => $status,
         ];
 
         // dd($loanMasterData);
@@ -306,6 +313,12 @@ class LoanController extends Controller
     {
         // dd($referenceNo);
 
+        $status=1;
+        $advType = AdvanceType::find($request->loan_head_id);
+        if($advType->advance_type=="reducing"){
+            $status=2;
+        }
+
         $advance = new Advance();
         $advance->user_id = $request->employee_id;
         // Get employee details
@@ -324,6 +337,7 @@ class LoanController extends Controller
         $advance->installment_month = $request->installment_month;
         $advance->adjustable_installment = $request->adjustable_installment;
         $advance->adjust_in = $request->adjust_in;
+        $advance->status = $status;
         /*$advance->payslip_1 = $data['payslip_1'];
         $advance->payslip_2 = $data['payslip_2'];
         $advance->payslip_3 = $data['payslip_3'];
@@ -366,7 +380,8 @@ class LoanController extends Controller
             'adj_interest_emi_in' => $request->adj_interest_emi_in,
             'sal_block_id' => $request->sal_block_id,
             'from_yyyy' => $request->wef_year,
-            'from_mm' => $request->wef_month
+            'from_mm' => $request->wef_month,
+            'status' => $status
         ];
 
         //dd($loanMasterData);
@@ -670,7 +685,7 @@ class LoanController extends Controller
         $advances = $query->orderBy('created_at', 'desc')->paginate(10);*/
 
         $advanceTypes = AdvanceType::all();
-        dd($advances);
+        // dd($advances);
 
         return view('loan.process', compact('salarystatus', 'emp', 'departments', 'advances', "advanceTypes"));
     }
@@ -943,5 +958,22 @@ class LoanController extends Controller
         );
 
         return redirect()->route('advance.index')->with('success', 'Advance updated successfully');
+    }
+
+
+    public function checkLoanType(Request $request)
+    {
+        try {
+            $loanType = DB::table('advance_types')->where('id', $request->loan_type_id)->first();
+            // dd($loanType->advance_type);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+        // dd($loanType);
+        if ($loanType && $loanType->advance_type == 'reducing') {
+            return response()->json(['is_reducing' => true]);
+        }
+
+        return response()->json(['is_reducing' => false]);
     }
 }

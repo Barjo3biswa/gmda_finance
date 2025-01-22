@@ -388,6 +388,7 @@ function ReducingInt()
     var r=document.getElementById("loan_interest_rate").value;
 
 var REMI = Math.abs(parseFloat(PMT(((r/100)/12), n, p))); //output */
+document.getElementById('monthly_emi').value = Math.round(REMI);
 var totalRPayable = parseFloat(REMI)*parseFloat(n);
 $('#DispPAmtR').val(p);
 $('#DispRIntP').val( Math.round(totalRPayable-p).toFixed(2));
@@ -401,6 +402,8 @@ var totP = 0;
 var totI = 0;
 var d = false;
 var dd = 1;
+var adjustedEmi = parseFloat(Math.round(REMI)+(parseFloat(totalRPayable)-(Math.round(REMI)*n)));
+document.getElementById('adj_emi').value = Math.round(adjustedEmi);
 for(var i=0;i<n;i++){
         if((i == n-1 && d == true) || (i<n-1))
         {
@@ -489,6 +492,43 @@ function PMT(i, n, p) {
         $('#tableData').val(JSON.stringify(data)); // Convert array to JSON string
 
         // Form will now submit with the serialized data
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#loan_head_id').change(function() {
+            var loanTypeId = $(this).val();
+            if (loanTypeId) {
+                $.ajax({
+                    url: "{{ route('loan.checkLoanType') }}",
+                    method: 'GET',
+                    data: { loan_type_id: loanTypeId },
+                    success: function(response) {
+                        if (response.is_reducing) {
+                            $('#interest_amount').prop('disabled', true).val('');
+                            $('#no_of_installment_interest').prop('disabled', true).val('');
+                            $('#interest_installment').prop('disabled', true).val('');
+                            $('#adj_interest_emi').prop('disabled', true).val('');
+                            $('#adj_interest_emi_in').prop('disabled', true).val('');
+                        } else {
+                            $('#interest_amount').prop('disabled', false);
+                            $('#no_of_installment_interest').prop('disabled', false);
+                            $('#interest_installment').prop('disabled', false);
+                            $('#adj_interest_emi').prop('disabled', false);
+                            $('#adj_interest_emi_in').prop('disabled', false);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("There was an error checking the loan type: " + error);
+                    }
+                });
+            } else {
+                $('#loan_amount').prop('disabled', false);
+            }
+        });
+
+        $('#loan_head_id').trigger('change');
     });
 </script>
 @endsection
