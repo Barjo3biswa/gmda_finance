@@ -49,7 +49,11 @@ class LoanMaster extends Model
         'sal_block_yr',
         'from_yyyy',
         'from_mm',
-        'updated_by'
+        'updated_by',
+        'applied_on',
+        'applied_for',
+        'status',
+
     ];
 
     public function advance()

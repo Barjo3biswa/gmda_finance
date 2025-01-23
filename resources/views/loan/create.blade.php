@@ -42,7 +42,7 @@
                                             <input type="hidden" name="sal_block_id" id="sal_block_id">
                                             <div class="col-md-3">
                                                 <label for="">Employee</label>
-                                                <select class="form-control select2" id="employee_id" name="employee_id" required>
+                                                <select class="form-control js-example-basic-multiple" id="employee_id" name="employee_id" required>
                                                     <option value="">--SELECT--</option>
                                                     @foreach ($employees as $key => $emp)
                                                         <option value="{{ $emp->user_id }}">{{ $emp->first_name }} {{ $emp->last_name }}</option>
@@ -435,8 +435,6 @@ function PMT(i, n, p) {
                             $('#interest_installment').hide();
                             $('#adj_interest_emi').hide();
                             $('#adj_interest_emi_in').hide();
-                            $('#wef_month').hide();
-                            $('#wef_year').hide();
                         } else {
                             $('#interest_amount').prop('disabled', false);
                             $('#no_of_installment_interest').prop('disabled', false);
@@ -448,8 +446,6 @@ function PMT(i, n, p) {
                             $('#interest_installment').show();
                             $('#adj_interest_emi').show();
                             $('#adj_interest_emi_in').show();
-                            $('#wef_month').show();
-                            $('#wef_year').show();
                         }
                     },
                     error: function(xhr, status, error) {
