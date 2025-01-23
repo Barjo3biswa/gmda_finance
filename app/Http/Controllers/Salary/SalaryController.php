@@ -182,10 +182,12 @@ class SalaryController extends Controller
     public function finalPaySlip(Request $request, $id, $sl_blk)
     {
         $emp_id = Crypt::decrypt($id);
-        $salary_block = salaryBlock::where('id', $sl_blk)->get();
-        $emp_details = User::where('id', $emp_id)->first();
+        $salary_block = salaryBlock::where('id', $sl_blk)->first();
+        $emp_details = User::with('employee')->where('id', $emp_id)->first();
         $salary = salaryMaster::with('salaryTrans')->where('emp_id', $emp_id)->where('sal_block_id', $sl_blk)->first();
-        return view('salary.final-payslip', compact('salary', 'emp_details'));
+        $claims = $salary->salaryTrans->where('pay_head', 'Income')->where('amount', '!=', 0);
+        $deductions = $salary->salaryTrans->where('pay_head', 'Deduction')->where('amount', '!=', 0);
+        return view('salary.final-payslip', compact('salary', 'emp_details', 'claims', 'deductions', 'salary_block'));
     }
 
     public function updateAmount(Request $request)
