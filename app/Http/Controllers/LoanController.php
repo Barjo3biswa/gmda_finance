@@ -657,7 +657,7 @@ class LoanController extends Controller
         $departments = Department::select('id', 'name')->get();
         $salarystatus = salaryBlock::where('sal_process_status', 'Unblock')->where("is_finalized", 0)->first();
 
-        //dd($salarystatus->isAdvanceProcessed());
+        dd($salarystatus);
 
         /*$advances = Advance::filter()
             // ->active()
@@ -677,6 +677,13 @@ class LoanController extends Controller
                 }
             ], 'employee', 'advanceType', 'salhead')->whereHas('advanceType', function($q) {
                 $q->where('type', 'loan');
+            })
+            ->where(function($query) use ($salarystatus) {
+                $query->where('from_yyyy', '>', $salarystatus->year)
+                      ->orWhere(function($q) use ($salarystatus) {
+                          $q->where('from_yyyy', '=', $salarystatus->year)
+                            ->where('from_mm', '>=', $salarystatus->month);
+                      });
             })
             ->orderBy('user_id', 'desc')
             ->paginate(100);
