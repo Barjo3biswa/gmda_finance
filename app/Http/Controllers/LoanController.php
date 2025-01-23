@@ -657,7 +657,7 @@ class LoanController extends Controller
         $departments = Department::select('id', 'name')->get();
         $salarystatus = salaryBlock::where('sal_process_status', 'Unblock')->where("is_finalized", 0)->first();
 
-        dd($salarystatus);
+        // dd($salarystatus);
 
         /*$advances = Advance::filter()
             // ->active()
