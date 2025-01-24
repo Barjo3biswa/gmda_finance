@@ -95,9 +95,9 @@ class LoanController extends Controller
     {
         // $tableData = json_decode($request->input('table_data'), true);
         // dd($tableData);
-
         $status=1;
-        $advType = AdvanceType::find($request->loan_head_id);
+        $advType = DB::table('advance_types')->where('id', $request->loan_head_id)->first();
+        // dd($advType);
         if($advType->advance_type=="reducing"){
             $status=2;
         }
@@ -188,7 +188,7 @@ class LoanController extends Controller
         $emp_dept = $employee->department_id;
         $emp_desig = $employee->designation_id;
         //dd($emp_code, $emp_dept, $emp_desig);
-
+        // dd($status);
         $loanMasterData = [
             'advances_id' => $advanceId,
             'reference_no' => $referenceNo,
