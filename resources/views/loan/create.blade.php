@@ -391,7 +391,7 @@ function PMT(i, n, p) {
         $("#memListTable tbody tr").each(function() {
             var row = {};
             var balance = $(this).find("td").eq(4).text().trim();
-            if (balance === "" || balance === "0.00") {
+            if (balance === "") {
                 return;
             }
             $(this).find("td").each(function(index) {
@@ -405,6 +405,7 @@ function PMT(i, n, p) {
             });
             tableData.push(row);
         });
+        alert(tableData);
         return tableData;
     }
 

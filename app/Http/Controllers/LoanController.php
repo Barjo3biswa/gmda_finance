@@ -154,116 +154,125 @@ class LoanController extends Controller
 
         // dd($referenceNo);
 
-        $advance = new Advance();
-        $advance->reference_no = $referenceNo;
-        $advance->user_id = $request->employee_id;
-        // Get employee details
-        $employee = Employee::where('user_id', $request->employee_id)->first();
-        $advance->emp_code = $employee ? $employee->code : '';
-        $advance->advance_id = $request->loan_head_id;
-        $advance->loan_head_id = $request->loan_head_id;
-        $advance->principal_amount = $request->principal_amount;
-        $advance->monthly_installment = $request->monthly_emi;
-        //$advance->recovered_amount = $request->recovered_amount;
-        $advance->interest_amount = $request->interest_amount;
-        $advance->interest_recovered = $request->interest_recovered;
-        // $advance->start_date = $request->start_date;
-        // $advance->closing_date = $request->closing_date;
-        $advance->installment_year = $request->installment_year;
-        $advance->installment_month = $request->installment_month;
-        $advance->adjustable_installment = $request->adjustable_installment;
-        $advance->adjust_in = $request->adjust_in;
-        $advance->status = $status;
-        /*$advance->payslip_1 = $data['payslip_1'];
-        $advance->payslip_2 = $data['payslip_2'];
-        $advance->payslip_3 = $data['payslip_3'];
-        $advance->document_path = $data['document_path'];*/
+        DB::beginTransaction();
+        try {
 
-        $advance->save();
+            $advance = new Advance();
+            $advance->reference_no = $referenceNo;
+            $advance->user_id = $request->employee_id;
+            // Get employee details
+            $employee = Employee::where('user_id', $request->employee_id)->first();
+            $advance->emp_code = $employee ? $employee->code : '';
+            $advance->advance_id = $request->loan_head_id;
+            $advance->loan_head_id = $request->loan_head_id;
+            $advance->principal_amount = $request->principal_amount;
+            $advance->monthly_installment = $request->monthly_emi;
+            //$advance->recovered_amount = $request->recovered_amount;
+            $advance->interest_amount = $request->interest_amount;
+            $advance->interest_recovered = $request->interest_recovered;
+            // $advance->start_date = $request->start_date;
+            // $advance->closing_date = $request->closing_date;
+            $advance->installment_year = $request->installment_year;
+            $advance->installment_month = $request->installment_month;
+            $advance->adjustable_installment = $request->adjustable_installment;
+            $advance->adjust_in = $request->adjust_in;
+            $advance->status = $status;
+            /*$advance->payslip_1 = $data['payslip_1'];
+            $advance->payslip_2 = $data['payslip_2'];
+            $advance->payslip_3 = $data['payslip_3'];
+            $advance->document_path = $data['document_path'];*/
 
-        $advanceId = $advance->id;
+            $advance->save();
 
-        $employee = Employee::where('user_id', $request->employee_id)->first();
-        $emp_code = $employee->code;
-        $emp_dept = $employee->department_id;
-        $emp_desig = $employee->designation_id;
-        //dd($emp_code, $emp_dept, $emp_desig);
-        // dd($status);
-        $loanMasterData = [
-            'advances_id' => $advanceId,
-            'reference_no' => $referenceNo,
-            'user_id' => $request->employee_id,
-            'emp_code' => $emp_code ?? null,
-            'fld_deptid' => $emp_dept,
-            'fld_desigid' => $emp_desig,
-            'loan_type_id' => $request->loan_head_id,
-            'loan_amount' => $request->loan_amount,
-            'loan_interest_rate' => $request->loan_interest_rate,
-            'principal_amount' => $request->principal_amount,
-            'outstanding_principal' => $request->principal_amount,
-            'no_of_installment' => $request->no_of_installment,
-            'principal_installment' => 0,
-            'monthly_emi' => $request->monthly_emi,
-            'adj_emi' => $request->adj_emi,
-            'adj_emi_in' => $request->adj_emi_in,
-            'interest_amount' => $request->interest_amount,
-            'no_of_installment_interest' => $request->no_of_installment_interest,
-            'outstanding_interest_amount' => $request->interest_amount,
-            'interest_installment' => 0,
-            'interest_emi' => $request->interest_installment,
-            'adj_interest_emi' => $request->adj_interest_emi,
-            'adj_interest_emi_in' => $request->adj_interest_emi_in,
-            'sal_block_id' => $request->sal_block_id,
-            'from_yyyy' => $request->wef_year,
-            'from_mm' => $request->wef_month,
-            'applied_on' => now(),
-            'applied_for' => 'New Loan',
-            'status' => $status,
-        ];
+            $advanceId = $advance->id;
 
-        // dd($loanMasterData);
-
-        $salaryBlock = SalaryBlock::find($request->sal_block_id);
-        //dd($loanMasterData);
-
-        $salaryBlock = salaryBlock::find($request->sal_block_id);
-
-        /*
-        if ($salaryBlock) {
-            $loanMasterData['sal_block_month'] = $salaryBlock->month;
-            $loanMasterData['sal_block_yr'] = $salaryBlock->year;
-        } else {
-            // Handle if no SalaryBlock is found (you can set null or handle the error)
-            $loanMasterData['sal_block_month'] = null;
-            $loanMasterData['sal_block_yr'] = null;
-        }
-        */
-
-        //dd($loanMasterData);
-        LoanMaster::firstOrCreate(
-            $loanMasterData
-        );
-
-        $loanid = LoanMaster::where('reference_no', $referenceNo)->value('id');
-
-        $tableData = json_decode($request->input('table_data'), true);
-        $op_bal = $request->loan_amount;
-        foreach ($tableData as $row) {
-            LoanMasterDetail::create([
-                'emp_id' => $request->employee_id,
-                'emp_code' => $emp_code,
+            $employee = Employee::where('user_id', $request->employee_id)->first();
+            $emp_code = $employee->code;
+            $emp_dept = $employee->department_id;
+            $emp_desig = $employee->designation_id;
+            //dd($emp_code, $emp_dept, $emp_desig);
+            // dd($status);
+            $loanMasterData = [
+                'advances_id' => $advanceId,
+                'reference_no' => $referenceNo,
+                'user_id' => $request->employee_id,
+                'emp_code' => $emp_code ?? null,
+                'fld_deptid' => $emp_dept,
+                'fld_desigid' => $emp_desig,
                 'loan_type_id' => $request->loan_head_id,
-                'loan_id' => $loanid,
-                'payment_no' => $row['sl'],
-                'payment_date' => '01-' . $request->wef_month . '-' . $request->wef_year,
-                'begining_balance' => $op_bal,
-                'payment' => $row['emi'],
-                'interest' => $row['int'],
-                'principal' => $row['principal'],
-                'ending_balance' => $row['balance']
-            ]);
-            $op_bal = $row['balance'];
+                'loan_amount' => $request->loan_amount,
+                'loan_interest_rate' => $request->loan_interest_rate,
+                'principal_amount' => $request->principal_amount,
+                'outstanding_principal' => $request->principal_amount,
+                'no_of_installment' => $request->no_of_installment,
+                'principal_installment' => 0,
+                'monthly_emi' => $request->monthly_emi,
+                'adj_emi' => $request->adj_emi,
+                'adj_emi_in' => $request->adj_emi_in,
+                'interest_amount' => $request->interest_amount,
+                'no_of_installment_interest' => $request->no_of_installment_interest,
+                'outstanding_interest_amount' => $request->interest_amount,
+                'interest_installment' => 0,
+                'interest_emi' => $request->interest_installment,
+                'adj_interest_emi' => $request->adj_interest_emi,
+                'adj_interest_emi_in' => $request->adj_interest_emi_in,
+                'sal_block_id' => $request->sal_block_id,
+                'from_yyyy' => $request->wef_year,
+                'from_mm' => $request->wef_month,
+                'applied_on' => now(),
+                'applied_for' => 'New Loan',
+                'status' => $status,
+            ];
+
+            // dd($loanMasterData);
+
+            $salaryBlock = SalaryBlock::find($request->sal_block_id);
+            //dd($loanMasterData);
+
+            $salaryBlock = salaryBlock::find($request->sal_block_id);
+
+            /*
+            if ($salaryBlock) {
+                $loanMasterData['sal_block_month'] = $salaryBlock->month;
+                $loanMasterData['sal_block_yr'] = $salaryBlock->year;
+            } else {
+                // Handle if no SalaryBlock is found (you can set null or handle the error)
+                $loanMasterData['sal_block_month'] = null;
+                $loanMasterData['sal_block_yr'] = null;
+            }
+            */
+
+            //dd($loanMasterData);
+            LoanMaster::firstOrCreate(
+                $loanMasterData
+            );
+
+            $loanid = LoanMaster::where('reference_no', $referenceNo)->value('id');
+            
+            $tableData = json_decode($request->input('table_data'), true);
+            // dd($tableData);
+            $op_bal = $request->loan_amount;
+            foreach ($tableData as $row) {
+                LoanMasterDetail::create([
+                    'emp_id' => $request->employee_id,
+                    'emp_code' => $emp_code,
+                    'loan_type_id' => $request->loan_head_id,
+                    'loan_id' => $loanid,
+                    'payment_no' => $row['sl'],
+                    'payment_date' => '01-' . $request->wef_month . '-' . $request->wef_year,
+                    'begining_balance' => $op_bal,
+                    'payment' => $row['emi'],
+                    'interest' => $row['int'],
+                    'principal' => $row['principal'],
+                    'ending_balance' => $row['balance']
+                ]);
+                $op_bal = $row['balance'];
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('loan.index')->with('error', 'Error occurred: ' . $e->getMessage());
         }
+        DB::commit();
 
         return redirect()->route('loan.index')->with('success', 'New loan added successfully');
     }
