@@ -33,7 +33,7 @@ class LoanController extends Controller
 
         // Initialize the base query for advances
         $query = Advance::with('employee', 'advanceType')
-            ->whereHas('advanceType', function($q) {
+            ->whereHas('advanceType', function ($q) {
                 $q->where('type', 'loan'); // Filter by loan type
             })
             ->orderBy('created_at', 'desc');
@@ -45,7 +45,7 @@ class LoanController extends Controller
 
         // Apply filtering for department if selected
         if ($request->has('department_id') && $request->department_id != '') {
-            $query->whereHas('employee', function($q) use ($request) {
+            $query->whereHas('employee', function ($q) use ($request) {
                 $q->where('department_id', $request->department_id);
             });
         }
@@ -95,11 +95,11 @@ class LoanController extends Controller
     {
         // $tableData = json_decode($request->input('table_data'), true);
         // dd($tableData);
-        $status=1;
+        $status = 1;
         $advType = DB::table('advance_types')->where('id', $request->loan_head_id)->first();
         // dd($advType);
-        if($advType->advance_type=="reducing"){
-            $status=2;
+        if ($advType->advance_type == "reducing") {
+            $status = 2;
         }
         // Generate reference number
         $currentDate = now();
@@ -122,7 +122,7 @@ class LoanController extends Controller
         function extractNumericPart($referenceNo)
         {
             if (preg_match('/\d+$/', $referenceNo, $matches)) {
-                return (int)$matches[0];  // Return the numeric part as an integer
+                return (int) $matches[0];  // Return the numeric part as an integer
             }
             return 0;  // Return 0 if no numeric part is found
         }
@@ -222,7 +222,7 @@ class LoanController extends Controller
         ];
 
         // dd($loanMasterData);
-        
+
         $salaryBlock = SalaryBlock::find($request->sal_block_id);
         //dd($loanMasterData);
 
@@ -244,24 +244,25 @@ class LoanController extends Controller
             $loanMasterData
         );
 
-        $loanid=LoanMaster::where('reference_no', $referenceNo)->value('id');
+        $loanid = LoanMaster::where('reference_no', $referenceNo)->value('id');
 
         $tableData = json_decode($request->input('table_data'), true);
-
+        $op_bal = $request->loan_amount;
         foreach ($tableData as $row) {
             LoanMasterDetail::create([
                 'emp_id' => $request->employee_id,
                 'emp_code' => $emp_code,
-                'loan_type_id'=> $request->loan_head_id,
+                'loan_type_id' => $request->loan_head_id,
                 'loan_id' => $loanid,
-                'payment_no'=>$row['sl'],
-                'payment_date'=>'01-'.$request->wef_month.'-'.$request->wef_year,
-                'begining_balance'=>$row['balance'],
+                'payment_no' => $row['sl'],
+                'payment_date' => '01-' . $request->wef_month . '-' . $request->wef_year,
+                'begining_balance' => $op_bal,
                 'payment' => $row['emi'],
                 'interest' => $row['int'],
                 'principal' => $row['principal'],
                 'ending_balance' => $row['balance']
             ]);
+            $op_bal = $row['balance'];
         }
 
         return redirect()->route('loan.index')->with('success', 'New loan added successfully');
@@ -272,15 +273,16 @@ class LoanController extends Controller
      */
     public function show(string $id)
     {
-        $refno=advance::where('id', $id)->value('reference_no');
-        $loanid=LoanMaster::where('advances_id', $id)->value('id');
+        $refno = advance::where('id', $id)->value('reference_no');
+        $loanid = LoanMaster::where('advances_id', $id)->value('id');
         // dd($loanid);
         $loan = LoanMaster::with('employee', 'advanceType')->where('id', $loanid)->first();
         $loanmasterdetail = LoanMasterDetail::where('loan_id', $loanid)->get();
         // dd($loanmasterdetail);
         // dd($loan);
         $employees = Employee::all();
-        $advanceTypes = DB::select('SELECT * FROM advance_types WHERE type = ?', ['loan']);;
+        $advanceTypes = DB::select('SELECT * FROM advance_types WHERE type = ?', ['loan']);
+        ;
         $salaryheads = SalaryHead::all();
         // dd($loan)
         return view('loan.show', compact('loan', 'loanmasterdetail', 'employees', 'advanceTypes', 'salaryheads'));
@@ -298,8 +300,8 @@ class LoanController extends Controller
         // Fetch related data (e.g., employees, loan types, salary heads)
         $employees = Employee::all();
         $advanceTypes = DB::table('advance_types')
-                  ->where('type', 'loan')
-                  ->get();
+            ->where('type', 'loan')
+            ->get();
         $salaryheads = salaryHead::all();
 
         // Return the edit view with the current loan data
@@ -313,10 +315,10 @@ class LoanController extends Controller
     {
         // dd($referenceNo);
 
-        $status=1;
+        $status = 1;
         $advType = AdvanceType::find($request->loan_head_id);
-        if($advType->advance_type=="reducing"){
-            $status=2;
+        if ($advType->advance_type == "reducing") {
+            $status = 2;
         }
 
         $advance = new Advance();
@@ -342,7 +344,7 @@ class LoanController extends Controller
         $advance->payslip_2 = $data['payslip_2'];
         $advance->payslip_3 = $data['payslip_3'];
         $advance->document_path = $data['document_path'];*/
-        
+
         $advance = Advance::where('id', $request->advances_id)->first();
         $advance->update();
 
@@ -531,7 +533,7 @@ class LoanController extends Controller
         function extractNumericPart($referenceNo)
         {
             if (preg_match('/\d+$/', $referenceNo, $matches)) {
-                return (int)$matches[0];  // Return the numeric part as an integer
+                return (int) $matches[0];  // Return the numeric part as an integer
             }
             return 0;  // Return 0 if no numeric part is found
         }
@@ -675,7 +677,7 @@ class LoanController extends Controller
                     return $query->where("year", optional($salarystatus)->year)
                         ->where("month", optional($salarystatus)->month);
                 }
-            ], 'employee', 'advanceType', 'salhead')->whereHas('advanceType', function($q) {
+            ], 'employee', 'advanceType', 'salhead')->whereHas('advanceType', function ($q) {
                 $q->where('type', 'loan');
             })
             ->orderBy('user_id', 'desc')
@@ -740,34 +742,34 @@ class LoanController extends Controller
             }
 
             $loans = LoanMaster::query()        //$selected_advances = Advance::query()
-                    ->whereIn("id", $adv_ids)
-                    //->active()
-                    ->get();
-    
-                    foreach($loans as $loan){
-                        if ($loan->principal_instllmnt_status == 'completed' || $loan->outstanding_principal <= 0) {
-                            $installmentType = 'interest';
-                        } else {
-                            $installmentType = 'principal';
-                        }
-    
-                        $log_data = [
-                            'loan_id'   => $loan->id,
-                            'ref_no'    => $loan->reference_no,
-                            'employee_id'    => $loan->user_id,
-                            'emp_code'    => $loan->emp_code,
-                            'monthly_emi'    => $loan->monthly_emi,
-                            'interest_installment' => $loan->interest_installment,
-                            'process_by'     => auth()->user()->id,
-                            'process_date'   => now(),
-                            'principal_or_interest' => $installmentType,
-                            'month'          => $salary_block->month, //salary month
-                            'year'           => $salary_block->year, //salary year
-                            'type'           => "loan",
-                            'ip_address'     => request()->ip(),
-                        ];
-                        LoanProcessLog::create($log_data);
-                    }
+                ->whereIn("id", $adv_ids)
+                //->active()
+                ->get();
+
+            foreach ($loans as $loan) {
+                if ($loan->principal_instllmnt_status == 'completed' || $loan->outstanding_principal <= 0) {
+                    $installmentType = 'interest';
+                } else {
+                    $installmentType = 'principal';
+                }
+
+                $log_data = [
+                    'loan_id' => $loan->id,
+                    'ref_no' => $loan->reference_no,
+                    'employee_id' => $loan->user_id,
+                    'emp_code' => $loan->emp_code,
+                    'monthly_emi' => $loan->monthly_emi,
+                    'interest_installment' => $loan->interest_installment,
+                    'process_by' => auth()->user()->id,
+                    'process_date' => now(),
+                    'principal_or_interest' => $installmentType,
+                    'month' => $salary_block->month, //salary month
+                    'year' => $salary_block->year, //salary year
+                    'type' => "loan",
+                    'ip_address' => request()->ip(),
+                ];
+                LoanProcessLog::create($log_data);
+            }
             //  dd($loans);
             //log---
 
@@ -891,7 +893,7 @@ class LoanController extends Controller
                     return $query->where("department_id", request("department_id"));
                 });
             })
-            ->whereHas('advanceType', function($q) {
+            ->whereHas('advanceType', function ($q) {
                 $q->where('type', 'loan');
             })
         ;
@@ -912,7 +914,7 @@ class LoanController extends Controller
 
     public function close(string $id)
     {
-        $refno=advance::where('id', $id)->value('reference_no');
+        $refno = advance::where('id', $id)->value('reference_no');
         $loan = LoanMaster::where('reference_no', $refno)->first();
         // Fetch related data (e.g., employees, loan types, salary heads)
         $employees = Employee::all();
@@ -929,14 +931,14 @@ class LoanController extends Controller
     public function closeLoan(Request $request, string $id)
     {
         // dd($referenceNo);
-        
+
         $advance = new Advance();
         $advance->close_advance = $request->close_advance;
         $advance->closed_from_month = $request->closed_from_month;
         $advance->closed_from_year = $request->closed_from_year;
         $advance->closed_to_month = $request->closed_to_month;
         $advance->closed_to_year = $request->closed_to_year;
-        
+
         $advance = Advance::where('reference_no', $request->reference_no)->first();
         $advance->update();
 
