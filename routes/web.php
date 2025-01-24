@@ -143,6 +143,11 @@ Route::group(['middleware' => 'auth.jwt'], function () {
 
 
     Route::post('/set-default', [App\Http\Controllers\defaultOptionController::class, 'setDefault'])->name('set-default');
+
+
+    Route::get('form16', [App\Http\Controllers\Form16bController::class, 'index'])->name('form16.index');
+    Route::post('form16/create', [App\Http\Controllers\Form16bController::class, 'create'])->name('form16.create');
+    Route::post('form16/store', [App\Http\Controllers\Form16bController::class, 'store'])->name('form16.store');
 });
 
 

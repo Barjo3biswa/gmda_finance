@@ -154,5 +154,4 @@ class User extends Authenticatable implements JWTSubject // Add implements JWTSu
         return $this->belongsTo(Employee::class, 'id', 'user_id');
     }
 
-
 }

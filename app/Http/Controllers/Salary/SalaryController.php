@@ -17,6 +17,7 @@ use App\Models\salaryHead;
 use App\Models\salaryHeadAmountDistribution;
 use App\Models\salaryMaster;
 use App\Models\salaryProcessStep;
+use App\Models\SalarySummmary;
 use App\Models\salaryTemp;
 use App\Models\salaryTrans;
 use App\Models\User;
@@ -768,17 +769,26 @@ class SalaryController extends Controller
         // $step_details = salaryProcessStep::where('step_name', 'salary')->first();
         $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
 
-        $user = user::get();
+        $financial_year =  $salary_block->month >= 4 ? $salary_block->year . '-' . ($salary_block->year + 1) : ($salary_block->year - 1) . '-' . $salary_block->year;
+
+        $user = user::where('salary_flag', 'open')->get();
+
 
         try {
             DB::beginTransaction();
             foreach ($user as $usr) {
                 $salaryTempData = salaryTemp::where('emp_id', $usr->id)->where('block_id', $salary_block->id)->get();
 
+
+                if ($salaryTempData->isEmpty()) {
+                    continue;
+                }
+
                 $salarySummary = SalarySummmary::updateOrCreate(
                     [
                         'emp_id' => $usr->id,
                         'sal_block_id' => $salary_block->id,
+                        'financial_year' => $financial_year,
                         'month' => $salary_block->month,
                         'year' => $salary_block->year,
                     ],
