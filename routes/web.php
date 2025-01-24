@@ -38,6 +38,7 @@ Route::group(['middleware' => 'auth.jwt'], function () {
 
     Route::get('/salary-process', [App\Http\Controllers\Salary\SalaryController::class, 'salaryProcess'])->name('salary-process');
     Route::get('/payslip/{id}/{sl_blk}', [App\Http\Controllers\Salary\SalaryController::class, 'payslip'])->name('payslip');
+    Route::get('/final-pay-slip/{id}/{sl_blk}', [App\Http\Controllers\Salary\SalaryController::class, 'finalPaySlip'])->name('final-pay-slip');
     Route::post('/update-amount', [App\Http\Controllers\Salary\SalaryController::class, 'updateAmount'])->name('update-amount');
 
     Route::get('/excel-upload', [App\Http\Controllers\Salary\SalaryController::class, 'salaryExcelUpload'])->name('excel-upload');
@@ -65,6 +66,7 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::get('/hold-unhold', [App\Http\Controllers\Salary\SalaryController::class, 'holdUnhold'])->name('hold-unhold');
     Route::post('/hold-salary', [App\Http\Controllers\Salary\SalaryController::class, 'holdSalary'])->name('hold-salary');
     Route::get('/unhold-salary/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'unholdSalary'])->name('unhold-salary');
+
 
 
 

@@ -48,7 +48,7 @@
                                                                 <div class="form-group">
                                                                     <label for="name">Head Code</label>
                                                                     <input name="code" class="form-control"
-                                                                        @if (isset($editable)) value="{{ $editable->code }}" @endif>
+                                                                        @if (isset($editable)) value="{{ $editable->code }}" readonly @endif>
                                                                 </div>
                                                             </div>
                                                         </div>

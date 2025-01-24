@@ -8,18 +8,20 @@ return new class extends Migration {
     /**
      * Run the migrations.
      */
-    // public function up(): void
-    // {
-    //     Schema::create('advance_processes', function (Blueprint $table) {
-    //         $table->unsignedBigInteger('loan_id');
-    //     });
-    // }
+    public function up(): void
+    {
+        Schema::table('salary_trans', function (Blueprint $table) {
+            $table->integer('master_id')->after('emp_code');
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        //
+        Schema::table('salary_trans', function (Blueprint $table) {
+            //
+        });
     }
 };

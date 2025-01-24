@@ -11,10 +11,10 @@
   padding: 20px 0 0px 0px;
 }
 
-.breadcome-list {
+/* .breadcome-list {
   margin-top: 60px;
   margin-bottom: 20px;
-}
+} */
 
 .breadcome-list.single-page-breadcome {
   padding-top: 10px;
@@ -30,17 +30,25 @@
 ul.tab-custon-design li.active a,
 ul.tab-review-design li.active a {
   color: #fff !important;
-  background: green;
+  /* background: green; */
+  background: #488acd;
   /* border-radius: 14px; */
 }
 
+.all-content-wrapper {
+  position: relative;
+  min-height: 100vh;
+}
+
 .footer-copyright-area {
-  position: fixed;
-  bottom: 0;
-  /* position: relative;
+  /* position: fixed;
   bottom: 0; */
+  position: absolute;
+  /* top: 100%; */
+  bottom: -30px;
   width: 100%;
   padding: 4px 0px !important;
+  margin-top: 20px;
 }
 
 .mb-5 {
