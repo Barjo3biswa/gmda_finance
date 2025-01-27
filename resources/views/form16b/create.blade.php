@@ -529,5 +529,87 @@
     </div>
 @endsection
 @section('js')
-    <script></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        console.log('ready');
+        change();
+    });
+    function change() {
+        console.log('change');
+        var basic1 = $('#basic1').val() || 0;
+        var basic2 = $('#basic2').val() || 0;
+        var basic3 = $('#basic3').val() || 0;
+        var gross = parseInt(basic1)+parseInt(basic2)+parseInt(basic3);
+        $('#gross').val(gross);
+
+        var hra = $('#hra').val() || 0;
+        var coveyance = $('#coveyance').val() ||0;
+        var charge_allowance = $('#charge_allowance').val() || 0;
+        var other = $('#other').val() || 0;
+        var total_less = parseInt(hra)+parseInt(coveyance)+parseInt(charge_allowance)+parseInt(other);
+        $('#total_less').val(total_less);
+
+        var balance = gross-total_less;
+        $('#balance').val(balance);
+
+        var entertainment_allowance = $('#entertainment_allowance').val() || 0;
+        var professional_tax = $('#professional_tax').val() || 0;
+        var aggregate = parseInt(entertainment_allowance)+parseInt(professional_tax);
+        $('#aggregate').val(aggregate);
+
+        var income_chargeable = parseInt(balance)-parseInt(aggregate);
+        $('#income_chargeable').val(income_chargeable);
+
+        var sb_interest = $('#sb_interest').val() || 0;
+        var hbl_interest = $('#hbl_interest').val() || 0;
+        var total_other_income = parseInt(sb_interest)+parseInt(hbl_interest);
+        $('#total_other_income').val(total_other_income);
+        var gross_total_income = parseInt(income_chargeable)+parseInt(sb_interest)+parseInt(hbl_interest);
+        $('#gross_total_income').val(gross_total_income);
+        var total_deduction_A = parseInt(gpf_epf_cpf)+parseInt(gis)+parseInt(life_insurance_premium)+parseInt(public_provident_fund)+parseInt(repayment_of_hbl_principal)+parseInt(tuition_fee_of_children)+parseInt(other_deduction);
+
+        var gpf_epf_cpf = $('#gpf_epf_cpf').val() || 0;
+        var gis = $('#gis').val() || 0;
+        var life_insurance_premium = $('#life_insurance_premium').val() || 0;
+        var public_provident_fund = $('#public_provident_fund').val() || 0;
+        var repayment_of_hbl_principal = $('#repayment_of_hbl_principal').val() || 0;
+        var tuition_fee_of_children = $('#tuition_fee_of_children').val() || 0;
+        var other_deduction = $('#other_deduction').val() || 0;
+        var section_80ccc = $('#section_80ccc').val() || 0;
+        var section_80ccd = $('#section_80ccd').val() || 0;
+        var total_deduction_9 = parseInt(gpf_epf_cpf)+parseInt(gis)+parseInt(life_insurance_premium)+parseInt(public_provident_fund)+parseInt(repayment_of_hbl_principal)+parseInt(tuition_fee_of_children)+parseInt(other_deduction)+parseInt(section_80ccc)+parseInt(section_80ccd);
+        $('#total_deduction_9').val(total_deduction_9);
+
+
+
+        var medical_insurance_premium = $('#medical_insurance_premium').val() || 0;
+        var medical_treatment_of_handicapped = $('#medical_treatment_of_handicapped').val() || 0;
+        var interest_on_higher_edu_loan = $('#interest_on_higher_edu_loan').val() || 0;
+        var donations = $('#donations').val() || 0;
+        var interest_on_sb_ac_deducation = $('#interest_on_sb_ac_deducation').val() || 0;
+        var aggregate_of_deductible_amount = parseInt(total_deduction_9)+parseInt(medical_insurance_premium)+parseInt(medical_treatment_of_handicapped)+parseInt(interest_on_higher_edu_loan)+parseInt(donations)+parseInt(interest_on_sb_ac_deducation);
+
+        $('#aggregate_of_deductible_amount').val(aggregate_of_deductible_amount);
+        var total_income = parseInt(gross_total_income)-parseInt(aggregate_of_deductible_amount);
+        $('#total_income').val(total_income);
+
+
+        var tax_on_total_income = $('#tax_on_total_income').val() || 0;
+        var rebate = $('#rebate').val() || 0;
+        var bal_tax_payable = $('#bal_tax_payable').val() || 0;
+        var edu_cess = $('#edu_cess').val() || 0;
+        var tax_payable = parseInt(bal_tax_payable)+parseInt(edu_cess);
+        $('#tax_payable').val(tax_payable);
+
+
+        var less_relief = $('#less_relief').val() || 0;
+        var tax_payable18 = parseInt(tax_payable)-parseInt(less_relief);
+        $('#tax_payable18').val(tax_payable18);
+        var tax_deduct = $('#tax_deduct').val() || 0;
+        var balance_20 = parseInt(tax_payable18)-parseInt(tax_deduct);
+        $('#balance_20').val(balance_20);
+
+    }
+
+    </script>
 @endsection

@@ -25,9 +25,9 @@ class Form16bController extends Controller
 
         // dd($salarySummary);
 
-        if ($salarySummary != 12) {
-            return redirect()->route('form16.index')->with('error', 'Complete Salary Summaries does not exists for this employee and financial year.');
-        }
+        // if ($salarySummary != 12) {
+        //     return redirect()->route('form16.index')->with('error', 'Complete Salary Summaries does not exists for this employee and financial year.');
+        // }
 
         $totalINC_HRA = SalarySummmary::select('emp_id', 'INC_HRA', 'financial_year')
             ->where('emp_id', $employee->id)
