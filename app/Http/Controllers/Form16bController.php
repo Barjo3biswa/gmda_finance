@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\Form16b;
+use App\Models\salaryMaster;
 use App\Models\SalarySummmary;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ class Form16bController extends Controller
 
     public function create(Request $request)
     {
+        // dd($request->all());
         $employee = User::where('id', $request->employee_id)->first();
         $financialYear = $request->financial_year;
 
@@ -36,8 +38,16 @@ class Form16bController extends Controller
             return redirect()->route('form16.index')->with('error', 'Form 16b already generated for this employee and financial year.');
         }
 
+        // dd($employee->emp_code, $financialYear);
+
+        $totalGrossSalary = salaryMaster::where('emp_code', $employee->emp_code)
+            ->where('financial_year', $financialYear)
+            ->sum('gross');
+
+        // dd($totalGrossSalary);
+
         $totalINC_HRA = SalarySummmary::select('emp_id', 'INC_HRA', 'financial_year')
-            ->where('emp_id', $employee->id)
+            ->where('emp_code', $employee->emp_code)
             ->where('financial_year', $financialYear)
             ->sum('INC_HRA');
 
@@ -45,28 +55,28 @@ class Form16bController extends Controller
         // dd($totalINC_HRA);
 
         $totalINC_OTHERALLW = SalarySummmary::select('emp_id', 'INC_OTHERALLW', 'financial_year')
-            ->where('emp_id', $employee->id)
+            ->where('emp_code', $employee->emp_code)
             ->where('financial_year', $financialYear)
             ->sum('INC_OTHERALLW');
 
         // dd($totalINC_OTHERALLW);
 
         $totalDED_PTAX = SalarySummmary::select('emp_id', 'DED_PTAX', 'financial_year')
-            ->where('emp_id', $employee->id)
+            ->where('emp_code', $employee->emp_code)
             ->where('financial_year', $financialYear)
             ->sum('DED_PTAX');
 
         // dd($totalDED_PTAX);
 
         $totalDED_GPF = SalarySummmary::select('emp_id', 'DED_GPF', 'financial_year')
-            ->where('emp_id', $employee->id)
+            ->where('emp_code', $employee->emp_code)
             ->where('financial_year', $financialYear)
             ->sum('DED_GPF');
 
         // dd($totalDED_GPF);
 
         $totalDED_EPF = SalarySummmary::select('emp_id', 'DED_EPF', 'financial_year')
-            ->where('emp_id', $employee->id)
+            ->where('emp_code', $employee->emp_code)
             ->where('financial_year', $financialYear)
             ->sum('DED_EPF');
 
@@ -74,14 +84,14 @@ class Form16bController extends Controller
         // dd($totalDED_EPF);
 
         $totalDED_NPS = SalarySummmary::select('emp_id', 'DED_NPS', 'financial_year')
-            ->where('emp_id', $employee->id)
+            ->where('emp_code', $employee->emp_code)
             ->where('financial_year', $financialYear)
             ->sum('DED_NPS');
 
         // dd($totalDED_NPS);
 
         $totalDED_CPF = SalarySummmary::select('emp_id', 'DED_CPF', 'financial_year')
-            ->where('emp_id', $employee->id)
+            ->where('emp_code', $employee->emp_code)
             ->where('financial_year', $financialYear)
             ->sum('DED_CPF');
 
@@ -92,7 +102,7 @@ class Form16bController extends Controller
         $totalGPF_EPF_CPF = $totalDED_GPF + $totalDED_NPS;
 
         $totalDED_GSLI = SalarySummmary::select('emp_id', 'DED_GSLI', 'financial_year')
-            ->where('emp_id', $employee->id)
+            ->where('emp_code', $employee->emp_code)
             ->where('financial_year', $financialYear)
             ->sum('DED_GSLI');
 
@@ -103,6 +113,7 @@ class Form16bController extends Controller
         return view('form16b.create', compact(
             'employee',
             'financialYear',
+            'totalGrossSalary',
             'totalINC_HRA',
             'totalINC_OTHERALLW',
             'totalDED_PTAX',

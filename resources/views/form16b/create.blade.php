@@ -40,7 +40,7 @@
                                                             <label>(a) Salary as per provisions contained in sec. 17(1)</label>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" placeholder="Basic" name="basic1" id="basic1" data-validation="number" data-validation-error-msg="Numeric Value Only" value="$total_gross_salary" onkeyup="change()" />
+                                                            <input type="text" class="form-control" placeholder="Basic" name="basic1" id="basic1" data-validation="number" data-validation-error-msg="Numeric Value Only" value="{{$totalGrossSalary}}" onkeyup="change()" />
                                                         </div>
                                                     </div>
                                                 </div>
