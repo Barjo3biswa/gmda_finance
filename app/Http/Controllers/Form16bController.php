@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\Form16b;
 use App\Models\SalarySummmary;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -28,6 +29,12 @@ class Form16bController extends Controller
         // if ($salarySummary != 12) {
         //     return redirect()->route('form16.index')->with('error', 'Complete Salary Summaries does not exists for this employee and financial year.');
         // }
+
+        $form16b = Form16b::where('emp_code', $employee->emp_code)->where('financial_year', $financialYear)->first();
+
+        if ($form16b) {
+            return redirect()->route('form16.index')->with('error', 'Form 16b already generated for this employee and financial year.');
+        }
 
         $totalINC_HRA = SalarySummmary::select('emp_id', 'INC_HRA', 'financial_year')
             ->where('emp_id', $employee->id)
