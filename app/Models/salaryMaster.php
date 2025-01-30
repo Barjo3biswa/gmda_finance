@@ -16,4 +16,14 @@ class salaryMaster extends Model
     {
         return $this->hasMany(salaryTrans::class, 'master_id', 'id');
     }
+
+    public function employee()
+    {
+        return $this->hasOne(Employee::class, 'user_id', 'emp_id');
+    }
+
+    public function user()
+    {
+        return $this->hasOne(user::class, 'id', 'emp_id');
+    }
 }

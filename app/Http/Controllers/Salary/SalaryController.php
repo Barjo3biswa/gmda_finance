@@ -649,13 +649,14 @@ class SalaryController extends Controller
                     'sal_block_id' => $sal_block_id,
                     'month' => $salary_block->month,
                     'year' => $salary_block->year,
+                    'financial_year' => $salary_block->month >= 4 ? $salary_block->year . '-' . ($salary_block->year + 1) : ($salary_block->year - 1) . '-' . $salary_block->year,
                     // 'total_days'  =>,
                     // 'working_days'  =>,
                     'gross' => $gross,
                     'deduction' => $deduction,
                     'net' => $net,
                 ];
-                dd($data);
+                // dd($data);
                 $created = salaryMaster::create($data);
 
                 $temp_salary = salaryTemp::where('emp_id', $emp->id)
@@ -679,10 +680,10 @@ class SalaryController extends Controller
             $salary_block->save();
             $step_details->status = 'process';
             $step_details->save();
-            $this->processSalarySummary();
+            $this->processSalarySummary($step_details->block_id);
             DB::commit();
         } catch (\Exception $e) {
-            // dd($e);
+            dd($e);
             DB::rollBack();
             return redirect()->back()->with('error', 'Error while Finalizing Salary');
         }
@@ -809,11 +810,11 @@ class SalaryController extends Controller
     }
 
 
-    public function processSalarySummary(): bool
+    public function processSalarySummary($block_id): bool
     {
         // $step_details = salaryProcessStep::where('step_name', 'salary')->first();
-        $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
-
+        $salary_block = salaryBlock::where('id', $block_id)->first();
+        // dd($salary_block);
         $user = user::get();
         DB::beginTransaction();
         $financial_year = $salary_block->month >= 4 ? $salary_block->year . '-' . ($salary_block->year + 1) : ($salary_block->year - 1) . '-' . $salary_block->year;
@@ -1195,6 +1196,41 @@ class SalaryController extends Controller
         userHoldUnhold::where('emp_id', $decrypt)->update(['status' => 'closed']);
         return redirect()->back()->with('success', 'Successfull');
 
+    }
+
+
+    public function salarySummeryNet(Request $request)
+    {
+        // dd($request->all());
+        $currentMonth = date('n');
+        $currentYear = date('Y');
+
+        $salary_block = salaryBlock::where(function ($q) use ($currentMonth, $currentYear) {
+            for ($i = -3; $i <= 3; $i++) {
+                $month = ($currentMonth + $i);
+                $year = $currentYear;
+
+                if ($month < 1) {
+                    $month += 12; // Wrap around to last year
+                    $year -= 1;
+                } elseif ($month > 12) {
+                    $month -= 12; // Wrap around to next year
+                    $year += 1;
+                }
+
+                $q->orWhere(function ($query) use ($month, $year) {
+                    $query->where('month', $month)->where('year', $year);
+                });
+            }
+        })->get();
+        // dd($salary_block);
+        $couurent_open_block = salaryBlock::where('sal_process_status', 'unblock')->first();
+        $default_block = salaryBlock::where('month', date('m'))->where('year', date('Y'))->first();
+        $view_salary_block = $request->sal_block ?? ($couurent_open_block ? $couurent_open_block->id : $default_block->id);
+        $salary_master = salaryMaster::where('sal_block_id', $request->sal_block)->get();
+        // dd($salary_master);
+        return view('salary.salary-summery-net', compact('salary_block', 'view_salary_block', 'salary_master'));
+        // dd($salary_block);
     }
 
 }

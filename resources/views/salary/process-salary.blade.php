@@ -92,7 +92,7 @@
                                                                         @foreach ($salary_block as $blok)
                                                                             <option value="{{ $blok->id }}"
                                                                                 {{ $view_salary_block == $blok->id ? 'selected' : '' }}>
-                                                                                {{ \Carbon\Carbon::createFromDate(null, $blok->month)->format('F') }}/{{ $blok->year }}
+                                                                                {{ \Carbon\Carbon::createFromDate(null, $blok->month,1)->format('F') }}/{{ $blok->year }}
                                                                             </option>
                                                                         @endforeach
                                                                     </select>

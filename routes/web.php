@@ -67,6 +67,9 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::post('/hold-salary', [App\Http\Controllers\Salary\SalaryController::class, 'holdSalary'])->name('hold-salary');
     Route::get('/unhold-salary/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'unholdSalary'])->name('unhold-salary');
 
+    Route::get('/salary-summery-net', [App\Http\Controllers\Salary\SalaryController::class, 'salarySummeryNet'])->name('salary-summery-net');
+
+
 
 
 

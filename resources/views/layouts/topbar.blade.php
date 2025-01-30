@@ -49,7 +49,7 @@
                                         <a href="{{ route('salary-process', ['view' => 'summery']) }}" class="dropdown-item">Salary
                                             Summery</a>
 
-                                        <a href="{{ route('salary-process', ['view' => 'summery']) }}" class="dropdown-item">Salary
+                                        <a href="{{ route('salary-summery-net') }}" class="dropdown-item">Salary
                                             Summery (Net)</a>
                                     @endif
                                     @if (\App\Helpers\commonHelper::isPermissionExist('salary_excel_upload'))

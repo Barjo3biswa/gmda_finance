@@ -70,8 +70,10 @@
                                                                         class="form-control">
                                                                         <option value="">--select--</option>
                                                                         @foreach ($salary_block as $blok)
+                                                                        {{-- {{  dump($blok->month)}} --}}
                                                                             <option value="{{ $blok->id }}"
                                                                                 {{ $view_salary_block == $blok->id ? 'selected' : '' }}>
+                                                                                {{-- {{$blok->month  }} --}}
                                                                                 {{ \Carbon\Carbon::createFromDate(null, $blok->month,1)->format('F') }}/{{ $blok->year }}
                                                                             </option>
                                                                         @endforeach
@@ -108,71 +110,33 @@
                                                 <table class="table table-bordered table-hover" id="dtExample">
                                                     <thead>
                                                         <tr>
+                                                            <th>SL</th>
                                                             <th>Emp Name</th>
-                                                            <th>Emp Code</th>
-
-                                                            @foreach ($salary_head as $hd)
-                                                                <th width="5%">{{ $hd->code }}</th>
-                                                            @endforeach
-                                                            <!-- <th>Gross</th>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <th>Deduction</th> -->
-                                                            <th width="5%">Net</th>
-                                                            <th>Edit Salary</th>
+                                                            <th>Designation</th>
+                                                            <th>IFSC Code</th>
+                                                            <th>A/C No</th>
+                                                            <th>Net Pay(Rs)</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @foreach ($employee as $key => $emp)
-                                                            @php
-                                                                $ind_gross = $emp->grossSalary(
-                                                                    $view_salary_block,
-                                                                    'draft',
-                                                                );
-                                                                $ind_deduct = $emp->deductSalary(
-                                                                    $view_salary_block,
-                                                                    'draft',
-                                                                );
-                                                                $indi_net = $ind_gross - $ind_deduct;
-                                                                $class = '';
-                                                                if ($indi_net < 0) {
-                                                                    $class = 'td_danger';
-                                                                }
-                                                            @endphp
-                                                            <tr>
-                                                                <td class="{{ $class }}"><a href="{{ route('final-pay-slip',['id' => Crypt::encrypt($emp->id), 'sl_blk' => $view_salary_block]) }}">{{ $emp->name }}</a></td>
-                                                                <td class="{{ $class }}">{{ $emp->emp_code }}</td>
-                                                                @foreach ($salary_head as $hd)
-                                                                    @php
-                                                                        $amount = $emp->getHeadAmount(
-                                                                            $view_salary_block,
-                                                                            $hd->id,
-                                                                        );
-                                                                        $pay_cut = '';
-                                                                        if ($hd->pay_cut_hd == 1 && $amount > 0) {
-                                                                            $pay_cut = 'pay_cut';
-                                                                        }
-                                                                    @endphp
-                                                                    <td class="{{ $class }} {{ $pay_cut }}">
-                                                                        {{ $amount }}
-                                                                    </td>
-                                                                @endforeach
-                                                                <!-- <td class="{{ $class }}">{{ $ind_gross }}</td><td class="{{ $class }}">{{ $ind_deduct }}</td> -->
-                                                                <td class="{{ $class }}">{{ $indi_net }}</td>
-                                                                <td class="{{ $class }}"><a
-                                                                        href="{{ route('payslip', ['id' => Crypt::encrypt($emp->id), 'sl_blk' => $view_salary_block]) }}">Edit</a>
-                                                                </td>
-                                                            </tr>
+                                                        @foreach ($salary_master as $key=>$sal)
+                                                        <tr>
+                                                            <th>{{ ++$key }}</th>
+                                                            <th>{{ $sal->user->name }}</th>
+                                                            <th>{{ $sal->employee->designation->name??"NA" }}</th>
+                                                            <th>{{ $sal->employee->bank_ifsc_no??'NA' }}</th>
+                                                            <th>{{ $sal->employee->bank_ac_no??"NA" }}</th>
+                                                            <th>{{ $sal->net }}</th>
+                                                        </tr>
                                                         @endforeach
                                                     </tbody>
-                                                    <tfoot>
+                                                    {{-- <tfoot>
                                                         <tr>
                                                             <th colspan="2">Total</th>
-                                                            @foreach ($salary_head as $hd)
-                                                                <th></th>
-                                                            @endforeach
                                                             <th></th>
                                                             <th></th>
                                                         </tr>
-                                                    </tfoot>
+                                                    </tfoot> --}}
                                                 </table>
                                             </div>
                                         </div>
