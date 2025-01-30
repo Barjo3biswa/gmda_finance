@@ -816,14 +816,25 @@ class SalaryController extends Controller
 
         $user = user::get();
         DB::beginTransaction();
+        $financial_year = $salary_block->month >= 4 ? $salary_block->year . '-' . ($salary_block->year + 1) : ($salary_block->year - 1) . '-' . $salary_block->year;
+
+        $user = user::where('salary_flag', 'open')->get();
+
+
         try {
             foreach ($user as $usr) {
                 $salaryTempData = salaryTemp::where('emp_id', $usr->id)->where('block_id', $salary_block->id)->get();
+
+
+                if ($salaryTempData->isEmpty()) {
+                    continue;
+                }
 
                 $salarySummary = SalarySummmary::updateOrCreate(
                     [
                         'emp_id' => $usr->id,
                         'sal_block_id' => $salary_block->id,
+                        'financial_year' => $financial_year,
                         'month' => $salary_block->month,
                         'year' => $salary_block->year,
                     ],

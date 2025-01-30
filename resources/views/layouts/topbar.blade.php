@@ -97,6 +97,15 @@
                     <!-- <a href="{{ route('policy.processed_policy_list') }}" class="dropdown-item">Processed List</a> -->
                 </div>
             </li>
+            <li class="nav-item dropdown res-dis-nn">
+                <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"
+                    class="nav-link dropdown-toggle">Form16 <span class="angle-down-topmenu"><i
+                            class="fa fa-angle-down"></i></span></a>
+                <div role="menu" class="dropdown-menu animated zoomIn">
+                    <a href="{{ route('form16.index') }}" class="dropdown-item">Create New Form16</a>
+
+                </div>
+            </li>
         </ul>
     </div>
 </div>

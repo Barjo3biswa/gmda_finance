@@ -13,11 +13,12 @@ class SalarySummmary extends Model
     protected $guarded = ['id'];
 
     protected $fillable = [
-        'emp_id', 
-        'emp_code', 
-        'sal_block_id', 
-        'month', 
-        'year', 
+        'emp_id',
+        'emp_code',
+        'sal_block_id',
+        'financial_year',
+        'month',
+        'year',
         'salary_details'
     ];
 
@@ -27,12 +28,12 @@ class SalarySummmary extends Model
 
         $salaryHeads = \App\Models\SalaryHead::all();
         $dynamicColumns = [];
-        
+
         foreach ($salaryHeads as $head) {
             if ($head->pay_head == 'Deduction') {
                 $dynamicColumns[] = 'DED_' . $head->salary_head_code;
             }
-            
+
             if ($head->pay_head == 'Income') {
                 $dynamicColumns[] = 'INC_' . $head->salary_head_code;
             }
