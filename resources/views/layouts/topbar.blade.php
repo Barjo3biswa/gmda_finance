@@ -4,54 +4,60 @@
             <li class="nav-item"><a href="{{ route('home') }}" class="nav-link">Dashboard</a>
             </li>
             @if (
-                \App\Helpers\commonHelper::isPermissionExist('salary_head_view') ||
+                    \App\Helpers\commonHelper::isPermissionExist('salary_head_view') ||
                     \App\Helpers\commonHelper::isPermissionExist('salary_head_create') ||
                     \App\Helpers\commonHelper::isPermissionExist('salary_head_update') ||
-                    \App\Helpers\commonHelper::isPermissionExist('salary_management'))
-                <li class="nav-item dropdown res-dis-nn">
-                    <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"
-                        class="nav-link dropdown-toggle">Master<span class="angle-down-topmenu"><i
-                                class="fa fa-angle-down"></i></span></a>
-                    <div role="menu" class="dropdown-menu animated zoomIn">
-                        @if (
-                            \App\Helpers\commonHelper::isPermissionExist('salary_head_view') ||
-                                \App\Helpers\commonHelper::isPermissionExist('salary_head_create') ||
-                                \App\Helpers\commonHelper::isPermissionExist('salary_head_update'))
-                            <a href="{{ route('salary-head') }}" class="dropdown-item">Salary Head</a>
-                        @endif
-                        @if (\App\Helpers\commonHelper::isPermissionExist('salary_management'))
-                            <a href="{{ route('emp-amount') }}" class="dropdown-item">Head Wise Amount</a>
-                        @endif
-                    </div>
-                </li>
+                    \App\Helpers\commonHelper::isPermissionExist('salary_management')
+                )
+                            <li class="nav-item dropdown res-dis-nn">
+                                <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"
+                                    class="nav-link dropdown-toggle">Master<span class="angle-down-topmenu"><i
+                                            class="fa fa-angle-down"></i></span></a>
+                                <div role="menu" class="dropdown-menu animated zoomIn">
+                                    @if (
+                                            \App\Helpers\commonHelper::isPermissionExist('salary_head_view') ||
+                                            \App\Helpers\commonHelper::isPermissionExist('salary_head_create') ||
+                                            \App\Helpers\commonHelper::isPermissionExist('salary_head_update')
+                                        )
+                                                        <a href="{{ route('salary-head') }}" class="dropdown-item">Salary Head</a>
+                                    @endif
+                                    @if (\App\Helpers\commonHelper::isPermissionExist('salary_management'))
+                                        <a href="{{ route('emp-amount') }}" class="dropdown-item">Head Wise Amount</a>
+                                    @endif
+                                </div>
+                            </li>
             @endif
             @if (
-                \App\Helpers\commonHelper::isPermissionExist('salary_block_management') ||
+                    \App\Helpers\commonHelper::isPermissionExist('salary_block_management') ||
                     \App\Helpers\commonHelper::isPermissionExist('salary_process') ||
                     \App\Helpers\commonHelper::isPermissionExist('salary_summery_management') ||
-                    \App\Helpers\commonHelper::isPermissionExist('salary_excel_upload'))
-                <li class="nav-item dropdown res-dis-nn">
-                    <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"
-                        class="nav-link dropdown-toggle">Salary<span class="angle-down-topmenu"><i
-                                class="fa fa-angle-down"></i></span></a>
-                    <div role="menu" class="dropdown-menu animated zoomIn">
-                        @if (\App\Helpers\commonHelper::isPermissionExist('salary_block_management'))
-                            <a href="{{ route('salary-block') }}" class="dropdown-item">Salary Block</a>
-                        @endif
-                        @if (\App\Helpers\commonHelper::isPermissionExist('salary_process'))
-                            <a href="{{ route('salary-process', ['view' => 'process']) }}" class="dropdown-item">Process
-                                Salary</a>
-                        @endif
-                        @if (\App\Helpers\commonHelper::isPermissionExist('salary_summery_management'))
-                            <a href="{{ route('salary-process', ['view' => 'summery']) }}" class="dropdown-item">Salary
-                                Summery</a>
-                        @endif
-                        @if (\App\Helpers\commonHelper::isPermissionExist('salary_excel_upload'))
-                            <a href="{{ route('excel-upload') }}" class="dropdown-item">Upload Excel</a>
-                        @endif
-                        <a href="{{ route('hold-unhold') }}" class="dropdown-item">Hold/Unhold Salary</a>
-                    </div>
-                </li>
+                    \App\Helpers\commonHelper::isPermissionExist('salary_excel_upload')
+                )
+                            <li class="nav-item dropdown res-dis-nn">
+                                <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"
+                                    class="nav-link dropdown-toggle">Salary<span class="angle-down-topmenu"><i
+                                            class="fa fa-angle-down"></i></span></a>
+                                <div role="menu" class="dropdown-menu animated zoomIn">
+                                    @if (\App\Helpers\commonHelper::isPermissionExist('salary_block_management'))
+                                        <a href="{{ route('salary-block') }}" class="dropdown-item">Salary Block</a>
+                                    @endif
+                                    @if (\App\Helpers\commonHelper::isPermissionExist('salary_process'))
+                                        <a href="{{ route('salary-process', ['view' => 'process']) }}" class="dropdown-item">Process
+                                            Salary</a>
+                                    @endif
+                                    @if (\App\Helpers\commonHelper::isPermissionExist('salary_summery_management'))
+                                        <a href="{{ route('salary-process', ['view' => 'summery']) }}" class="dropdown-item">Salary
+                                            Summery</a>
+
+                                        <a href="{{ route('salary-process', ['view' => 'summery']) }}" class="dropdown-item">Salary
+                                            Summery (Net)</a>
+                                    @endif
+                                    @if (\App\Helpers\commonHelper::isPermissionExist('salary_excel_upload'))
+                                        <a href="{{ route('excel-upload') }}" class="dropdown-item">Upload Excel</a>
+                                    @endif
+                                    <a href="{{ route('hold-unhold') }}" class="dropdown-item">Hold/Unhold Salary</a>
+                                </div>
+                            </li>
             @endif
             <li class="nav-item dropdown res-dis-nn">
                 <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"

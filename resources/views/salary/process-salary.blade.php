@@ -9,6 +9,11 @@
             border-radius: 4px;
             font-size: 12px;
         }
+        @media print {
+            .example-screen {
+                display: none;
+            }
+        }
     </style>
     <style>
         .custom-scrollbar {
@@ -149,21 +154,28 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-8">
+                                    <div class="col-md-8" id="printableArea">
                                         <div class="row">
                                             @php
                                                 $curr_salary_blk = $salary_block
                                                     ->where('id', $view_salary_block)
                                                     ->first();
                                             @endphp
-                                            <h4>Salary Outstanding For
-                                                {{ \Carbon\Carbon::createFromDate(null, $curr_salary_blk->month)->format('F') }}/{{ $curr_salary_blk->year }}
-                                            </h4>
+                                            <div class="row" style="display: flex;">
+                                                <div class="col-md-6">
+                                                    <h4 style="margin-left: 20px;">Salary Outstanding For
+                                                        {{ \Carbon\Carbon::createFromDate(null, $curr_salary_blk->month)->format('F') }}/{{ $curr_salary_blk->year }}
+                                                    </h4>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <input type="button" onclick="printDiv('printableArea')" value="Print" class="btn btn-primary btn-xs example-screen" />
+                                                </div>
+                                            </div>
                                             @php
                                                 $income = 0;
                                                 $deduction = 0;
                                             @endphp
-                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" >
                                                 <table class="table table-bordered">
                                                     <thead>
                                                         <tr>
@@ -236,7 +248,7 @@
                                                                 <td>{{ $hd->name }}</td>
                                                                 <td>{{ number_format($amount, 2) }}
                                                                     @if ($hd->pay_cut_hd == 1)
-                                                                        <a target="_blank"
+                                                                        <a target="_blank" class="example-screen"
                                                                             href="{{ route('salary-process', ['view' => 'summery', 'status' => 'pay_cut']) }}"><i
                                                                                 class="fa-solid fa-arrow-right"></i></a>
                                                                     @endif
@@ -262,7 +274,7 @@
                                                 <table class="table table-bordered">
                                                     <thead>
                                                         <tr>
-                                                            <th>Income Total</th>
+                                                            <th>Gross Total</th>
                                                             <th>{{ number_format($income, 2) }}</th>
                                                         </tr>
                                                         <tr>
@@ -288,9 +300,16 @@
     @endsection
     @section('js')
         <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
-        {{-- <script>
-        $(document).ready(function() {
-            $('#dtExample').DataTable();
-        })
-    </script> --}}
+        <script>
+            function printDiv(divName) {
+                var printContents = document.getElementById(divName).innerHTML;
+                var originalContents = document.body.innerHTML;
+
+                document.body.innerHTML = printContents;
+
+                window.print();
+
+                document.body.innerHTML = originalContents;
+            }
+        </script>
     @endsection

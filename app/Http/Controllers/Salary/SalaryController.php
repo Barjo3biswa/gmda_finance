@@ -17,6 +17,7 @@ use App\Models\salaryHead;
 use App\Models\salaryHeadAmountDistribution;
 use App\Models\salaryMaster;
 use App\Models\salaryProcessStep;
+use App\Models\SalarySummmary;
 use App\Models\salaryTemp;
 use App\Models\salaryTrans;
 use App\Models\User;
@@ -136,8 +137,31 @@ class SalaryController extends Controller
 
     public function salaryProcess(Request $request)
     {
-        // dd($request->all());
-        $salary_block = salaryBlock::get();
+        $currentMonth = date('n');
+        $currentYear = date('Y');
+
+        $salary_block = salaryBlock::where(function ($q) use ($currentMonth, $currentYear) {
+            for ($i = -3; $i <= 3; $i++) {
+                $month = ($currentMonth + $i);
+                $year = $currentYear;
+
+                if ($month < 1) {
+                    $month += 12; // Wrap around to last year
+                    $year -= 1;
+                } elseif ($month > 12) {
+                    $month -= 12; // Wrap around to next year
+                    $year += 1;
+                }
+
+                $q->orWhere(function ($query) use ($month, $year) {
+                    $query->where('month', $month)->where('year', $year);
+                });
+            }
+        })->get();
+
+
+
+        // $salary_block = salaryBlock::get();
         $salary_head = salaryHead::orderBy('order_fld')->get();
         $process_steps = salaryProcessStep::orderBy('order')->get();
         $couurent_open_block = salaryBlock::where('sal_process_status', 'unblock')->first();
@@ -615,11 +639,13 @@ class SalaryController extends Controller
                     'emp_id' => $emp->id,
                     'emp_code' => $emp->emp_code,
                     'emp_name' => $emp->name,
-                    // 'emp_object'  =>,
-                    // 'department_id'  =>,
-                    // 'department'  =>,
-                    // 'designation_id'  =>,
-                    // 'payband'  =>,
+                    'emp_object' => json_encode($emp->employee),
+                    'department_id' => $emp->employee->department_id ?? null,
+                    'department' => $emp->employee->department_id ?? null,
+                    'designation_id' => $emp->employee->designation_id ?? null,
+                    'payband' => $emp->employee->payband_id ?? null,
+                    'ifsc_code' => $emp->employee->bank_ifsc_no ?? null,
+                    'account_no' => $emp->employee->bank_ac_no ?? null,
                     'sal_block_id' => $sal_block_id,
                     'month' => $salary_block->month,
                     'year' => $salary_block->year,
@@ -629,7 +655,7 @@ class SalaryController extends Controller
                     'deduction' => $deduction,
                     'net' => $net,
                 ];
-                // dd($data);
+                dd($data);
                 $created = salaryMaster::create($data);
 
                 $temp_salary = salaryTemp::where('emp_id', $emp->id)
@@ -653,9 +679,10 @@ class SalaryController extends Controller
             $salary_block->save();
             $step_details->status = 'process';
             $step_details->save();
+            $this->processSalarySummary();
             DB::commit();
         } catch (\Exception $e) {
-            dd($e);
+            // dd($e);
             DB::rollBack();
             return redirect()->back()->with('error', 'Error while Finalizing Salary');
         }
@@ -744,7 +771,7 @@ class SalaryController extends Controller
         try {
             $user = user::where('salary_flag', 'open')->get();
             $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
-            $deductable_head = salaryHead::where('sal_deduct_if_absent', 1)->orderBy('order')->get();
+            $deductable_head = salaryHead::where('sal_deduct_if_absent', 1)->orderBy('order_fld')->get();
             $pay_cut_head = salaryHead::where('pay_cut_hd', 1)->first()->id;
             foreach ($user as $usr) {
                 $attendance_summery = AttendanceSummery::where('block_id', $salary_block->id)->where('user_id', $usr->id)->first();
@@ -774,6 +801,7 @@ class SalaryController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            // dd($e);
             return redirect()->back()->with('error', 'Error While Processing Attendance');
         }
 
@@ -787,9 +815,8 @@ class SalaryController extends Controller
         $salary_block = salaryBlock::where('sal_process_status', 'Unblock')->first();
 
         $user = user::get();
-
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
             foreach ($user as $usr) {
                 $salaryTempData = salaryTemp::where('emp_id', $usr->id)->where('block_id', $salary_block->id)->get();
 
@@ -821,12 +848,10 @@ class SalaryController extends Controller
 
                 $salarySummary->save();
             }
-
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }
-
         DB::commit();
 
         return true;
@@ -920,7 +945,7 @@ class SalaryController extends Controller
         }
         $salary_block = salaryBlock::get();
         $all_sal_head = salaryHead::orderBy('order_fld')->get();
-        $salary_head = salaryHead::where('pay_cut_hd', 1)->orderBy('order')->get();
+        $salary_head = salaryHead::where('pay_cut_hd', 1)->orderBy('order_fld')->get();
         $view_salary_block = salaryBlock::where('sal_process_status', 'unblock')->first()->id;
         $employee = User::all()->filter(function ($user) {
             return $user->payCut() > 0;
