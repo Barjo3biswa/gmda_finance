@@ -77,7 +77,7 @@ class User extends Authenticatable implements JWTSubject // Add implements JWTSu
 
     public function grossSalary($block_id, $status)
     {
-        $hed = salaryHead::where('pay_head', 'Income')->pluck('id')->toArray();
+        $hed = salaryHead::where('pay_head', 'Income')->where('is_substitute_head', 0)->pluck('id')->toArray();
         $block = salaryBlock::find($block_id);
         if ($block->is_finalized) {
             return salaryTrans::whereIn('sal_head_id', $hed)
@@ -100,7 +100,7 @@ class User extends Authenticatable implements JWTSubject // Add implements JWTSu
 
     public function deductSalary($block_id, $status)
     {
-        $hed = salaryHead::where('pay_head', 'Deduction')->pluck('id')->toArray();
+        $hed = salaryHead::where('pay_head', 'Deduction')->where('is_substitute_head', 0)->pluck('id')->toArray();
         $block = salaryBlock::find($block_id);
         if ($block->is_finalized) {
             return salaryTrans::whereIn('sal_head_id', $hed)

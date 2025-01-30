@@ -38,7 +38,7 @@ class SalaryController extends Controller
     }
     public function salaryHead(Request $request)
     {
-        $salary_head = salaryHead::orderBy('order')->get();
+        $salary_head = salaryHead::orderBy('order_fld')->get();
         if ($request->editable_id) {
             $editable_id = Crypt::decrypt($request->editable_id);
             $editable = salaryHead::where("id", $editable_id)->first();
@@ -138,7 +138,7 @@ class SalaryController extends Controller
     {
         // dd($request->all());
         $salary_block = salaryBlock::get();
-        $salary_head = salaryHead::orderBy('order')->get();
+        $salary_head = salaryHead::orderBy('order_fld')->get();
         $process_steps = salaryProcessStep::orderBy('order')->get();
         $couurent_open_block = salaryBlock::where('sal_process_status', 'unblock')->first();
         $default_block = salaryBlock::where('month', date('m'))->where('year', date('Y'))->first();
@@ -167,7 +167,7 @@ class SalaryController extends Controller
         $emp_id = Crypt::decrypt($id);
         $emp_details = User::where('id', $emp_id)->first();
         $salary_block = salaryBlock::get();
-        $salary_head = salaryHead::orderBy('order')->get();
+        $salary_head = salaryHead::orderBy('order_fld')->get();
 
         if ($request->sal_block) {
             $view_salary_block = $request->sal_block;
@@ -230,13 +230,13 @@ class SalaryController extends Controller
 
     public function salaryExcelUpload(Request $request)
     {
-        $head = salaryHead::orderBy('order')->get();
+        $head = salaryHead::orderBy('order_fld')->get();
         return view('salary.excel-upload', compact('head'));
     }
 
     public function sampleExcelHD(Request $request)
     {
-        $excel = User::get();
+        $excel = User::where('salary_flag', 'open')->get();
         $fileName = 'Sample-Head-Wise-Upload.csv';
         $headers = array(
             "Content-type" => "text/csv",
@@ -329,8 +329,8 @@ class SalaryController extends Controller
 
     public function sampleExcelEmp(Request $request)
     {
-        $excel = User::get();
-        $head = salaryHead::orderBy('order')->get();
+        $excel = User::where('salary_flag', 'open')->get();
+        $head = salaryHead::orderBy('order_fld')->get();
         $fileName = 'Sample-Employee-Wise-Upload.csv';
         $headers = array(
             "Content-type" => "text/csv",
@@ -403,8 +403,14 @@ class SalaryController extends Controller
         if (!$salary_block) {
             return redirect()->back()->with('error', 'Please Unblock New Salary Month & Year');
         }
+        // $file = $request->file('excel_file');
+        // dd([
+        //     'extension' => $file->getClientOriginalExtension(),
+        //     'mime_type' => $file->getMimeType(),
+        //     'original_name' => $file->getClientOriginalName(),
+        // ]);
         $request->validate([
-            'excel_file' => 'required|mimes:xlsx,xls,csv',
+            'excel_file' => 'required|mimetypes:text/csv,text/plain,application/vnd.ms-excel',
         ]);
         try {
             Excel::import(new EmployeeWiseImport, $request->file('excel_file'));
@@ -455,7 +461,7 @@ class SalaryController extends Controller
     {
         // dd($request->all());
         $employee = user::get();
-        $salary_head = salaryHead::orderBy('order')->get();
+        $salary_head = salaryHead::orderBy('order_fld')->get();
         $editable_id = $request->employee_id;
         return view('salary.head-wise-fix-amount', compact('employee', 'salary_head', 'editable_id'));
     }
@@ -510,7 +516,7 @@ class SalaryController extends Controller
             return redirect()->back()->with('error', 'Please Unblock Salary for this month');
         }
         $employee = User::where('salary_flag', 'open')->get();
-        $salary_heads = salaryHead::orderBy('order')->get();
+        $salary_heads = salaryHead::orderBy('order_fld')->get();
         DB::beginTransaction();
         try {
             foreach ($employee as $emp) {
@@ -584,8 +590,8 @@ class SalaryController extends Controller
             return redirect()->back()->with('error', 'Please maintaion process order');
         }
         $sal_block_id = $step_details->block_id;
-        $income_hed = salaryHead::where('pay_head', 'Income')->pluck('id')->toArray();
-        $deduct_hed = salaryHead::where('pay_head', 'Deduction')->pluck('id')->toArray();
+        $income_hed = salaryHead::where('pay_head', 'Income')->where('is_substitute_head', 0)->pluck('id')->toArray();
+        $deduct_hed = salaryHead::where('pay_head', 'Deduction')->where('is_substitute_head', 0)->pluck('id')->toArray();
         $salary_block = salaryBlock::where('id', $sal_block_id)->first();
         if ($salary_block->is_finalized == 1) {
             return redirect()->back()->with('error', 'Already Finalized');
@@ -660,6 +666,9 @@ class SalaryController extends Controller
     {
         // dd($loan_detail);
         $loans = json_decode($loan_detail);
+        if (!is_array($loans) && !$loans instanceof Traversable) {
+            $loans = [$loans];
+        }
         foreach ($loans as $loan) {
 
             $loan_master = LoanMaster::where('id', $loan->loan_id)->first();
@@ -910,7 +919,7 @@ class SalaryController extends Controller
             return redirect()->back()->with('error', 'Process is completed');
         }
         $salary_block = salaryBlock::get();
-        $all_sal_head = salaryHead::orderBy('order')->get();
+        $all_sal_head = salaryHead::orderBy('order_fld')->get();
         $salary_head = salaryHead::where('pay_cut_hd', 1)->orderBy('order')->get();
         $view_salary_block = salaryBlock::where('sal_process_status', 'unblock')->first()->id;
         $employee = User::all()->filter(function ($user) {

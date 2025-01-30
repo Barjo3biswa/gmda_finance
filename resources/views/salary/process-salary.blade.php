@@ -195,7 +195,9 @@
                                                                 </td>
                                                             </tr>
                                                             @php
+                                                            if($hd->is_substitute_head!=1){
                                                                 $income = $income + $amount;
+                                                            }
                                                             @endphp
                                                         @endforeach
                                                     </tbody>
