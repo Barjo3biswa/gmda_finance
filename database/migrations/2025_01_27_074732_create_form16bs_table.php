@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('form16bs', function (Blueprint $table) {
             $table->id();
             $table->string('receipt_no')->nullable();
-            $table->integer('emp_code')->nullable();
+            $table->string('emp_code')->nullable();
             $table->string('financial_year')->nullable();
             $table->string('basic1')->nullable();
             $table->string('basic2')->nullable();
