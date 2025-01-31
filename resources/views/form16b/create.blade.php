@@ -96,7 +96,7 @@
                                                             <label>Coveyance</label>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" placeholder="Coveyance" name="conveyance" id="coveyance" data-validation="number" data-validation-error-msg="Numeric Value Only" value="$total_conveyance" onkeyup="change()"/>
+                                                            <input type="text" class="form-control" placeholder="Coveyance" name="conveyance" id="coveyance" data-validation="number" data-validation-error-msg="Numeric Value Only" value="{{$totalINC_CONVA}}" onkeyup="change()"/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -106,7 +106,7 @@
                                                             <label>Charge Allowance</label>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <input type="text" class="form-control" placeholder="Charge Allowance" name="charge_allowance" id="charge_allowance" data-validation="number" data-validation-error-msg="Numeric Value Only" value="$total_charge" onkeyup="change()"/>
+                                                            <input type="text" class="form-control" placeholder="Charge Allowance" name="charge_allowance" id="charge_allowance" data-validation="number" data-validation-error-msg="Numeric Value Only" value="{{$totalINC_CRGA}}" onkeyup="change()"/>
                                                         </div>
                                                     </div>
                                                 </div>
