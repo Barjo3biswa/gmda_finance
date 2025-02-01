@@ -152,6 +152,13 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::get('form16', [App\Http\Controllers\Form16bController::class, 'index'])->name('form16.index');
     Route::post('form16/create', [App\Http\Controllers\Form16bController::class, 'create'])->name('form16.create');
     Route::post('form16/store', [App\Http\Controllers\Form16bController::class, 'store'])->name('form16.store');
+    Route::get('form16/search/', [App\Http\Controllers\Form16bController::class, 'viewIndex'])->name('form16.viewIndex');
+    Route::get('form16/view/', [App\Http\Controllers\Form16bController::class, 'view'])->name('form16.view');
+
+    Route::get('salary-head-report', [App\Http\Controllers\ReportController::class, 'salaryHeadReport'])->name('report.salaryHeadReport');
+    Route::get('glsi-report', [App\Http\Controllers\ReportController::class, 'glsiReport'])->name('report.glsiReport');
+    Route::get('nps-report', [App\Http\Controllers\ReportController::class, 'npsReport'])->name('report.npsReport');
+    Route::get('sss-report', [App\Http\Controllers\ReportController::class, 'sssReport'])->name('report.sssReport');
+    Route::get('lic-report', [App\Http\Controllers\ReportController::class, 'licReport'])->name('report.licReport');
+    Route::get('summary-head-report', [App\Http\Controllers\ReportController::class, 'summaryHeadReport'])->name('report.summaryHeadReport');
 });
-
-

@@ -105,7 +105,27 @@
                             class="fa fa-angle-down"></i></span></a>
                 <div role="menu" class="dropdown-menu animated zoomIn">
                     <a href="{{ route('form16.index') }}" class="dropdown-item">Create New Form16</a>
-
+                    <a href="{{ route('form16.viewIndex') }}" class="dropdown-item">View Form16</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown res-dis-nn">
+                <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"
+                    class="nav-link dropdown-toggle">Reports <span class="angle-down-topmenu"><i
+                            class="fa fa-angle-down"></i></span></a>
+                <div role="menu" class="dropdown-menu animated zoomIn">
+                    <a href="{{ route('report.salaryHeadReport') }}" class="dropdown-item">Salary Head Report</a>
+                    <a href="{{ route('report.summaryHeadReport') }}" class="dropdown-item">Summary Head Report</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown res-dis-nn">
+                <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"
+                    class="nav-link dropdown-toggle">Savings Register<span class="angle-down-topmenu"><i
+                            class="fa fa-angle-down"></i></span></a>
+                <div role="menu" class="dropdown-menu animated zoomIn">
+                    <a href="{{ route('report.glsiReport')}}" class="dropdown-item">GLSI Report</a>
+                    <a href="{{ route('report.npsReport')}}" class="dropdown-item">NPS Report</a>
+                    <a href="{{ route('report.sssReport')}}" class="dropdown-item">SSS Report</a>
+                    <a href="{{ route('report.licReport')}}" class="dropdown-item">LIC Report</a>
                 </div>
             </li>
         </ul>

@@ -343,7 +343,7 @@
 				<td class="center" colspan="3">Verification</td>
 			</tr>
 			<tr>
-				<td class="cellpadding" colspan="3">I, {{$secretary_details->emp_f_name}} {{$secretary_details->emp_m_name}} {{$secretary_details->emp_l_name}} <!-- son/daughter of Kula Ram Das --> working in the capacity of {{$secretary_post_details->fld_PostName}}(designation) do hereby certify that a sum of Rs. {{$emp->tax_deduct}} has been deducted and deposited to the credit of the Central Government. I further certify that the information given above is true, complete and correct and based on th books of account, documents, TDS statements, TDS deposited and other available records.</td>
+				<td class="cellpadding" colspan="3">I, ______________________ <!-- son/daughter of Kula Ram Das --> working in the capacity of ______________________ (designation) do hereby certify that a sum of Rs. {{$emp->tax_deduct}} has been deducted and deposited to the credit of the Central Government. I further certify that the information given above is true, complete and correct and based on th books of account, documents, TDS statements, TDS deposited and other available records.</td>
 			</tr>
 			<tr>
 				<td>Place:  Guwahati</td>
@@ -355,8 +355,8 @@
 				<td>Date: {{date('d-m-Y')}}</td>
 			</tr>
 			<tr>
-				<td>Designation: {{$secretary_post_details->fld_PostName}}</td>
-				<td colspan="2">Fullname: {{$secretary_details->emp_f_name}} {{$secretary_details->emp_m_name}} {{$secretary_details->emp_l_name}}</td>
+				<td>Designation: ______________________</td>
+				<td colspan="2">Fullname: ______________________</td>
 			</tr>
 		</tbody>
 	</table>
