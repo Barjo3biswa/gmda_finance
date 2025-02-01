@@ -54,7 +54,7 @@
                 </div> --}}
                 <div class="product-payment-inner-st">
                     <div id="myTabContent" class="tab-content custom-product-edit">
-                        <h4>Payslip Report</h4>
+                        <h4>Payslip View</h4>
                         <div class="product-tab-list tab-pane fade active in" id="description">
                             <div class="row">
                                 <div class="col-md-6">
@@ -102,66 +102,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                        <h4>Employee List
-                                        </h4>
-                                        <form action="{{ route('publish-pay-slip') }}" method="post">
-                                            @csrf
-                                            <input type="submit" class="btb btn-primary btn-xs" value="Publish"
-                                                name="submit">
-                                            <input type="submit" class="btb btn-primary btn-xs" value="Un Publish"
-                                                name="submit">
-                                            <div class="table-responsive">
-                                                <table class="table table-bordered table-hover" id="dtExample">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>SL
-                                                                <input type="checkbox" id="checkAll">
-                                                            </th>
-                                                            <th>Emp Name</th>
-                                                            <th>Designation</th>
-                                                            <th>IFSC Code</th>
-                                                            <th>A/C No</th>
-                                                            <th>Net Pay(Rs)</th>
-                                                            <th>Status</th>
-                                                            <th>Action</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach ($salary_master as $key => $sal)
-                                                            <tr>
-                                                                <th>
-
-                                                                    <input type="checkbox" name="mas_id[]" class="date"
-                                                                        value="{{ $sal->id }}">
-                                                                    {{ ++$key }}
-                                                                </th>
-                                                                <th>{{ $sal->user->name }}</th>
-                                                                <th>{{ $sal->employee->designation->name ?? "NA" }}</th>
-                                                                <th>{{ $sal->employee->bank_ifsc_no ?? 'NA' }}</th>
-                                                                <th>{{ $sal->employee->bank_ac_no ?? "NA" }}</th>
-                                                                <th>{{ $sal->net }}</th>
-                                                                <th>
-                                                                    @if ($sal->is_published == 1)
-                                                                        <span class="badge badge-success">Published</span>
-                                                                    @else
-                                                                        <span class="badge badge-warning">Draft</span>
-                                                                    @endif
-                                                                </th>
-                                                                <th><a
-                                                                        href="{{ route('final-pay-slip', ['id' => Crypt::encrypt($sal->emp_id), 'sl_blk' => $sal->sal_block_id]) }}">Pay
-                                                                        Slip</a></th>
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-
+                            <div class="row" id="printableArea">
+                                @include('salary.common-payslip')
                             </div>
                         </div>
                     </div>
@@ -224,5 +166,55 @@
                 });
             }
         });
+    </script>
+
+    <script>
+        function printDiv(divName) {
+            // Get the content of the specified div
+            var printContents = document.getElementById(divName).innerHTML;
+
+            // Open a new window
+            var printWindow = window.open('', '_blank', 'height=600,width=800');
+
+            // Write the HTML structure into the new window
+            printWindow.document.write(`
+<html>
+    <head>
+        <title>Print Payslip</title>
+        <link rel="stylesheet" href="styles.css"> <!-- Include your stylesheets -->
+        <style>
+            @media print {
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+                .btn, .no-print {
+                    display: none; /* Hide buttons */
+                }
+                .container {
+                    width: 100%;
+                    margin: 0 auto;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        ${printContents}
+    </body>
+</html>
+`);
+
+            // Close the document to ensure all content is loaded
+            printWindow.document.close();
+
+            // Trigger the print dialog after the new window loads
+            printWindow.onload = function () {
+                printWindow.print();
+                printWindow.close();
+            };
+        }
+
+
     </script>
     @endsection

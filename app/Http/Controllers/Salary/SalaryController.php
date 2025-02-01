@@ -1247,34 +1247,53 @@ class SalaryController extends Controller
 
     public function PaySlipReport(Request $request)
     {
-        // $currentMonth = date('n');
-        // $currentYear = date('Y');
+        $salary_block = salaryBlock::where('month', $request->month)->where('year', $request->year)->first();
 
-        // $salary_block = salaryBlock::where(function ($q) use ($currentMonth, $currentYear) {
-        //     for ($i = -3; $i <= 3; $i++) {
-        //         $month = ($currentMonth + $i);
-        //         $year = $currentYear;
+        if ($salary_block) {
+            $salary_master = salaryMaster::where('sal_block_id', $salary_block->id)->get();
+        } else {
+            $salary_master = collect();
+        }
+        return view('salary.payslip-report', compact('salary_master'));
+    }
 
-        //         if ($month < 1) {
-        //             $month += 12; // Wrap around to last year
-        //             $year -= 1;
-        //         } elseif ($month > 12) {
-        //             $month -= 12; // Wrap around to next year
-        //             $year += 1;
-        //         }
+    public function publishPaySlip(Request $request)
+    {
+        if ($request->submit == 'Publish') {
+            $status = 1;
+        } else {
+            $status = 0;
+        }
+        salaryMaster::whereIn('id', $request->mas_id)->update(['is_published' => $status]);
+        return redirect()->back()->with('success', 'Successfull');
+    }
 
-        //         $q->orWhere(function ($query) use ($month, $year) {
-        //             $query->where('month', $month)->where('year', $year);
-        //         });
-        //     }
-        // })->get();
+    public function PaySlipIndivisual(Request $request)
+    {
+        // dd("ok");
+        // return view('salary.payslip-indivisual');
 
+        $emp_id = Auth::user()->id;
+        $salary_block = salaryBlock::where('month', $request->month)->where('year', $request->year)->first();
 
-        $couurent_open_block = salaryBlock::where('sal_process_status', 'unblock')->first();
-        $default_block = salaryBlock::where('month', date('m'))->where('year', date('Y'))->first();
-        $view_salary_block = $request->sal_block ?? ($couurent_open_block ? $couurent_open_block->id : $default_block->id);
-        $salary_master = salaryMaster::where('sal_block_id', $request->sal_block)->get();
-        return view('salary.payslip-report', compact('salary_block', 'view_salary_block', 'salary_master'));
+        // $salary_block = salaryBlock::where('id', $sl_blk)->first();
+        $emp_details = User::with('employee')->where('id', $emp_id)->first();
+        if ($salary_block) {
+            $salary = salaryMaster::with('salaryTrans')->where('emp_id', $emp_id)
+                ->where('sal_block_id', $salary_block->id)->first();
+
+            $claims = $salary->salaryTrans->where('pay_head', 'Income')->where('amount', '!=', 0);
+            $deductions = $salary->salaryTrans->where('pay_head', 'Deduction')->where('amount', '!=', 0);
+        } else {
+            $salary = collect();
+        }
+
+        // if (!$salary) {
+        //     return redirect()->back()->with('error', 'Salary Not Generated');
+        // }
+        $claims = collect();
+        $deductions = collect();
+        return view('salary.payslip-indivisual', compact('salary', 'emp_details', 'claims', 'deductions', 'salary_block'));
     }
 
 }
