@@ -22,7 +22,13 @@ class ReportController extends Controller
 
         $data = [];
 
-        if(request()->salary_head){
+        if(request()->salary_head ||
+            request()->department ||
+            request()->section ||
+            request()->appointment_type ||
+            request()->pf_category ||
+            request()->from_month ||
+            request()->to_month){
             $query = salaryTrans::query()
                 ->with('employee')
                 ->whereHas('employee', function($q) {
@@ -158,7 +164,13 @@ class ReportController extends Controller
         }
 
         $data = [];
-        if(request()->report_type){
+        if(request()->report_type ||
+            request()->department ||
+            request()->section ||
+            request()->appointment_type ||
+            request()->pf_category ||
+            request()->from_month ||
+            request()->to_month){
             $query = salaryTrans::query()
                 ->with('employee')
                 ->where('sal_head_id', $salHead_id->id)
@@ -213,7 +225,13 @@ class ReportController extends Controller
 
         $data = [];
 
-        if(request()->report_type){
+        if(request()->report_type ||
+            request()->department ||
+            request()->section ||
+            request()->appointment_type ||
+            request()->pf_category ||
+            request()->from_month ||
+            request()->to_month){
             $query = salaryTrans::query()
                 ->with('employee')
                 ->where('sal_head_id', 13)
@@ -275,7 +293,13 @@ class ReportController extends Controller
             return redirect()->back()->with('error', 'SSS salary head not found');
         }
 
-        if(request()->report_type){
+        if(request()->report_type ||
+            request()->department ||
+            request()->section ||
+            request()->appointment_type ||
+            request()->pf_category ||
+            request()->from_month ||
+            request()->to_month){
             $query = salaryTrans::query()
                 ->with('employee')
                 ->where('sal_head_id', $salHead_id->id)
@@ -337,7 +361,13 @@ class ReportController extends Controller
             return redirect()->back()->with('error', 'LIC salary head not found');
         }
 
-        if(request()->report_type){
+        if(request()->report_type ||
+            request()->department ||
+            request()->section ||
+            request()->appointment_type ||
+            request()->pf_category ||
+            request()->from_month ||
+            request()->to_month){
             $query = salaryTrans::query()
                 ->with('employee')
                 ->where('sal_head_id', $salHead_id->id)
