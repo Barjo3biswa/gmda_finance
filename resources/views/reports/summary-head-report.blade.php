@@ -267,16 +267,20 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <th class="text-right">{{ $type }} Type Total</th>
-                                    <th>{{ number_format($typeTotal, 2) }}</th>
+                                    <th class="text-right">
+                                        <strong>{{ $type }} Type Total</strong>
+                                    </th>
+                                    <th>
+                                        <strong>{{ number_format($typeTotal, 2) }}</strong>
+                                    </th>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
                 @endforeach
-                <div class="alert alert-info mt-3">
+                {{-- <div class="alert alert-info mt-3">
                     <strong>Overall Grand Total:</strong> {{ number_format($overallGrandTotal, 2) }}
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

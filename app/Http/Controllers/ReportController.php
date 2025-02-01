@@ -48,8 +48,11 @@ class ReportController extends Controller
             } elseif(request()->to_month) {
                 $query->where('month', '<=', request()->to_month);
             } else {
-                // If no month range specified, use the default month
-                $query->where('month', request()->month);
+
+                if(request()->month){
+                    $query->where('month', request()->month);
+                }
+
             }
 
             $data = $query->get();

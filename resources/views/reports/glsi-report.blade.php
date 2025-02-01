@@ -192,6 +192,7 @@
                                                 <table class="table table-striped table-bordered">
                                                     <thead>
                                                         <tr>
+                                                            <th>SL. No.</th>
                                                             <th>Employee Code</th>
                                                             <th>Employee Name</th>
                                                             <th>Month</th>
@@ -201,6 +202,7 @@
                                                     <tbody>
                                                         @foreach ($data as $transaction)
                                                             <tr>
+                                                                <td>{{ $loop->iteration }}</td>
                                                                 <td>{{ $transaction->emp_code }}</td>
                                                                 <td>{{ $transaction->employee->first_name }}
                                                                     {{ $transaction->employee->last_name }}</td>
