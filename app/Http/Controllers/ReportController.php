@@ -24,6 +24,7 @@ class ReportController extends Controller
 
         if(request()->salary_head){
             $query = salaryTrans::query()
+                ->with('employee')
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
                         $q->where('department_id', request()->department);
@@ -84,6 +85,7 @@ class ReportController extends Controller
            request()->to_month){
 
             $query = salaryTrans::query()
+                ->with('employee')
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
                         $q->where('department_id', request()->department);
@@ -158,6 +160,7 @@ class ReportController extends Controller
         $data = [];
         if(request()->report_type){
             $query = salaryTrans::query()
+                ->with('employee')
                 ->where('sal_head_id', $salHead_id->id)
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
@@ -212,6 +215,7 @@ class ReportController extends Controller
 
         if(request()->report_type){
             $query = salaryTrans::query()
+                ->with('employee')
                 ->where('sal_head_id', 13)
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
@@ -273,6 +277,7 @@ class ReportController extends Controller
 
         if(request()->report_type){
             $query = salaryTrans::query()
+                ->with('employee')
                 ->where('sal_head_id', $salHead_id->id)
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
@@ -334,6 +339,7 @@ class ReportController extends Controller
 
         if(request()->report_type){
             $query = salaryTrans::query()
+                ->with('employee')
                 ->where('sal_head_id', $salHead_id->id)
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
