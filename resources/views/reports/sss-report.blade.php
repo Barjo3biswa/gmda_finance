@@ -184,7 +184,7 @@ use Carbon\Carbon;
                                                 </tbody>
                                                 <tfoot>
                                                     <tr>
-                                                        <td colspan="3" class="text-right"><strong>Total</strong></td>
+                                                        <td colspan="4" class="text-right"><strong>Total</strong></td>
                                                         <td><strong>{{ number_format($data->sum('amount'), 2) }}</strong></td>
                                                     </tr>
                                                 </tfoot>
