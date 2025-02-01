@@ -53,15 +53,15 @@
 			</tr>
 			<tr>
 				<td>G.S. Road, Christianbasti</td>
-				<td class="center" rowspan="2">{{$year[1]}}-{{$year[1]+1}}</td>
+				<td class="center" rowspan="2">{{$year}}</td>
 				<td>From</td>
 				<td>To</td>
 			</tr>
 			<tr>
 				<td>City: Guwahati</td>
 				<td>Pin Code: 781005</td>
-				<td>01/04/{{$year[0]}}</td>
-				<td>31/03/{{$year[1]}}</td>
+				<td>01/04/{{ explode('-', $year)[0] }}</td>
+				<td>31/03/{{ explode('-', $year)[1] }}</td>
 			</tr>
 		</tbody>
 	</table>

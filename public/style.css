@@ -1,15 +1,15 @@
 /*-----------------------------------------------------------------------------------
 
-    Template Name: Kiaalap - Kiaalap Admin Template 
+    Template Name: Kiaalap - Kiaalap Admin Template
     Description: Kiaalap Admin Template is a responsive admin template based on the famous Bootstrap framework it's easy to edit and customize by documentation.
     Author: Colorlib
     Version: 1.0
 
 -----------------------------------------------------------------------------------
-    
+
     CSS INDEX
     ===================
-	
+
     1. Common
 	2. Helper Class
 	3. All Nested Class
@@ -44,7 +44,7 @@
 /*----------------------------------------*/
 html,
 body {
-    height: 100%;
+    min-height: 100%;
     font-family: 'Roboto', sans-serif;
     font-weight: 400;
     background: #F6F8FA;

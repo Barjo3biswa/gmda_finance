@@ -8,6 +8,7 @@ use App\Models\salaryTrans;
 use App\Models\Department;
 use App\Models\DepartmentSection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -21,8 +22,15 @@ class ReportController extends Controller
 
         $data = [];
 
-        if(request()->salary_head){
+        if(request()->salary_head ||
+            request()->department ||
+            request()->section ||
+            request()->appointment_type ||
+            request()->pf_category ||
+            request()->from_month ||
+            request()->to_month){
             $query = salaryTrans::query()
+                ->with('employee')
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
                         $q->where('department_id', request()->department);
@@ -40,7 +48,6 @@ class ReportController extends Controller
                 ->where('sal_head_id', request()->salary_head)
                 ->where('year', request()->year);
 
-            // Add month range filtering
             if(request()->from_month && request()->to_month) {
                 $query->whereBetween('month', [request()->from_month, request()->to_month]);
             } elseif(request()->from_month) {
@@ -70,13 +77,11 @@ class ReportController extends Controller
         $sections = DepartmentSection::all();
         $appointmenttypes = AuthMaster::where('master_type', 'Appointment Type')->get();
 
-        // Get unique salary head types
         $salaryHeadTypes = salaryHead::select('pay_head')->distinct()->get();
 
         $data = [];
         $groupedData = [];
 
-        // Check if any filter is applied
         if(request()->year ||
            request()->department ||
            request()->section ||
@@ -86,6 +91,7 @@ class ReportController extends Controller
            request()->to_month){
 
             $query = salaryTrans::query()
+                ->with('employee')
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
                         $q->where('department_id', request()->department);
@@ -107,7 +113,6 @@ class ReportController extends Controller
                 })
                 ->where('year', request()->year);
 
-            // Add month range filtering
             if(request()->from_month && request()->to_month) {
                 $query->whereBetween('month', [request()->from_month, request()->to_month]);
             } elseif(request()->from_month) {
@@ -116,23 +121,21 @@ class ReportController extends Controller
                 $query->where('month', '<=', request()->to_month);
             }
 
-            // If no salary head type is selected, group by type
             if(!request()->salary_head_type) {
                 $groupedData = $query
                     ->with(['salaryHead' => function($q) {
                         $q->select('id', 'name', 'pay_head');
                     }])
-                    ->select('sal_head_id', \DB::raw('SUM(amount) as total_amount'))
+                    ->select('sal_head_id', DB::raw('SUM(amount) as total_amount'))
                     ->groupBy('sal_head_id')
                     ->get()
                     ->groupBy(function($item) {
                         return $item->salaryHead->pay_head;
                     });
             } else {
-                // If salary head type is selected, use original query
                 $data = $query
                     ->with('salaryHead')
-                    ->select('sal_head_id', \DB::raw('SUM(amount) as total_amount'))
+                    ->select('sal_head_id', DB::raw('SUM(amount) as total_amount'))
                     ->groupBy('sal_head_id')
                     ->get();
             }
@@ -160,11 +163,16 @@ class ReportController extends Controller
             return redirect()->back()->with('error', 'GLSI salary head not found');
         }
 
-        // dd($salHead_id);
-
         $data = [];
-        if(request()->report_type){
+        if(request()->report_type ||
+            request()->department ||
+            request()->section ||
+            request()->appointment_type ||
+            request()->pf_category ||
+            request()->from_month ||
+            request()->to_month){
             $query = salaryTrans::query()
+                ->with('employee')
                 ->where('sal_head_id', $salHead_id->id)
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
@@ -182,9 +190,6 @@ class ReportController extends Controller
                 })
                 ->where('year', request()->year);
 
-
-
-            // Add month range filtering
             if(request()->from_month && request()->to_month) {
                 $query->whereBetween('month', [request()->from_month, request()->to_month]);
             } elseif(request()->from_month) {
@@ -192,8 +197,6 @@ class ReportController extends Controller
             } elseif(request()->to_month) {
                 $query->where('month', '<=', request()->to_month);
             } else {
-                // If no month range specified, use the default month
-
                 if(request()->month){
                     $query->where('month', request()->month);
                 }
@@ -222,8 +225,15 @@ class ReportController extends Controller
 
         $data = [];
 
-        if(request()->report_type){
+        if(request()->report_type ||
+            request()->department ||
+            request()->section ||
+            request()->appointment_type ||
+            request()->pf_category ||
+            request()->from_month ||
+            request()->to_month){
             $query = salaryTrans::query()
+                ->with('employee')
                 ->where('sal_head_id', 13)
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
@@ -241,7 +251,6 @@ class ReportController extends Controller
                 })
                 ->where('year', request()->year);
 
-            // Add month range filtering
             if(request()->from_month && request()->to_month) {
                 $query->whereBetween('month', [request()->from_month, request()->to_month]);
             } elseif(request()->from_month) {
@@ -260,10 +269,7 @@ class ReportController extends Controller
             if(request()->report_type == 'monthly'){
                 $data = $query->get();
             } else {
-
                 $data = $query->sum('amount');
-
-                // dd($data);
             }
         }
         return view('reports.nps-report', compact(
@@ -287,8 +293,15 @@ class ReportController extends Controller
             return redirect()->back()->with('error', 'SSS salary head not found');
         }
 
-        if(request()->report_type){
+        if(request()->report_type ||
+            request()->department ||
+            request()->section ||
+            request()->appointment_type ||
+            request()->pf_category ||
+            request()->from_month ||
+            request()->to_month){
             $query = salaryTrans::query()
+                ->with('employee')
                 ->where('sal_head_id', $salHead_id->id)
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
@@ -306,7 +319,6 @@ class ReportController extends Controller
                 })
                 ->where('year', request()->year);
 
-            // Add month range filtering
             if(request()->from_month && request()->to_month) {
                 $query->whereBetween('month', [request()->from_month, request()->to_month]);
             } elseif(request()->from_month) {
@@ -325,10 +337,7 @@ class ReportController extends Controller
             if(request()->report_type == 'monthly'){
                 $data = $query->get();
             } else {
-
                 $data = $query->sum('amount');
-
-                // dd($data);
             }
         }
         return view('reports.sss-report', compact(
@@ -352,8 +361,15 @@ class ReportController extends Controller
             return redirect()->back()->with('error', 'LIC salary head not found');
         }
 
-        if(request()->report_type){
+        if(request()->report_type ||
+            request()->department ||
+            request()->section ||
+            request()->appointment_type ||
+            request()->pf_category ||
+            request()->from_month ||
+            request()->to_month){
             $query = salaryTrans::query()
+                ->with('employee')
                 ->where('sal_head_id', $salHead_id->id)
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
@@ -371,7 +387,6 @@ class ReportController extends Controller
                 })
                 ->where('year', request()->year);
 
-            // Add month range filtering
             if(request()->from_month && request()->to_month) {
                 $query->whereBetween('month', [request()->from_month, request()->to_month]);
             } elseif(request()->from_month) {
@@ -379,21 +394,16 @@ class ReportController extends Controller
             } elseif(request()->to_month) {
                 $query->where('month', '<=', request()->to_month);
             } else {
-
                 if(request()->month){
                     $query->where('month', request()->month);
                 }
-
             }
 
 
             if(request()->report_type == 'monthly'){
                 $data = $query->get();
             } else {
-
                 $data = $query->sum('amount');
-
-                // dd($data);
             }
         }
         return view('reports.lic-report', compact(
