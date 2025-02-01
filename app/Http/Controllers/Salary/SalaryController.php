@@ -741,6 +741,18 @@ class SalaryController extends Controller
             // dd($data);
             LoanMaster::where('id', $loan->loan_id)->update($data);
 
+            $loan_master = LoanMaster::where('id', $loan->loan_id)->first();
+            if ($loan_master->advanceType->advance_type == 'flat') {
+                if ($loan_master->no_of_installment == $loan_master->principal_installment && $loan_master->no_of_installment_interest == $loan_master->interest_installment) {
+                    $loan_master->status = 5;
+                    $loan_master->save();
+                }
+            } else {
+                if ($loan_master->no_of_installment == $loan_master->principal_installment) {
+                    $loan_master->status = 5;
+                    $loan_master->save();
+                }
+            }
             LoanRecovery::create([
                 'emp_id' => $loan_master->user_id,
                 'emp_code' => $loan_master->emp_code,
@@ -816,55 +828,55 @@ class SalaryController extends Controller
         $salary_block = salaryBlock::where('id', $block_id)->first();
         // dd($salary_block);
         $user = user::get();
-        DB::beginTransaction();
+        // DB::beginTransaction();
         $financial_year = $salary_block->month >= 4 ? $salary_block->year . '-' . ($salary_block->year + 1) : ($salary_block->year - 1) . '-' . $salary_block->year;
 
         $user = user::where('salary_flag', 'open')->get();
 
 
-        try {
-            foreach ($user as $usr) {
-                $salaryTempData = salaryTemp::where('emp_id', $usr->id)->where('block_id', $salary_block->id)->get();
+        // try {
+        foreach ($user as $usr) {
+            $salaryTempData = salaryTemp::where('emp_id', $usr->id)->where('block_id', $salary_block->id)->get();
 
 
-                if ($salaryTempData->isEmpty()) {
-                    continue;
-                }
-
-                $salarySummary = SalarySummmary::updateOrCreate(
-                    [
-                        'emp_id' => $usr->id,
-                        'sal_block_id' => $salary_block->id,
-                        'financial_year' => $financial_year,
-                        'month' => $salary_block->month,
-                        'year' => $salary_block->year,
-                    ],
-                    [
-                        'emp_code' => $usr->emp_code,
-                    ]
-                );
-
-                $this->addDynamicColumns($salarySummary, $salaryTempData);
-
-                foreach ($salaryTempData as $temp) {
-                    if ($temp->pay_head == 'Deduction') {
-                        $columnName = 'DED_' . str_replace('.', '_', $temp->salary_head_code);
-                        $salarySummary->$columnName = $temp->amount;
-                    }
-
-                    if ($temp->pay_head == 'Income') {
-                        $columnName = 'INC_' . str_replace('.', '_', $temp->salary_head_code);
-                        $salarySummary->$columnName = $temp->amount;
-                    }
-                }
-
-                $salarySummary->save();
+            if ($salaryTempData->isEmpty()) {
+                continue;
             }
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
+
+            $salarySummary = SalarySummmary::updateOrCreate(
+                [
+                    'emp_id' => $usr->id,
+                    'sal_block_id' => $salary_block->id,
+                    'financial_year' => $financial_year,
+                    'month' => $salary_block->month,
+                    'year' => $salary_block->year,
+                ],
+                [
+                    'emp_code' => $usr->emp_code,
+                ]
+            );
+
+            $this->addDynamicColumns($salarySummary, $salaryTempData);
+
+            foreach ($salaryTempData as $temp) {
+                if ($temp->pay_head == 'Deduction') {
+                    $columnName = 'DED_' . str_replace('.', '_', $temp->salary_head_code);
+                    $salarySummary->$columnName = $temp->amount;
+                }
+
+                if ($temp->pay_head == 'Income') {
+                    $columnName = 'INC_' . str_replace('.', '_', $temp->salary_head_code);
+                    $salarySummary->$columnName = $temp->amount;
+                }
+            }
+
+            $salarySummary->save();
         }
-        DB::commit();
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     throw $e;
+        // }
+        // DB::commit();
 
         return true;
     }
@@ -1231,6 +1243,38 @@ class SalaryController extends Controller
         // dd($salary_master);
         return view('salary.salary-summery-net', compact('salary_block', 'view_salary_block', 'salary_master'));
         // dd($salary_block);
+    }
+
+    public function PaySlipReport(Request $request)
+    {
+        // $currentMonth = date('n');
+        // $currentYear = date('Y');
+
+        // $salary_block = salaryBlock::where(function ($q) use ($currentMonth, $currentYear) {
+        //     for ($i = -3; $i <= 3; $i++) {
+        //         $month = ($currentMonth + $i);
+        //         $year = $currentYear;
+
+        //         if ($month < 1) {
+        //             $month += 12; // Wrap around to last year
+        //             $year -= 1;
+        //         } elseif ($month > 12) {
+        //             $month -= 12; // Wrap around to next year
+        //             $year += 1;
+        //         }
+
+        //         $q->orWhere(function ($query) use ($month, $year) {
+        //             $query->where('month', $month)->where('year', $year);
+        //         });
+        //     }
+        // })->get();
+
+
+        $couurent_open_block = salaryBlock::where('sal_process_status', 'unblock')->first();
+        $default_block = salaryBlock::where('month', date('m'))->where('year', date('Y'))->first();
+        $view_salary_block = $request->sal_block ?? ($couurent_open_block ? $couurent_open_block->id : $default_block->id);
+        $salary_master = salaryMaster::where('sal_block_id', $request->sal_block)->get();
+        return view('salary.payslip-report', compact('salary_block', 'view_salary_block', 'salary_master'));
     }
 
 }

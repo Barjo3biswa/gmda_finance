@@ -10,6 +10,7 @@ class LoanService
 {
     public function generateFlatLoanData($loan)
     {
+        // dump($loan);
         if ($loan->no_of_installment > $loan->principal_installment) {
             $emi_amount = $loan->monthly_emi;
             // dd($emi_amount);

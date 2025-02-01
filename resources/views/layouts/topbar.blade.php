@@ -24,6 +24,10 @@
                                     @if (\App\Helpers\commonHelper::isPermissionExist('salary_management'))
                                         <a href="{{ route('emp-amount') }}" class="dropdown-item">Head Wise Amount</a>
                                     @endif
+                                    @if (\App\Helpers\commonHelper::isPermissionExist('salary_excel_upload'))
+                                        <a href="{{ route('excel-upload') }}" class="dropdown-item">Upload Excel</a>
+                                        <a href="{{ route('hold-unhold') }}" class="dropdown-item">Hold/Unhold Salary</a>
+                                    @endif
                                 </div>
                             </li>
             @endif
@@ -51,11 +55,9 @@
 
                                         <a href="{{ route('salary-summery-net') }}" class="dropdown-item">Salary
                                             Summery (Net)</a>
+
+                                        <a href="{{ route('pay-slip-report') }}" class="dropdown-item">Pay Slip</a>
                                     @endif
-                                    @if (\App\Helpers\commonHelper::isPermissionExist('salary_excel_upload'))
-                                        <a href="{{ route('excel-upload') }}" class="dropdown-item">Upload Excel</a>
-                                    @endif
-                                    <a href="{{ route('hold-unhold') }}" class="dropdown-item">Hold/Unhold Salary</a>
                                 </div>
                             </li>
             @endif

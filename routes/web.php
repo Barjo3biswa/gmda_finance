@@ -39,6 +39,7 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::get('/salary-process', [App\Http\Controllers\Salary\SalaryController::class, 'salaryProcess'])->name('salary-process');
     Route::get('/payslip/{id}/{sl_blk}', [App\Http\Controllers\Salary\SalaryController::class, 'payslip'])->name('payslip');
     Route::get('/final-pay-slip/{id}/{sl_blk}', [App\Http\Controllers\Salary\SalaryController::class, 'finalPaySlip'])->name('final-pay-slip');
+    Route::get('/pay-slip-report', [App\Http\Controllers\Salary\SalaryController::class, 'PaySlipReport'])->name('pay-slip-report');
     Route::post('/update-amount', [App\Http\Controllers\Salary\SalaryController::class, 'updateAmount'])->name('update-amount');
 
     Route::get('/excel-upload', [App\Http\Controllers\Salary\SalaryController::class, 'salaryExcelUpload'])->name('excel-upload');
