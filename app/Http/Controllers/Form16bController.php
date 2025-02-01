@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class Form16bController extends Controller
 {
@@ -30,9 +31,9 @@ class Form16bController extends Controller
 
         // dd($salarySummary);
 
-        if ($salarySummary != 12) {
-            return redirect()->route('form16.index')->with('error', 'Complete Salary Summaries does not exists for this employee and financial year.');
-        }
+        // if ($salarySummary != 12) {
+        //     return redirect()->route('form16.index')->with('error', 'Complete Salary Summaries does not exists for this employee and financial year.');
+        // }
 
         $form16b = Form16b::where('emp_code', $employee->emp_code)->where('financial_year', $financialYear)->first();
 
@@ -131,6 +132,14 @@ class Form16bController extends Controller
                 ->sum('DED_GSLI');
         }
 
+        $totalDED_SSD = 0;
+        if (Schema::hasColumn('salary_summmaries', 'DED_SSD')) {
+            $totalDED_SSD = SalarySummmary::select('emp_id', 'emp_code', 'financial_year', 'DED_SSD')
+                ->where('emp_code', $employee->emp_code)
+                ->where('financial_year', $financialYear)
+                ->sum('DED_SSD');
+        }
+
         // Note* there is a seperate field G.I.S but in old code in gis filed gsli is used
 
         return view('form16b.create', compact(
@@ -143,12 +152,56 @@ class Form16bController extends Controller
             'totalINC_OTHERALLW',
             'totalDED_PTAX',
             'totalGPF_EPF_CPF',
-            'totalDED_GSLI'
+            'totalDED_GSLI',
+            'totalDED_SSD'
         ));
     }
 
     public function store(Request $request)
     {
-        dd($request->all());
+        $check = Form16b::where('emp_code', $request->emp_code)->where('financial_year', $request->financial_year)->first();
+        if($check){
+            return redirect()->route('form16.index')->with('error', 'Form 16b already created for this employee and financial year.');
+        }
+        Form16b::create($request->all());
+        return redirect()->route('form16.index')->with('success', 'Form 16b created successfully.');
+    }
+
+    public function viewIndex()
+    {
+        $employees = User::select('id', 'name')->where('salary_flag', 'open')->get();
+        return view('form16b.viewIndex', compact('employees'));
+    }
+    public function view(Request $request)
+    {
+
+        $emp = Form16b::where('emp_id', $request->employee_id)->where('financial_year', $request->financial_year)->first();
+
+        if (!$emp) {
+            return redirect()->route('form16.viewIndex')->with('error', 'Form 16b not found for this employee and financial year.');
+        }
+
+        $employee = Employee::where('id', $request->employee_id)->first();
+
+        // dd( $employee);
+        $emp_name = $employee->emp_f_name." ".$employee->emp_m_name." ".$employee->emp_l_name;
+        $pan_no = $employee->pan_no;
+        $post_name = $employee->designation->name;
+        $year = $request->financial_year;
+        $secretary_details = "NA";
+        $secretary_post_details = "NA";
+
+
+        $pdf = PDF::loadView('form16b.pdf', compact(
+            'emp',
+            'post_name',
+            'emp_name',
+            'year',
+            'pan_no',
+            'secretary_details',
+            'secretary_post_details'
+        ));
+
+        return $pdf->stream('Form-16-B.pdf');
     }
 }

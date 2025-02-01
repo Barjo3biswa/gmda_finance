@@ -16,4 +16,9 @@ class salaryTrans extends Model
     {
         return $this->belongsTo(Employee::class, 'emp_id');
     }
+
+    public function salaryHead()
+    {
+        return $this->belongsTo(salaryHead::class, 'sal_head_id');
+    }
 }

@@ -29,6 +29,7 @@
                                     <form action="{{ route('form16.store') }}" method="POST"
                                         enctype="multipart/form-data">
                                         @csrf
+                                        <input type="hidden" class="form-control" id="emp_id" name="emp_id" value="{{$employee->id}}">
                                         <input type="hidden" class="form-control" id="emp_code" name="emp_code" value="{{$employee->emp_code}}">
                                         <input type="hidden" class="form-control" id="financial_year" name="financial_year" value="{{$financialYear}}">
                                         <div class="form-group">
@@ -261,7 +262,7 @@
                                                                         <label>Life Insurance Premium</label>
                                                                     </div>
                                                                     <div class="col-md-6">
-                                                                        <input type="text" class="form-control" placeholder="Life Insurance Premium" name="life_insurance_premium" id="life_insurance_premium" data-validation="number" data-validation-error-msg="Numeric Value Only" value="$salary_saving_deduction" onkeyup="change()"/>
+                                                                        <input type="text" class="form-control" placeholder="Life Insurance Premium" name="life_insurance_premium" id="life_insurance_premium" data-validation="number" data-validation-error-msg="Numeric Value Only" value="{{$totalDED_SSD}}" onkeyup="change()"/>
                                                                     </div>
                                                                 </div>
                                                             </div>
