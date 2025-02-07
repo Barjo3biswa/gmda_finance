@@ -153,11 +153,11 @@ class ReportController extends Controller
 
     public function glsiReport()
     {
-        $departments = Department::all();
-        $sections = DepartmentSection::all();
+        $departments = Department::select('id', 'name')->get();
+        $sections = DepartmentSection::select('id', 'name', 'department_id')->get();
         $appointmenttypes = AuthMaster::where('master_type', 'Appointment Type')->get();
 
-        $salHead_id = salaryHead::where('code', 'GLSI')->first();
+        $salHead_id = salaryHead::where('code', 'GLSI')->value('id');
 
         if(!$salHead_id){
             return redirect()->back()->with('error', 'GLSI salary head not found');
@@ -173,7 +173,7 @@ class ReportController extends Controller
             request()->to_month){
             $query = salaryTrans::query()
                 ->with('employee')
-                ->where('sal_head_id', $salHead_id->id)
+                ->where('sal_head_id', $salHead_id)
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
                         $q->where('department_id', request()->department);

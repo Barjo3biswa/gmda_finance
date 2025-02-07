@@ -180,8 +180,12 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th class="text-right">Grand Total</th>
-                                <th>{{ number_format($grandTotal, 2) }}</th>
+                                <th class="text-right">
+                                    <strong>Grand Total</strong>
+                                </th>
+                                <th>
+                                    <strong>{{ number_format($grandTotal, 2) }}</strong>
+                                </th>
                             </tr>
                         </tfoot>
                     </table>

@@ -97,7 +97,7 @@
                             class="fa fa-angle-down"></i></span></a>
                 <div role="menu" class="dropdown-menu animated zoomIn">
                     <a href="{{ route('form16.index') }}" class="dropdown-item">Create New Form16</a>
-                    <a href="{{ route('form16.viewIndex') }}" class="dropdown-item">View Form16</a>
+                    <a href="{{ route('form16.viewIndex') }}" class="dropdown-item">Download Form16</a>
                 </div>
             </li>
             <li class="nav-item dropdown res-dis-nn">
