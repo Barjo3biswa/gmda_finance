@@ -62,6 +62,8 @@ class ReportController extends Controller
 
             }
 
+            $data = $query->select('emp_id', DB::raw('SUM(amount) as amount'))
+                    ->groupBy('emp_id');
             $data = $query->get();
         }
         return view('reports.salary-head-report', compact(

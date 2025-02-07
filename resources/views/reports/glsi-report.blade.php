@@ -95,10 +95,7 @@
                                                 <div class="form-group">
                                                     <label for="pf_category">PF Category</label>
                                                     <select name="pf_category" id="pf_category" class="form-control">
-                                                        <option value="" selected="" disabled="">Select</option>
-                                                        <option value=""
-                                                            {{ request('pf_category') == '' ? 'selected' : '' }}>ALL
-                                                        </option>
+                                                        <option value="">All Categories</option>
                                                         <option value="CPF"
                                                             {{ request('pf_category') == 'CPF' ? 'selected' : '' }}>CPF
                                                         </option>

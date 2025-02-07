@@ -84,7 +84,7 @@ use Carbon\Carbon;
                                                     <label for="pf_category">PF Category</label>
                                                     <select name="pf_category" id="pf_category" class="form-control">
                                                         <option value="" selected="" disabled="">Select</option>
-                                                        <option value="" {{ request('pf_category') == '' ? 'selected' : '' }}>ALL</option>
+                                                        <option value="" {{ request('pf_category') == '' ? 'selected' : '' }}>All Categories</option>
                                                         <option value="CPF" {{ request('pf_category') == 'CPF' ? 'selected' : '' }}>CPF</option>
                                                         <option value="EPF" {{ request('pf_category') == 'EPF' ? 'selected' : '' }}>EPF</option>
                                                         <option value="GPF" {{ request('pf_category') == 'GPF' ? 'selected' : '' }}>GPF</option>
