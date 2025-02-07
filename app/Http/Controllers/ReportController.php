@@ -31,7 +31,7 @@ class ReportController extends Controller
             request()->to_month){
             $query = salaryTrans::query()
 
-                ->with('employee', 'salaryHead')
+                ->with('employee')
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
                         $q->where('department_id', request()->department);
@@ -67,7 +67,7 @@ class ReportController extends Controller
                     ->groupBy('emp_id');
             $data = $query->get();
 
-            // dd($data->take(1));
+            // dd($data->take(2));
         }
 
         $selectedSalHeadName = salaryHead::where('id', request()->salary_head)->value('name');
