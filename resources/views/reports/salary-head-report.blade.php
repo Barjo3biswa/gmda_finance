@@ -194,10 +194,10 @@
                                                     @foreach ($data as $transaction)
                                                         <tr>
                                                             <td>{{ $loop->iteration }}</td>
-                                                            <td>{{ $transaction->emp_code }}</td>
+                                                            <td>{{ $transaction->employee->code }}</td>
                                                             <td>{{ $transaction->employee->first_name }}
                                                                 {{ $transaction->employee->last_name }}</td>
-                                                            <td>{{ $transaction->salary_head_name }}</td>
+                                                            <td>{{ $selectedSalHeadName}}</td>
                                                             <td>{{ number_format($transaction->amount, 2) }}</td>
                                                         </tr>
                                                     @endforeach

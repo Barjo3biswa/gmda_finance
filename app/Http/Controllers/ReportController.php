@@ -30,7 +30,8 @@ class ReportController extends Controller
             request()->from_month ||
             request()->to_month){
             $query = salaryTrans::query()
-                ->with('employee')
+
+                ->with('employee', 'salaryHead')
                 ->whereHas('employee', function($q) {
                     if(request()->department) {
                         $q->where('department_id', request()->department);
@@ -65,8 +66,13 @@ class ReportController extends Controller
             $data = $query->select('emp_id', DB::raw('SUM(amount) as amount'))
                     ->groupBy('emp_id');
             $data = $query->get();
+
+            // dd($data->take(1));
         }
+
+        $selectedSalHeadName = salaryHead::where('id', request()->salary_head)->value('name');
         return view('reports.salary-head-report', compact(
+            'selectedSalHeadName',
             'SalaryHead',
             'departments',
             'sections',
