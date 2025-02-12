@@ -67,7 +67,7 @@ class ReportController extends Controller
                     ->groupBy('emp_id');
             $data = $query->get();
 
-            // dd($data->take(2));
+            // dd($data->take(2)[1]);
         }
 
         $selectedSalHeadName = salaryHead::where('id', request()->salary_head)->value('name');
