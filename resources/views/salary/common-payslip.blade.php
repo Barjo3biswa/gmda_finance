@@ -155,9 +155,11 @@
     <div class="row">
         <span>Amount in words:</span>
         <span class="heading">
-            {{ ucfirst(collect(explode(' ', NumberFormatter::create('en', NumberFormatter::SPELLOUT)->format($salary->net)))
-    ->map(fn($word) => ucfirst($word))
-    ->join(' ')) }}
+            {{ \App\Helpers\commonHelper::number_to_words($salary->net) }}
+            {{-- {{ ucfirst(collect(explode(' ', NumberFormatter::create('en',
+            NumberFormatter::SPELLOUT)->format($salary->net)))
+            ->map(fn($word) => ucfirst($word))
+            ->join(' ')) }} --}}
         </span>
     </div>
 </div>
