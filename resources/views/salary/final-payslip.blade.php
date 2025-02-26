@@ -25,56 +25,6 @@
     .header hr {
         margin-bottom: 8px !important;
     }
-
-    @media print {
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        .alert,
-        .navbar,
-        .footer,
-        .no-print {
-            display: none;
-            /* Hide unnecessary elements like navbars and footers */
-        }
-
-        .container {
-            margin: 0 auto;
-            width: 100%;
-            max-width: 100%;
-        }
-
-        .heading {
-            font-weight: bold;
-        }
-
-        hr {
-            margin: 10px 0;
-        }
-
-        .btn {
-            display: none;
-            /* Hide buttons */
-        }
-
-        .product-payment-inner-st span {
-            padding: 8px 0 !important;
-        }
-
-        .header hr {
-            margin-bottom: 8px !important;
-        }
-
-        .media-flex {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-    }
 </style>
 @endsection
 @section('content')
@@ -106,8 +56,12 @@
                                 <div class="col-md-2">
                                 </div>
                                 <div class="col-md-8" style="display: flex;justify-content: end;">
-                                    <button class="btn btn-primary btn-xs"
-                                        onclick="printDiv('printableArea')">Print</button>
+                                    {{-- <button class="btn btn-primary btn-xs"
+                                        onclick="printDiv('printableArea')">Print</button> --}}
+                                    <a class="btn btn-primary btn-xs"
+                                        href="{{ route('download-all-payslip', ['id' => Crypt::encrypt($salary_block->id), 'emp_id' => $emp_details->id]) }}">
+                                        Download
+                                    </a>
                                 </div>
                             </div>
                             <div class="row" id="printableArea">

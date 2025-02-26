@@ -29,7 +29,7 @@ use DB;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Schema;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 class SalaryController extends Controller
 {
     protected $loanService;
@@ -789,7 +789,7 @@ class SalaryController extends Controller
             foreach ($user as $usr) {
                 $attendance_summery = AttendanceSummery::where('block_id', $salary_block->id)->where('user_id', $usr->id)->first();
                 if (!$attendance_summery) {
-                    return redirect()->back()->with('error', 'Attendence is not processed.');
+                    return redirect()->back()->with('error', 'Attendence is not processed for. ' . $usr->id);
                 }
                 if ($attendance_summery->absent_count > 0) {
                     $pay_cut = 0;
@@ -1254,7 +1254,7 @@ class SalaryController extends Controller
         } else {
             $salary_master = collect();
         }
-        return view('salary.payslip-report', compact('salary_master'));
+        return view('salary.payslip-report', compact('salary_master', 'salary_block'));
     }
 
     public function publishPaySlip(Request $request)
@@ -1270,30 +1270,52 @@ class SalaryController extends Controller
 
     public function PaySlipIndivisual(Request $request)
     {
-        // dd("ok");
-        // return view('salary.payslip-indivisual');
-
         $emp_id = Auth::user()->id;
         $salary_block = salaryBlock::where('month', $request->month)->where('year', $request->year)->first();
-
-        // $salary_block = salaryBlock::where('id', $sl_blk)->first();
         $emp_details = User::with('employee')->where('id', $emp_id)->first();
         if ($salary_block) {
             $salary = salaryMaster::with('salaryTrans')->where('emp_id', $emp_id)
-                ->where('sal_block_id', $salary_block->id)->first();
+                ->where('sal_block_id', $salary_block->id)->where('is_published', 1)->first();
 
-            $claims = $salary->salaryTrans->where('pay_head', 'Income')->where('amount', '!=', 0);
-            $deductions = $salary->salaryTrans->where('pay_head', 'Deduction')->where('amount', '!=', 0);
+            if ($salary) {
+                $claims = $salary->salaryTrans->where('pay_head', 'Income')->where('amount', '!=', 0);
+                $deductions = $salary->salaryTrans->where('pay_head', 'Deduction')->where('amount', '!=', 0);
+            } else {
+                $claims = collect();
+                $deductions = collect();
+            }
+
         } else {
             $salary = collect();
+            $claims = collect();
+            $deductions = collect();
         }
-
-        // if (!$salary) {
-        //     return redirect()->back()->with('error', 'Salary Not Generated');
-        // }
-        $claims = collect();
-        $deductions = collect();
         return view('salary.payslip-indivisual', compact('salary', 'emp_details', 'claims', 'deductions', 'salary_block'));
+    }
+
+
+    public function doenloadAllPS(Request $request, $id)
+    {
+        $appUrl = url('/');
+        // dd($appUrl);
+        ini_set('memory_limit', '512M');
+        $decrypted = Crypt::decrypt($id);
+
+        $user = User::with([
+            'salaryMaster' => function ($q) use ($decrypted) {
+                $q->where('sal_block_id', $decrypted);
+            }
+        ])->whereHas('salaryMaster', function ($q) use ($decrypted) {
+            $q->where('sal_block_id', $decrypted);
+        });
+
+        if ($request->emp_id) {
+            $user = $user->where('id', $request->emp_id);
+        }
+        $user = $user->get();
+        $data = ['users' => $user, 'block_id' => $decrypted, 'app_url' => $appUrl];
+        $pdf = Pdf::loadView('salary.payslip-pdf-all', $data);
+        return $pdf->download('payslip.pdf');
     }
 
 }

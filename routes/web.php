@@ -44,6 +44,7 @@ Route::group(['middleware' => 'auth.jwt'], function () {
     Route::post('/publish-pay-slip', [App\Http\Controllers\Salary\SalaryController::class, 'publishPaySlip'])->name('publish-pay-slip');
     Route::get('/pay-slip-indi', [App\Http\Controllers\Salary\SalaryController::class, 'PaySlipIndivisual'])->name('pay-slip-indi');
 
+    Route::get('/download-all-payslip/{id}', [App\Http\Controllers\Salary\SalaryController::class, 'doenloadAllPS'])->name('download-all-payslip');
 
     Route::get('/excel-upload', [App\Http\Controllers\Salary\SalaryController::class, 'salaryExcelUpload'])->name('excel-upload');
     Route::get('/sample-excel-hd', [App\Http\Controllers\Salary\SalaryController::class, 'sampleExcelHD'])->name('sample-excel-hd');

@@ -69,7 +69,7 @@
                                                                 <select name="month" id="month" class="form-control">
                                                                     <option value="">--select--</option>
                                                                     @for ($i = 1; $i < 13; $i++)
-                                                                        <option value="{{ $i }}">
+                                                                        <option value="{{ $i }}" {{ Request()->get('month') == $i ? 'selected' : '' }}>
                                                                             {{ \Carbon\Carbon::createFromDate(null, $i, 1)->format('F') }}
                                                                         </option>
                                                                     @endfor
@@ -82,7 +82,9 @@
                                                                 <select name="year" id="year" class="form-control">
                                                                     <option value="">--select--</option>
                                                                     @for ($j = 2025; $j <= 2030; $j++)
-                                                                        <option value="{{ $j }}">{{ $j }}</option>
+                                                                        <option value="{{ $j }}" {{ Request()->get('year') == $j ? 'selected' : '' }}>
+                                                                            {{ $j }}
+                                                                        </option>
                                                                     @endfor
                                                                 </select>
                                                             </div>
@@ -102,8 +104,29 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" id="printableArea">
+                            {{-- <div class="row" id="printableArea">
+                                @if ($salary_block)
                                 @include('salary.common-payslip')
+                                @endif
+                            </div> --}}
+                            <div class="product-tab-list tab-pane fade active in" id="description">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                    </div>
+                                    {{-- <div class="col-md-8" style="display: flex;justify-content: end;">
+                                        <button class="btn btn-primary btn-xs"
+                                            onclick="printDiv('printableArea')">Print</button> --}}
+                                    </div>
+                                </div>
+                                <div class="row" id="printableArea">
+                                    @if ($salary_block && $salary)
+                                        <a class="btn btn-primary btn-xs"
+                                            href="{{ route('download-all-payslip', ['id' => Crypt::encrypt($salary_block->id), 'emp_id' => $emp_details->id]) }}">
+                                            Download
+                                        </a>
+                                        @include('salary.common-payslip')
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>

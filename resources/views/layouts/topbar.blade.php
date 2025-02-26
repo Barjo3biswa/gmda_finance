@@ -42,9 +42,9 @@
                                     class="nav-link dropdown-toggle">Salary<span class="angle-down-topmenu"><i
                                             class="fa fa-angle-down"></i></span></a>
                                 <div role="menu" class="dropdown-menu animated zoomIn">
-                                    {{-- @if (\App\Helpers\commonHelper::isPermissionExist('salary_block_management'))
-                                    <a href="{{ route('pay-slip-indi') }}" class="dropdown-item">Pay Slip</a>
-                                    @endif --}}
+                                    @if (\App\Helpers\commonHelper::isPermissionExist('salary_block_management'))
+                                        <a href="{{ route('pay-slip-indi') }}" class="dropdown-item">Pay Slip</a>
+                                    @endif
                                     @if (\App\Helpers\commonHelper::isPermissionExist('salary_block_management'))
                                         <a href="{{ route('salary-block') }}" class="dropdown-item">Salary Block</a>
                                     @endif

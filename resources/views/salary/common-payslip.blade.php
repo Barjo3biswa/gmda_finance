@@ -1,8 +1,59 @@
+<style>
+    @media print {
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .alert,
+        .navbar,
+        .footer,
+        .no-print {
+            display: none;
+            /* Hide unnecessary elements like navbars and footers */
+        }
+
+        .container {
+            margin: 0 auto;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .heading {
+            font-weight: bold;
+        }
+
+        hr {
+            margin: 10px 0;
+        }
+
+        .btn {
+            display: none;
+            /* Hide buttons */
+        }
+
+        .product-payment-inner-st span {
+            padding: 8px 0 !important;
+        }
+
+        .header hr {
+            margin-bottom: 8px !important;
+        }
+
+        .media-flex {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+    }
+</style>
 <div class="col-md-2">
 </div>
 <div class="col-md-8">
     <div class="row">
-        <div class="col-md-3" style="background: #f5f5f5;">
+        <div class="col-md-3">
             <div class="row" style="display: flex; justify-content: center;">
                 <img class="main-logo" src="{{ asset('logo/logo.png') }}" alt="" style="max-width: 120px;" />
             </div>
@@ -47,8 +98,8 @@
                     <span class="heading">PRAN:</span>
                     {{ $emp_details->employee->pran_no ?? "NA"}}
                 </div>
-                <div class="col-md-6"><span class="heading">Email Address:</span>
-                    {{ $emp_details->email ?? "NA"}}</div>
+                {{-- <div class="col-md-6"><span class="heading">Email Address:</span>
+                    {{ $emp_details->email ?? "NA"}}</div> --}}
             </div>
         </div>
     </div>
@@ -60,7 +111,7 @@
             </div>
             @foreach ($claims as $cl)
                 <div class="col-md-12" style="display: flex;justify-content: space-between;gap:20px;">
-                    <span>{{ $cl->salary_head_name }}</span><span>{{ $cl->amount }}</span>
+                    <span>{{ $cl->salary_head_name }}</span><span>{{ number_format($cl->amount, 2) }}</span>
                 </div>
             @endforeach
         </div>
@@ -71,7 +122,7 @@
             </div>
             @foreach ($deductions as $cl)
                 <div class="col-md-12" style="display: flex;justify-content: space-between;">
-                    <span>{{ $cl->salary_head_name }}</span><span>{{ $cl->amount }}</span>
+                    <span>{{ $cl->salary_head_name }}</span><span>{{ number_format($cl->amount, 2) }}</span>
                 </div>
             @endforeach
         </div>
@@ -83,10 +134,10 @@
                 <span class="heading">Total:</span>
             </div>
             <div class="col-md-4" style="display: flex;justify-content: end;">
-                <span class="heading">{{ $salary->gross }}</span>
+                <span class="heading">{{ number_format($salary->gross, 2) }}</span>
             </div>
             <div class="col-md-6" style="display: flex;justify-content: end;">
-                <span class="heading">{{ $salary->deduction }}</span>
+                <span class="heading">{{ number_format($salary->deduction, 2) }}</span>
             </div>
         </div>
     </div>
@@ -97,7 +148,7 @@
             </div>
             <div class="col-md-6" style="display: flex;justify-content: space-between;">
                 <span class="heading">NET PAY:</span>
-                <span class="heading">{{ $salary->net }}</span>
+                <span class="heading">{{ number_format($salary->net, 2) }}</span>
             </div>
         </div>
     </div>

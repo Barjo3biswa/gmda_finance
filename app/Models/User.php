@@ -154,4 +154,9 @@ class User extends Authenticatable implements JWTSubject // Add implements JWTSu
         return $this->belongsTo(Employee::class, 'id', 'user_id');
     }
 
+    public function salaryMaster()
+    {
+        return $this->hasMany(salaryMaster::class, 'emp_id', 'id');
+    }
+
 }

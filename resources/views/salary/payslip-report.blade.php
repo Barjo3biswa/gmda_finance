@@ -69,7 +69,7 @@
                                                                 <select name="month" id="month" class="form-control">
                                                                     <option value="">--select--</option>
                                                                     @for ($i = 1; $i < 13; $i++)
-                                                                        <option value="{{ $i }}">
+                                                                        <option value="{{ $i }}" {{ Request()->get('month') == $i ? 'selected' : '' }}>
                                                                             {{ \Carbon\Carbon::createFromDate(null, $i, 1)->format('F') }}
                                                                         </option>
                                                                     @endfor
@@ -82,7 +82,9 @@
                                                                 <select name="year" id="year" class="form-control">
                                                                     <option value="">--select--</option>
                                                                     @for ($j = 2025; $j <= 2030; $j++)
-                                                                        <option value="{{ $j }}">{{ $j }}</option>
+                                                                        <option value="{{ $j }}" {{ Request()->get('year') == $j ? 'selected' : '' }}>
+                                                                            {{ $j }}
+                                                                        </option>
                                                                     @endfor
                                                                 </select>
                                                             </div>
@@ -109,10 +111,15 @@
                                         </h4>
                                         <form action="{{ route('publish-pay-slip') }}" method="post">
                                             @csrf
-                                            <input type="submit" class="btb btn-primary btn-xs" value="Publish"
+                                            <input type="submit" class="btn btn-primary btn-xs" value="Publish"
                                                 name="submit">
-                                            <input type="submit" class="btb btn-primary btn-xs" value="Un Publish"
+                                            <input type="submit" class="btn btn-primary btn-xs" value="Un Publish"
                                                 name="submit">
+                                            @if ($salary_block)
+                                                <a href="{{ route('download-all-payslip', Crypt::encrypt($salary_block->id)) }}"
+                                                    class="btn btn-primary btn-xs">Download All</a>
+                                            @endif
+
                                             <div class="table-responsive">
                                                 <table class="table table-bordered table-hover" id="dtExample">
                                                     <thead>
