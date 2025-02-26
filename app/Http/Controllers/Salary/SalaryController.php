@@ -789,7 +789,7 @@ class SalaryController extends Controller
             foreach ($user as $usr) {
                 $attendance_summery = AttendanceSummery::where('block_id', $salary_block->id)->where('user_id', $usr->id)->first();
                 if (!$attendance_summery) {
-                    return redirect()->back()->with('error', 'Attendence is not processed for. ' . $usr->id);
+                    return redirect()->back()->with('error', 'Attendence is not processed for. ' . $usr->name);
                 }
                 if ($attendance_summery->absent_count > 0) {
                     $pay_cut = 0;
