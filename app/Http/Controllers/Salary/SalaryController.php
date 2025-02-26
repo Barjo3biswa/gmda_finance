@@ -1054,7 +1054,7 @@ class SalaryController extends Controller
 
                     if ($loan->advanceType->advance_type == 'flat') {
                         $salary_data = [
-                            'emp_code' => $loan->user->id,
+                            'emp_code' => $loan->user->emp_code,
                             'sal_head_id' => $salary_head,
                             'salary_head_code' => $salary_head_details->code,
                             'salary_head_name' => $salary_head_details->name,
