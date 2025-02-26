@@ -174,37 +174,37 @@ class CommonHelper
                 $w .= $nwords[floor($x / 100)] . ' Hundred';
                 $r = fmod($x, 100);
                 if ($r > 0) {
-                    $w .= ' ' . number_to_words($r);
+                    $w .= ' ' . self::number_to_words($r);
                 }
             } else if ($x < 100000) {
-                $w .= number_to_words(floor($x / 1000)) . ' Thousand';
+                $w .= self::number_to_words(floor($x / 1000)) . ' Thousand';
                 $r = fmod($x, 1000);
                 if ($r > 0) {
                     $w .= ' ';
                     if ($r < 100) {
                         $w .= ' ';
                     }
-                    $w .= number_to_words($r);
+                    $w .= self::number_to_words($r);
                 }
             } else if ($x < 10000000) {
-                $w .= number_to_words(floor($x / 100000)) . ' Lakh';
+                $w .= self::number_to_words(floor($x / 100000)) . ' Lakh';
                 $r = fmod($x, 100000);
                 if ($r > 0) {
                     $w .= ' ';
                     if ($r < 100) {
                         $w .= ' ';
                     }
-                    $w .= number_to_words($r);
+                    $w .= self::number_to_words($r);
                 }
             } else {
-                $w .= number_to_words(floor($x / 1000000)) . ' Million';
+                $w .= self::number_to_words(floor($x / 1000000)) . ' Million';
                 $r = fmod($x, 1000000);
                 if ($r > 0) {
                     $w .= ' ';
                     if ($r < 100) {
                         $word .= ' ';
                     }
-                    $w .= number_to_words($r);
+                    $w .= self::number_to_words($r);
                 }
             }
         }
