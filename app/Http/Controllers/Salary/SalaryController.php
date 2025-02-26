@@ -1048,7 +1048,7 @@ class SalaryController extends Controller
                     }
 
                     $json_data = $this->loanService->generateJsonData($loan, $data, $salary_head);
-                    dump($json_data);
+                    // dump($json_data);
                     $salary_head_details = salaryHead::where('id', $salary_head)->first();
                     $check_is_exist = salaryTemp::where('emp_id', $loan->user->id)->where('sal_head_id', $salary_head)->first();
 
